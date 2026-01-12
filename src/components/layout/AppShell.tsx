@@ -1,12 +1,9 @@
 "use client";
 
 import { ReactNode } from "react";
-import { Sidebar, MobileNav } from "./Sidebar";
 import { ToastProvider } from "@/components/ui/Toast";
-import { CommandPaletteProvider } from "@/components/ui/CommandPalette";
 import { AIAssistantProvider } from "@/components/ui/AIAssistant";
-import { StatusBar } from "@/components/ui/StatusBar";
-import { WelcomeModal } from "@/components/ui/WelcomeModal";
+import { AuthGate } from "@/components/auth/AuthGate";
 
 interface AppShellProps {
   children: ReactNode;
@@ -15,30 +12,13 @@ interface AppShellProps {
 export function AppShell({ children }: AppShellProps) {
   return (
     <ToastProvider>
-      <CommandPaletteProvider>
-        <AIAssistantProvider>
+      <AIAssistantProvider>
+        <AuthGate>
           <div className="min-h-screen bg-[#0D0D2A]">
-            {/* Global Status Bar */}
-            <StatusBar />
-
-            {/* Desktop Sidebar */}
-            <div className="hidden md:block">
-              <Sidebar />
-            </div>
-
-            {/* Main Content - adjusted for status bar */}
-            <main className="md:ml-64 min-h-screen pb-20 md:pb-0 md:pt-8">
-              {children}
-            </main>
-
-            {/* Mobile Bottom Nav */}
-            <MobileNav />
-
-            {/* Welcome Modal for first-time users */}
-            <WelcomeModal />
+            {children}
           </div>
-        </AIAssistantProvider>
-      </CommandPaletteProvider>
+        </AuthGate>
+      </AIAssistantProvider>
     </ToastProvider>
   );
 }

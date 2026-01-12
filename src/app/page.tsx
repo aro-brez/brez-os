@@ -1,443 +1,382 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import Link from "next/link";
 import { format } from "date-fns";
 import {
-  Sparkles,
-  TrendingUp,
-  Target,
-  DollarSign,
-  AlertTriangle,
   Zap,
   Clock,
-  Users,
   Check,
-  Plus,
-  ChevronRight,
-  Shield,
-  RefreshCw,
-  Play,
   Heart,
-  Database,
-  Gift,
-  ChevronDown,
-  ChevronUp,
+  Sparkles,
+  ArrowRight,
+  CheckCircle,
+  Circle,
+  RefreshCw,
 } from "lucide-react";
-import { Card, Badge, Button, ProgressBar } from "@/components/ui";
+import { Card, Badge, Button } from "@/components/ui";
 import { BrezLogo } from "@/components/ui/BrezLogo";
-import { devStore } from "@/lib/data/devStore";
 import { useToast } from "@/components/ui/Toast";
 import { useAIAssistant } from "@/components/ui/AIAssistant";
 import {
-  getTheOneThing,
-  getDataHealth,
-  getRealMetrics,
-  getAvailableXP,
-  type SpecificAction,
-  type DataHealth,
-} from "@/lib/ai/brez-intelligence";
+  getSelectedUser,
+  getUserRoleContext,
+  type BrezUser,
+} from "@/lib/stores/userStore";
 import {
-  RALPH_PARADOX,
-  CURRENT_STATE,
-} from "@/lib/data/source-of-truth";
+  GROWTH_GENERATOR_STEPS,
+  SACRED_PARADOX,
+  type Department,
+} from "@/lib/ai/supermind";
 
-export default function CommandCenter() {
-  const [theOneThing, setTheOneThing] = useState<SpecificAction | null>(null);
-  const [dataHealth, setDataHealth] = useState<DataHealth[]>([]);
-  const [availableXP, setAvailableXP] = useState<{ total: number; breakdown: { category: string; xp: number }[] }>({ total: 0, breakdown: [] });
-  const [metrics, setMetrics] = useState<ReturnType<typeof getRealMetrics> | null>(null);
+// Role-specific THE ONE THING actions
+const ROLE_ACTIONS: Record<Department, {
+  action: string;
+  why: string;
+  steps: string[];
+  metric: string;
+  timeEstimate: string;
+}> = {
+  exec: {
+    action: "Review cash position and make one AP decision",
+    why: "Cash is the #1 bottleneck. Every day without a decision costs us optionality.",
+    steps: [
+      "Open QuickBooks and note exact cash balance",
+      "Review AP aging - identify the highest-priority vendor",
+      "Decide: Pay now, negotiate payment plan, or convert to equity",
+      "Document the decision and communicate to Dan/Abla",
+    ],
+    metric: "AP decision logged",
+    timeEstimate: "30 min",
+  },
+  growth: {
+    action: "Find one way to improve conversion without increasing spend",
+    why: "Every 0.1% conversion improvement = more cash without more risk.",
+    steps: [
+      "Check yesterday's conversion rate vs. 7-day average",
+      "Review the top-performing ad creative - what's working?",
+      "Identify one landing page element to test",
+      "Set up the A/B test or make the change",
+    ],
+    metric: "Conversion rate improvement",
+    timeEstimate: "45 min",
+  },
+  retail: {
+    action: "Identify your highest-margin account and ensure they're stocked",
+    why: "Retail CM is 30% - the most profitable channel. Don't let shelves go empty.",
+    steps: [
+      "Pull your account list sorted by contribution margin",
+      "Check inventory status at top 3 accounts",
+      "If low inventory: place reorder or escalate to ops",
+      "Log any at-risk accounts in the system",
+    ],
+    metric: "Top accounts stocked",
+    timeEstimate: "30 min",
+  },
+  finance: {
+    action: "Update the cash forecast and flag any risks",
+    why: "We can't make good decisions with stale data. Cash clarity = survival.",
+    steps: [
+      "Pull current bank balance",
+      "Update this week's expected inflows/outflows",
+      "Calculate runway at current burn",
+      "Flag if runway drops below 6 weeks",
+    ],
+    metric: "Cash forecast updated",
+    timeEstimate: "20 min",
+  },
+  ops: {
+    action: "Find one way to reduce COGS or fulfillment cost",
+    why: "Every dollar saved on operations is a dollar toward paying off AP.",
+    steps: [
+      "Review last week's fulfillment costs per order",
+      "Identify highest-cost line item",
+      "Research one alternative (supplier, process, packaging)",
+      "Document potential savings and next steps",
+    ],
+    metric: "Cost reduction identified",
+    timeEstimate: "45 min",
+  },
+  product: {
+    action: "Read 5 customer reviews and identify one product insight",
+    why: "Validation = Flavor + Effect. Customer voice tells us if we're winning.",
+    steps: [
+      "Go to reviews (Amazon, website, or social)",
+      "Read 5 recent reviews - note patterns",
+      "Identify one actionable insight",
+      "Share the insight with the team in Slack",
+    ],
+    metric: "Product insight shared",
+    timeEstimate: "20 min",
+  },
+  cx: {
+    action: "Resolve your oldest open ticket and document the root cause",
+    why: "Every unresolved ticket is a customer who might not come back.",
+    steps: [
+      "Sort tickets by age - oldest first",
+      "Resolve the oldest ticket completely",
+      "Document: What was the issue? What was the root cause?",
+      "If it's a pattern, flag for the team",
+    ],
+    metric: "Ticket resolved + documented",
+    timeEstimate: "30 min",
+  },
+  creative: {
+    action: "Review yesterday's top ad and identify what made it work",
+    why: "The best creative makes people FEEL what BREZ does. Learn from winners.",
+    steps: [
+      "Pull yesterday's ad performance data",
+      "Identify the top-performing creative",
+      "Analyze: Hook, message, visual - what worked?",
+      "Document the pattern for future creative",
+    ],
+    metric: "Creative insight documented",
+    timeEstimate: "30 min",
+  },
+};
+
+export default function Dashboard() {
+  const [user, setUser] = useState<BrezUser | null>(null);
   const [greeting, setGreeting] = useState({ text: "", emoji: "" });
-  const [expandedAction, setExpandedAction] = useState(true);
-  const [expandedDataHealth, setExpandedDataHealth] = useState(false);
+  const [completedSteps, setCompletedSteps] = useState<number[]>([]);
+  const [isComplete, setIsComplete] = useState(false);
   const { celebrate } = useToast();
   const { toggle: toggleAI } = useAIAssistant();
 
   useEffect(() => {
+    // Get current user
+    const selectedUser = getSelectedUser();
+    setUser(selectedUser);
+
     // Time-aware greeting
     const hour = new Date().getHours();
-    if (hour < 12) setGreeting({ text: "Good morning", emoji: "☀️" });
-    else if (hour < 17) setGreeting({ text: "Good afternoon", emoji: "🌤️" });
-    else if (hour < 21) setGreeting({ text: "Good evening", emoji: "🌙" });
-    else setGreeting({ text: "Burning midnight oil", emoji: "🦉" });
-
-    // Load BREZ intelligence
-    setTheOneThing(getTheOneThing());
-    setDataHealth(getDataHealth());
-    setAvailableXP(getAvailableXP());
-    setMetrics(getRealMetrics());
+    if (hour < 12) setGreeting({ text: "Good morning", emoji: "" });
+    else if (hour < 17) setGreeting({ text: "Good afternoon", emoji: "" });
+    else if (hour < 21) setGreeting({ text: "Good evening", emoji: "" });
+    else setGreeting({ text: "Burning midnight oil", emoji: "" });
   }, []);
 
-  const currentUser = devStore.getCurrentUser();
+  if (!user) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <RefreshCw className="w-8 h-8 text-[#e3f98a] animate-spin" />
+      </div>
+    );
+  }
 
-  const getUrgencyColor = (urgency: SpecificAction["urgency"]) => {
-    switch (urgency) {
-      case "critical": return "bg-red-500/20 border-red-500/50 text-red-400";
-      case "high": return "bg-orange-500/20 border-orange-500/50 text-orange-400";
-      case "medium": return "bg-yellow-500/20 border-yellow-500/50 text-yellow-400";
-      default: return "bg-blue-500/20 border-blue-500/50 text-blue-400";
+  const roleContext = getUserRoleContext(user.department);
+  const roleAction = ROLE_ACTIONS[user.department];
+  const growthStep = GROWTH_GENERATOR_STEPS[roleContext.growthGeneratorFocus - 1];
+
+  const handleStepComplete = (stepIndex: number) => {
+    if (completedSteps.includes(stepIndex)) {
+      setCompletedSteps(completedSteps.filter(s => s !== stepIndex));
+    } else {
+      const newCompleted = [...completedSteps, stepIndex];
+      setCompletedSteps(newCompleted);
+
+      // Check if all steps are done
+      if (newCompleted.length === roleAction.steps.length) {
+        setIsComplete(true);
+        celebrate("THE ONE THING complete! You're moving us forward.");
+      }
     }
   };
 
-  const getStatusColor = (status: DataHealth["status"]) => {
-    switch (status) {
-      case "fresh": return "text-green-400";
-      case "stale": return "text-yellow-400";
-      case "missing": return "text-red-400";
-    }
+  const handleReset = () => {
+    setCompletedSteps([]);
+    setIsComplete(false);
   };
 
   return (
-    <div className="min-h-screen p-3 md:p-6 lg:p-8 max-w-7xl mx-auto">
-      {/* Header - Mobile Optimized */}
-      <div className="mb-4 md:mb-6">
-        <div className="flex items-center justify-between">
-          <div className="flex items-center gap-3">
-            {/* BREZ Logo */}
-            <BrezLogo variant="icon" size="lg" />
-            <div>
-              <h1 className="text-xl md:text-2xl lg:text-3xl font-bold text-white">
-                {greeting.emoji} {greeting.text}, {currentUser.name.split(" ")[0]}
-              </h1>
-              <p className="text-xs md:text-sm text-[#676986]">
-                {format(new Date(), "EEEE, MMMM d")} • {CURRENT_STATE.currentScenario.toUpperCase()} Phase
-              </p>
-            </div>
+    <div className="min-h-screen p-4 md:p-6 lg:p-8 max-w-3xl mx-auto">
+      {/* Header */}
+      <div className="mb-6 md:mb-8">
+        <div className="flex items-center gap-3 mb-2">
+          <BrezLogo variant="icon" size="lg" />
+          <div>
+            <h1 className="text-xl md:text-2xl font-bold text-white">
+              {greeting.text}, {user.name.split(" ")[0]}
+            </h1>
+            <p className="text-sm text-[#676986]">
+              {user.title} • {format(new Date(), "EEEE, MMMM d")}
+            </p>
           </div>
-          <Link href="/plan" className="hidden md:block">
-            <Button variant="secondary" size="sm" className="flex items-center gap-2">
-              <Shield className="w-4 h-4 text-[#ffce33]" />
-              <span>Stabilize</span>
-            </Button>
-          </Link>
         </div>
       </div>
 
-      {/* THE ONE THING - Hero Card */}
-      {theOneThing && (
-        <Card className="mb-4 md:mb-6 overflow-hidden border-2 border-[#e3f98a]/40 bg-gradient-to-br from-[#e3f98a]/10 via-[#0D0D2A] to-transparent">
-          <div
-            className="p-4 md:p-6 cursor-pointer"
-            onClick={() => setExpandedAction(!expandedAction)}
-          >
-            {/* Header */}
-            <div className="flex items-start justify-between gap-3 mb-3">
-              <div className="flex items-center gap-2">
-                <div className="w-8 h-8 md:w-10 md:h-10 rounded-lg bg-[#e3f98a] flex items-center justify-center">
-                  <Zap className="w-4 h-4 md:w-5 md:h-5 text-[#0D0D2A]" />
-                </div>
-                <div>
-                  <span className="text-xs md:text-sm font-bold text-[#e3f98a] uppercase tracking-wider">
-                    Your ONE Thing Right Now
-                  </span>
-                  <Badge className={`ml-2 text-xs ${getUrgencyColor(theOneThing.urgency)}`}>
-                    {theOneThing.urgency}
-                  </Badge>
-                </div>
-              </div>
-              <div className="flex items-center gap-2">
-                <Badge variant="success" size="sm" className="hidden md:flex">
-                  +{theOneThing.xpReward} XP
+      {/* THE ONE THING Card */}
+      <Card className="mb-6 overflow-hidden border-2 border-[#e3f98a]/40 bg-gradient-to-br from-[#e3f98a]/10 via-[#0D0D2A] to-transparent">
+        <div className="p-4 md:p-6">
+          {/* Header */}
+          <div className="flex items-center gap-2 mb-4">
+            <div className="w-10 h-10 rounded-lg bg-[#e3f98a] flex items-center justify-center">
+              <Zap className="w-5 h-5 text-[#0D0D2A]" />
+            </div>
+            <div>
+              <span className="text-sm font-bold text-[#e3f98a] uppercase tracking-wider">
+                Your ONE Thing Today
+              </span>
+              <div className="flex items-center gap-2 mt-0.5">
+                <Badge className="bg-[#8533fc]/20 text-[#8533fc] border-[#8533fc]/30">
+                  {roleContext.displayName}
                 </Badge>
-                {expandedAction ? <ChevronUp className="w-5 h-5 text-[#676986]" /> : <ChevronDown className="w-5 h-5 text-[#676986]" />}
+                <span className="text-xs text-[#676986] flex items-center gap-1">
+                  <Clock className="w-3 h-3" /> {roleAction.timeEstimate}
+                </span>
               </div>
             </div>
-
-            {/* Action Title */}
-            <h2 className="text-lg md:text-xl lg:text-2xl font-bold text-white mb-2">
-              {theOneThing.action}
-            </h2>
-
-            {/* Quick Info Row */}
-            <div className="flex flex-wrap items-center gap-2 md:gap-4 text-xs md:text-sm text-[#a8a8a8] mb-3">
-              <span className="flex items-center gap-1">
-                <Users className="w-3 h-3 md:w-4 md:h-4" /> {theOneThing.owner}
-              </span>
-              <span className="flex items-center gap-1">
-                <Clock className="w-3 h-3 md:w-4 md:h-4" /> {theOneThing.timeEstimate}
-              </span>
-              <span className="flex items-center gap-1">
-                <Target className="w-3 h-3 md:w-4 md:h-4" /> {theOneThing.metric}
-              </span>
-            </div>
-
-            {/* Expandable Steps */}
-            {expandedAction && (
-              <div className="mt-4 pt-4 border-t border-white/10">
-                <p className="text-xs md:text-sm font-semibold text-[#e3f98a] mb-3 uppercase tracking-wider">
-                  Specific Steps:
-                </p>
-                <div className="space-y-2">
-                  {theOneThing.steps.map((step, i) => (
-                    <div key={i} className="flex items-start gap-3 p-2 md:p-3 rounded-lg bg-white/5 hover:bg-white/10 transition-colors">
-                      <div className="w-6 h-6 rounded-full bg-[#e3f98a]/20 flex items-center justify-center flex-shrink-0 mt-0.5">
-                        <span className="text-xs font-bold text-[#e3f98a]">{i + 1}</span>
-                      </div>
-                      <p className="text-sm md:text-base text-white">{step.replace(/^\d+\.\s*/, '')}</p>
-                    </div>
-                  ))}
-                </div>
-
-                {/* Action Button */}
-                <div className="mt-4 flex flex-col md:flex-row gap-2">
-                  <Button
-                    variant="primary"
-                    className="w-full md:w-auto flex items-center justify-center gap-2"
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      celebrate(`Started: ${theOneThing.action}`);
-                    }}
-                  >
-                    <Play className="w-4 h-4" /> Start This Now
-                  </Button>
-                  <Button
-                    variant="secondary"
-                    className="w-full md:w-auto"
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      toggleAI();
-                    }}
-                  >
-                    Ask AI for Help
-                  </Button>
-                </div>
-
-                {/* Ralph Paradox - Encouragement */}
-                <div className="mt-4 p-3 rounded-lg bg-[#8533fc]/10 border border-[#8533fc]/20">
-                  <p className="text-xs md:text-sm text-[#8533fc] italic">
-                    💡 {RALPH_PARADOX.application}
-                  </p>
-                </div>
-              </div>
-            )}
           </div>
-        </Card>
-      )}
 
-      {/* Quick Stats - Mobile Grid */}
-      {metrics && (
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-2 md:gap-3 mb-4 md:mb-6">
-          <Link href="/financials">
-            <Card className="p-3 md:p-4 hover:border-[#e3f98a]/30 transition-colors cursor-pointer">
-              <div className="flex items-center justify-between mb-1 md:mb-2">
-                <DollarSign className={`w-4 h-4 md:w-5 md:h-5 ${metrics.cash.status === 'healthy' ? 'text-[#6BCB77]' : 'text-[#ff6b6b]'}`} />
-                <span className={`text-lg md:text-2xl font-bold ${metrics.cash.status === 'healthy' ? 'text-[#6BCB77]' : 'text-[#ff6b6b]'}`}>
-                  ${(metrics.cash.onHand / 1000).toFixed(0)}K
-                </span>
-              </div>
-              <p className="text-xs md:text-sm text-[#676986]">Cash ({metrics.cash.runway}wk runway)</p>
-            </Card>
-          </Link>
+          {/* Action */}
+          <h2 className="text-xl md:text-2xl font-bold text-white mb-3">
+            {roleAction.action}
+          </h2>
 
-          <Link href="/growth">
-            <Card className="p-3 md:p-4 hover:border-[#e3f98a]/30 transition-colors cursor-pointer">
-              <div className="flex items-center justify-between mb-1 md:mb-2">
-                <TrendingUp className={`w-4 h-4 md:w-5 md:h-5 ${metrics.dtc.contributionMargin >= metrics.dtc.target ? 'text-[#6BCB77]' : 'text-[#ffce33]'}`} />
-                <span className="text-lg md:text-2xl font-bold text-white">
-                  {(metrics.dtc.contributionMargin * 100).toFixed(0)}%
-                </span>
-              </div>
-              <p className="text-xs md:text-sm text-[#676986]">DTC CM (target {(metrics.dtc.target * 100).toFixed(0)}%)</p>
-            </Card>
-          </Link>
+          {/* Why */}
+          <p className="text-sm text-[#a8a8a8] mb-6 p-3 rounded-lg bg-white/5 border-l-2 border-[#e3f98a]">
+            <strong className="text-[#e3f98a]">Why:</strong> {roleAction.why}
+          </p>
 
-          <Card className="p-3 md:p-4">
-            <div className="flex items-center justify-between mb-1 md:mb-2">
-              <AlertTriangle className={`w-4 h-4 md:w-5 md:h-5 ${metrics.ap.stopShipRisks > 0 ? 'text-[#ff6b6b]' : 'text-[#6BCB77]'}`} />
-              <span className={`text-lg md:text-2xl font-bold ${metrics.ap.stopShipRisks > 0 ? 'text-[#ff6b6b]' : 'text-white'}`}>
-                {metrics.ap.stopShipRisks}
-              </span>
-            </div>
-            <p className="text-xs md:text-sm text-[#676986]">Stop-Ship Risks</p>
-          </Card>
-
-          <Card className="p-3 md:p-4">
-            <div className="flex items-center justify-between mb-1 md:mb-2">
-              <Target className="w-4 h-4 md:w-5 md:h-5 text-[#65cdd8]" />
-              <span className="text-lg md:text-2xl font-bold text-white">
-                ${metrics.dtc.cac}
-              </span>
-            </div>
-            <p className="text-xs md:text-sm text-[#676986]">CAC (max ${metrics.dtc.maxCAC})</p>
-          </Card>
-        </div>
-      )}
-
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 md:gap-6">
-        {/* Left Column - Data Health & XP */}
-        <div className="lg:col-span-2 space-y-4 md:space-y-6">
-          {/* Data Health Card */}
-          <Card padding="none">
-            <div
-              className="p-4 border-b border-white/5 flex items-center justify-between cursor-pointer"
-              onClick={() => setExpandedDataHealth(!expandedDataHealth)}
-            >
-              <div className="flex items-center gap-2">
-                <Database className="w-5 h-5 text-[#65cdd8]" />
-                <h3 className="font-semibold text-white">Data Health</h3>
-                {availableXP.total > 0 && (
-                  <Badge variant="warning" size="sm" className="flex items-center gap-1">
-                    <Gift className="w-3 h-3" /> {availableXP.total} XP available
-                  </Badge>
-                )}
-              </div>
-              {expandedDataHealth ? <ChevronUp className="w-5 h-5 text-[#676986]" /> : <ChevronDown className="w-5 h-5 text-[#676986]" />}
-            </div>
-
-            {expandedDataHealth && (
-              <div className="divide-y divide-white/5">
-                {dataHealth.map((item, i) => (
-                  <div key={i} className="p-4 hover:bg-white/5 transition-colors">
-                    <div className="flex items-start justify-between gap-3">
-                      <div className="flex-1">
-                        <div className="flex items-center gap-2 mb-1">
-                          <h4 className="font-medium text-white">{item.category}</h4>
-                          <span className={`text-xs font-semibold uppercase ${getStatusColor(item.status)}`}>
-                            {item.status}
-                          </span>
-                        </div>
-                        <p className="text-sm text-[#676986]">{item.howToUpdate}</p>
-                        {item.lastUpdated && (
-                          <p className="text-xs text-[#676986] mt-1">
-                            Last updated: {format(new Date(item.lastUpdated), "MMM d, yyyy")}
-                          </p>
-                        )}
-                      </div>
-                      <div className="flex flex-col items-end gap-2">
-                        <ProgressBar value={item.freshness} max={100} variant={item.freshness > 70 ? "success" : item.freshness > 30 ? "warning" : "danger"} className="w-20" />
-                        {item.xpReward > 0 && (
-                          <Button variant="secondary" size="sm" className="text-xs">
-                            Update +{item.xpReward} XP
-                          </Button>
-                        )}
-                      </div>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            )}
-
-            {!expandedDataHealth && availableXP.total > 0 && (
-              <div className="p-4">
-                <p className="text-sm text-[#a8a8a8]">
-                  {dataHealth.filter(d => d.status !== 'fresh').length} data sources need updating.
-                  Earn <span className="text-[#e3f98a] font-semibold">{availableXP.total} XP</span> by keeping data fresh!
-                </p>
-              </div>
-            )}
-          </Card>
-
-          {/* Active Priorities */}
-          <Card padding="none">
-            <div className="p-4 border-b border-white/5 flex items-center justify-between">
-              <div className="flex items-center gap-2">
-                <Sparkles className="w-5 h-5 text-[#e3f98a]" />
-                <h3 className="font-semibold text-white">Active Priorities</h3>
-                <Badge variant="info" size="sm">{CURRENT_STATE.activePriorities.length}/3 max</Badge>
-              </div>
-              <Link href="/plan" className="text-sm text-[#65cdd8] hover:underline">
-                Manage <ChevronRight className="w-4 h-4 inline" />
-              </Link>
-            </div>
-            <div className="p-4">
-              <div className="space-y-2">
-                {CURRENT_STATE.activePriorities.map((priority, i) => (
-                  <div key={i} className="flex items-center gap-3 p-3 rounded-lg bg-white/5">
-                    <div className="w-6 h-6 rounded-full bg-[#e3f98a]/20 flex items-center justify-center">
+          {/* Steps */}
+          <div className="space-y-3 mb-6">
+            <p className="text-sm font-semibold text-white uppercase tracking-wider">
+              Step by Step:
+            </p>
+            {roleAction.steps.map((step, i) => {
+              const isStepComplete = completedSteps.includes(i);
+              return (
+                <button
+                  key={i}
+                  onClick={() => handleStepComplete(i)}
+                  className={`w-full flex items-start gap-3 p-3 rounded-lg transition-all text-left ${
+                    isStepComplete
+                      ? "bg-[#6BCB77]/20 border border-[#6BCB77]/30"
+                      : "bg-white/5 hover:bg-white/10 border border-transparent"
+                  }`}
+                >
+                  <div className={`w-6 h-6 rounded-full flex items-center justify-center flex-shrink-0 mt-0.5 ${
+                    isStepComplete
+                      ? "bg-[#6BCB77]"
+                      : "bg-[#e3f98a]/20"
+                  }`}>
+                    {isStepComplete ? (
+                      <Check className="w-4 h-4 text-white" />
+                    ) : (
                       <span className="text-xs font-bold text-[#e3f98a]">{i + 1}</span>
-                    </div>
-                    <span className="text-white">{priority}</span>
+                    )}
                   </div>
-                ))}
-              </div>
-              {CURRENT_STATE.activePriorities.length >= 3 && (
-                <p className="text-xs text-[#ffce33] mt-3 flex items-center gap-1">
-                  <AlertTriangle className="w-3 h-3" />
-                  WIP limit reached. Complete or pause before adding new priorities.
-                </p>
-              )}
+                  <p className={`text-sm md:text-base ${
+                    isStepComplete ? "text-[#6BCB77] line-through" : "text-white"
+                  }`}>
+                    {step}
+                  </p>
+                </button>
+              );
+            })}
+          </div>
+
+          {/* Progress */}
+          <div className="mb-4">
+            <div className="flex items-center justify-between text-sm mb-2">
+              <span className="text-[#676986]">Progress</span>
+              <span className="text-[#e3f98a] font-semibold">
+                {completedSteps.length} / {roleAction.steps.length} steps
+              </span>
             </div>
-          </Card>
+            <div className="h-2 bg-white/10 rounded-full overflow-hidden">
+              <div
+                className="h-full bg-gradient-to-r from-[#e3f98a] to-[#6BCB77] transition-all duration-500"
+                style={{ width: `${(completedSteps.length / roleAction.steps.length) * 100}%` }}
+              />
+            </div>
+          </div>
+
+          {/* Actions */}
+          {isComplete ? (
+            <div className="p-4 rounded-lg bg-[#6BCB77]/20 border border-[#6BCB77]/30 text-center">
+              <CheckCircle className="w-8 h-8 text-[#6BCB77] mx-auto mb-2" />
+              <p className="text-[#6BCB77] font-semibold mb-3">
+                THE ONE THING Complete!
+              </p>
+              <Button variant="secondary" size="sm" onClick={handleReset}>
+                Start Fresh Tomorrow
+              </Button>
+            </div>
+          ) : (
+            <div className="flex flex-col md:flex-row gap-2">
+              <Button
+                variant="secondary"
+                className="flex-1"
+                onClick={toggleAI}
+              >
+                <Sparkles className="w-4 h-4" />
+                Ask Supermind for Help
+              </Button>
+            </div>
+          )}
         </div>
+      </Card>
 
-        {/* Right Column */}
-        <div className="space-y-4 md:space-y-6">
-          {/* Phase & Growth Generator */}
-          <Card className="border-2 border-[#e3f98a]/20">
-            <div className="flex items-center gap-2 mb-4">
-              <Shield className="w-5 h-5 text-[#ffce33]" />
-              <h3 className="font-semibold text-white">Phase: STABILIZE</h3>
-            </div>
-            <div className="space-y-3">
-              <div className="p-3 rounded-lg bg-[#ffce33]/10 border border-[#ffce33]/20">
-                <p className="text-xs text-[#ffce33]">
-                  Focus: Preserve cash, maximize CM, contain AP
-                </p>
-              </div>
+      {/* Context Cards */}
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
+        {/* Your Daily Question */}
+        <Card className="p-4">
+          <div className="flex items-center gap-2 mb-3">
+            <Circle className="w-4 h-4 text-[#65cdd8]" />
+            <span className="text-sm font-semibold text-white">Your Daily Question</span>
+          </div>
+          <p className="text-sm text-[#a8a8a8] italic">
+            &ldquo;{roleContext.dailyQuestion}&rdquo;
+          </p>
+        </Card>
 
-              <div className="text-xs text-[#676986] space-y-1">
-                <p className="font-semibold text-white mb-2">Exit to THRIVE when:</p>
-                <p className="flex items-center gap-2">
-                  <Check className="w-3 h-3 text-[#6BCB77]" /> AP under active management
-                </p>
-                <p className="flex items-center gap-2">
-                  <RefreshCw className="w-3 h-3 text-[#ffce33]" /> Cash reserves &gt; $500k (4 weeks)
-                </p>
-                <p className="flex items-center gap-2">
-                  <RefreshCw className="w-3 h-3 text-[#ffce33]" /> DTC CM &gt; 35%
-                </p>
-                <p className="flex items-center gap-2">
-                  <RefreshCw className="w-3 h-3 text-[#ffce33]" /> +20% DTC at same spend
-                </p>
-              </div>
-            </div>
-          </Card>
+        {/* Growth Generator Focus */}
+        <Card className="p-4">
+          <div className="flex items-center gap-2 mb-3">
+            <ArrowRight className="w-4 h-4 text-[#e3f98a]" />
+            <span className="text-sm font-semibold text-white">Your Growth Focus</span>
+          </div>
+          <p className="text-sm text-[#a8a8a8]">
+            Step {roleContext.growthGeneratorFocus}: <span className="text-[#e3f98a]">{growthStep.name}</span>
+          </p>
+        </Card>
+      </div>
 
-          {/* Quick Actions - Mobile Optimized */}
-          <Card>
-            <h3 className="font-semibold text-white mb-4">Quick Actions</h3>
-            <div className="grid grid-cols-2 gap-2">
-              <Link href="/growth">
-                <Button variant="secondary" size="sm" className="w-full justify-start text-xs md:text-sm">
-                  <TrendingUp className="w-4 h-4" />
-                  <span className="truncate">Growth Sim</span>
-                </Button>
-              </Link>
-              <Link href="/tasks?new=true">
-                <Button variant="secondary" size="sm" className="w-full justify-start text-xs md:text-sm">
-                  <Plus className="w-4 h-4" />
-                  <span className="truncate">New Task</span>
-                </Button>
-              </Link>
-              <Link href="/financials">
-                <Button variant="secondary" size="sm" className="w-full justify-start text-xs md:text-sm">
-                  <DollarSign className="w-4 h-4" />
-                  <span className="truncate">Financials</span>
-                </Button>
-              </Link>
-              <Link href="/channels">
-                <Button variant="secondary" size="sm" className="w-full justify-start text-xs md:text-sm">
-                  <Users className="w-4 h-4" />
-                  <span className="truncate">Team</span>
-                </Button>
-              </Link>
-            </div>
-          </Card>
-
-          {/* Purpose Reminder */}
-          <Card className="border-2 border-[#8533fc]/20 bg-gradient-to-br from-[#8533fc]/5 to-transparent">
-            <div className="flex items-center gap-2 mb-3">
-              <Heart className="w-5 h-5 text-[#8533fc]" />
-              <h3 className="font-semibold text-white">Remember</h3>
-            </div>
-            <p className="text-sm text-[#a8a8a8] italic">
-              &ldquo;You&apos;re building a $200B company that proves conscious capitalism wins.&rdquo;
-            </p>
-            <p className="text-xs text-[#8533fc] mt-3">
-              {RALPH_PARADOX.principle}
-            </p>
-          </Card>
+      {/* Current Phase */}
+      <Card className="p-4 mb-6 border border-[#ffce33]/20 bg-[#ffce33]/5">
+        <div className="flex items-center justify-between">
+          <div>
+            <span className="text-xs font-semibold text-[#ffce33] uppercase tracking-wider">
+              Current Phase
+            </span>
+            <p className="text-white font-bold">STABILIZE</p>
+          </div>
+          <div className="text-right">
+            <span className="text-xs text-[#676986]">Company Focus</span>
+            <p className="text-sm text-[#a8a8a8]">Improve CM, Protect Cash</p>
+          </div>
         </div>
+      </Card>
+
+      {/* Purpose Reminder */}
+      <Card className="p-4 border border-[#8533fc]/20 bg-gradient-to-br from-[#8533fc]/10 to-transparent">
+        <div className="flex items-center gap-2 mb-3">
+          <Heart className="w-4 h-4 text-[#8533fc]" />
+          <span className="text-sm font-semibold text-white">Remember</span>
+        </div>
+        <p className="text-sm text-[#a8a8a8] italic mb-2">
+          &ldquo;{roleContext.purposeReminder}&rdquo;
+        </p>
+        <p className="text-xs text-[#8533fc]">
+          {SACRED_PARADOX.taoistPrinciples.wuWei}
+        </p>
+      </Card>
+
+      {/* Footer */}
+      <div className="mt-8 text-center">
+        <p className="text-xs text-[#676986]">
+          BREZ Supermind • Building a $200B company through conscious capitalism
+        </p>
       </div>
     </div>
   );
