@@ -353,6 +353,100 @@ export interface CustomerJourneyRecord {
   attributedEvents: string[];
 }
 
+// ============ COHORT MEASUREMENT ============
+
+/**
+ * Every change affects: Retail Velocity | DTC CM | Retention
+ * We measure in cohorts to isolate impact.
+ */
+
+export type CohortDimension =
+  | "event"           // Customers from specific event
+  | "optimization"    // Before/after a change
+  | "entry_channel"   // Meta vs TikTok vs Event vs Retail
+  | "first_product"   // Drift vs Chill vs Elevate
+  | "geography"       // Market/DMA
+  | "url_path"        // Landing page / attribution
+  | "offer_type"      // Discount vs full price
+  | "date_range"      // Seasonal / time-based
+  | "cac_tier";       // High vs low acquisition cost
+
+export interface Cohort {
+  id: string;
+  name: string;
+  dimension: CohortDimension;
+  criteria: Record<string, string | number | boolean>;
+
+  // Cohort size
+  customerCount: number;
+  createdAt: string;
+
+  // The three universal metrics
+  metrics: {
+    // Retail Velocity impact
+    retailVelocityBefore?: number;
+    retailVelocityAfter?: number;
+    retailVelocityChange?: number;
+
+    // DTC Contribution Margin impact
+    dtcCMBefore?: number;
+    dtcCMAfter?: number;
+    dtcCMChange?: number;
+
+    // Retention impact
+    day7Retention?: number;
+    day30Retention?: number;
+    day90Retention?: number;
+    subscriptionConversion?: number;
+    churnRate?: number;
+  };
+
+  // Attribution windows
+  measurementPeriod: {
+    start: string;
+    end: string;
+    windowDays: number;
+  };
+
+  // Learnings
+  insight?: string;
+  shouldRepeat?: boolean;
+  confidenceLevel: "high" | "medium" | "low";
+}
+
+export interface OptimizationExperiment {
+  id: string;
+  name: string;
+  description: string;
+  type: "creative" | "landing_page" | "offer" | "product" | "targeting" | "channel" | "event";
+
+  // What changed
+  changeDescription: string;
+  hypothesis: string;
+
+  // Cohorts
+  controlCohortId?: string;
+  treatmentCohortId: string;
+
+  // Timeline
+  startedAt: string;
+  endedAt?: string;
+  status: "running" | "completed" | "paused" | "abandoned";
+
+  // Results
+  results?: {
+    retailVelocityImpact: number;
+    dtcCMImpact: number;
+    retentionImpact: number;
+    statisticalSignificance: number;
+    recommendation: "scale" | "iterate" | "abandon";
+  };
+
+  // Learning
+  learning?: string;
+  addedToSupermind: boolean;
+}
+
 // ============ AGGREGATED JOURNEY VIEW ============
 
 export interface JourneyStageMetrics {
