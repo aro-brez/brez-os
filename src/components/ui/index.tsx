@@ -168,9 +168,10 @@ interface CardProps {
   padding?: "none" | "sm" | "md" | "lg";
   hover?: boolean;
   onClick?: () => void;
+  style?: React.CSSProperties;
 }
 
-export function Card({ children, className, padding = "md", hover = false, onClick }: CardProps) {
+export function Card({ children, className, padding = "md", hover = false, onClick, style }: CardProps) {
   const paddings = {
     none: "",
     sm: "p-3",
@@ -188,6 +189,7 @@ export function Card({ children, className, padding = "md", hover = false, onCli
         className
       )}
       onClick={onClick}
+      style={style}
     >
       {children}
     </div>
@@ -201,9 +203,10 @@ interface BadgeProps {
   variant?: "default" | "success" | "warning" | "danger" | "info";
   size?: "sm" | "md";
   className?: string;
+  style?: React.CSSProperties;
 }
 
-export function Badge({ children, variant = "default", size = "sm", className }: BadgeProps) {
+export function Badge({ children, variant = "default", size = "sm", className, style }: BadgeProps) {
   const variants = {
     default: "bg-white/10 text-[#a8a8a8]",
     success: "bg-[#6BCB77]/20 text-[#6BCB77]",
@@ -218,7 +221,7 @@ export function Badge({ children, variant = "default", size = "sm", className }:
   };
 
   return (
-    <span className={clsx("rounded-full font-medium", variants[variant], sizes[size], className)}>
+    <span className={clsx("rounded-full font-medium border", variants[variant], sizes[size], className)} style={style}>
       {children}
     </span>
   );
