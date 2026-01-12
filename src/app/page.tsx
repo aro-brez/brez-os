@@ -25,6 +25,9 @@ import {
   Shield,
   RefreshCw,
   Play,
+  Heart,
+  Award,
+  Compass,
 } from "lucide-react";
 import { Card, Badge, Button, Avatar, ProgressBar } from "@/components/ui";
 import { devStore } from "@/lib/data/devStore";
@@ -32,6 +35,7 @@ import { getTopPriorities, getNextBestAction, getQuestionsToAnswer, Priority, Ne
 import { Huddle } from "@/lib/data/schemas";
 import { useToast } from "@/components/ui/Toast";
 import { useAIAssistant } from "@/components/ui/AIAssistant";
+import { brain, Department, ROLE_CONTEXTS } from "@/lib/ai/brain";
 
 export default function CommandCenter() {
   const [priorities, setPriorities] = useState<Priority[]>([]);
@@ -42,6 +46,18 @@ export default function CommandCenter() {
   const [aiInsight, setAiInsight] = useState({ text: "", type: "tip" as "tip" | "warning" | "action" });
   const { celebrate } = useToast();
   const { toggle: toggleAI } = useAIAssistant();
+
+  // Supermind state
+  const [roleDashboard, setRoleDashboard] = useState<{
+    dailyFocus: string;
+    topPriorities: string[];
+    purposeReminder: string;
+    sacredParadox: string;
+    achievements: string[];
+    phaseContext: string;
+  } | null>(null);
+  const [wisdom, setWisdom] = useState<{ quote: string; source: string } | null>(null);
+  const [currentPhase, setCurrentPhase] = useState<{ phase: string; progress: string } | null>(null);
 
   useEffect(() => {
     // Time-aware greeting
@@ -59,11 +75,22 @@ export default function CommandCenter() {
     // Load recent meeting summaries
     setHuddles(devStore.getFinalizedHuddles().slice(0, 3));
 
-    // Generate AI insight
+    // Initialize Supermind data
+    const currentUser = devStore.getCurrentUser();
+    if (currentUser.department) {
+      brain.setUserDepartment(currentUser.department as Department);
+    }
+    setRoleDashboard(brain.getRoleDashboard());
+    setWisdom(brain.getWisdom());
+    const phase = brain.getCurrentPhase();
+    setCurrentPhase({ phase: phase.phase, progress: phase.progress });
+
+    // Generate AI insight from role dashboard
+    const dashboard = brain.getRoleDashboard();
     const insights = [
-      { text: "Focus on DTC contribution margin - this is the Growth Generator's first step.", type: "tip" as const },
-      { text: "2 goals are at risk. Consider reviewing blockers in today's standup.", type: "warning" as const },
-      { text: "3 meeting action items await approval to become tasks.", type: "action" as const },
+      { text: dashboard.topPriorities[0] || "Focus on contribution margin.", type: "tip" as const },
+      { text: dashboard.dailyFocus, type: "action" as const },
+      { text: `Wisdom: "${brain.getWisdom().quote}"`, type: "tip" as const },
     ];
     setAiInsight(insights[Math.floor(Math.random() * insights.length)]);
   }, []);
@@ -130,7 +157,7 @@ export default function CommandCenter() {
           <Link href="/plan">
             <Button variant="secondary" size="sm" className="hidden md:flex items-center gap-2">
               <Shield className="w-4 h-4 text-[#ffce33]" />
-              <span>Phase: Stabilize</span>
+              <span>Phase: {currentPhase?.phase ? currentPhase.phase.charAt(0).toUpperCase() + currentPhase.phase.slice(1) : "Stabilize"}</span>
             </Button>
           </Link>
         </div>
@@ -409,6 +436,46 @@ export default function CommandCenter() {
 
         {/* Right Column - Quick Stats & Navigation */}
         <div className="space-y-6">
+          {/* Purpose & Wisdom Card */}
+          {roleDashboard && (
+            <Card className="border-2 border-[#8533fc]/20 bg-gradient-to-br from-[#8533fc]/5 to-transparent">
+              <div className="flex items-center gap-2 mb-4">
+                <Heart className="w-5 h-5 text-[#8533fc]" />
+                <h3 className="font-semibold text-white">Your Purpose Today</h3>
+              </div>
+              <div className="space-y-4">
+                {/* Purpose Reminder */}
+                <div className="p-3 rounded-lg bg-[#8533fc]/10 border border-[#8533fc]/20">
+                  <p className="text-sm text-white italic">&ldquo;{roleDashboard.purposeReminder}&rdquo;</p>
+                </div>
+
+                {/* Daily Focus Question */}
+                <div>
+                  <p className="text-xs text-[#676986] uppercase tracking-wider mb-1">Daily Focus</p>
+                  <p className="text-sm text-[#e3f98a]">{roleDashboard.dailyFocus}</p>
+                </div>
+
+                {/* Sacred Paradox Wisdom */}
+                <div className="pt-3 border-t border-white/5">
+                  <p className="text-xs text-[#676986] uppercase tracking-wider mb-1">Sacred Paradox</p>
+                  <p className="text-xs text-[#65cdd8]">{roleDashboard.sacredParadox}</p>
+                </div>
+
+                {/* Achievements if any */}
+                {roleDashboard.achievements.length > 0 && (
+                  <div className="pt-3 border-t border-white/5">
+                    <p className="text-xs text-[#676986] uppercase tracking-wider mb-2">Unlocked</p>
+                    <div className="flex flex-wrap gap-1">
+                      {roleDashboard.achievements.slice(0, 3).map((achievement, i) => (
+                        <Badge key={i} variant="success" size="sm">{achievement}</Badge>
+                      ))}
+                    </div>
+                  </div>
+                )}
+              </div>
+            </Card>
+          )}
+
           {/* Growth Generator Status */}
           <Card className="border-2 border-[#e3f98a]/20">
             <div className="flex items-center gap-2 mb-4">
@@ -416,6 +483,12 @@ export default function CommandCenter() {
               <h3 className="font-semibold text-white">Growth Generator</h3>
             </div>
             <div className="space-y-3">
+              {/* Phase Context */}
+              {roleDashboard && (
+                <div className="p-2 rounded-lg bg-[#ffce33]/10 border border-[#ffce33]/20 mb-3">
+                  <p className="text-xs text-[#ffce33]">{roleDashboard.phaseContext}</p>
+                </div>
+              )}
               <div className="p-3 rounded-lg bg-[#e3f98a]/10 border border-[#e3f98a]/20">
                 <p className="text-xs text-[#e3f98a] font-semibold uppercase tracking-wider mb-1">Current Step</p>
                 <p className="text-sm text-white">Improve contribution margin</p>

@@ -3,9 +3,27 @@
  *
  * This connects all data sources, generates real recommendations,
  * and allows the AI to modify the system based on conversations.
+ *
+ * Now enhanced with Supermind - the consciousness layer that adds:
+ * - Phase-aware recommendations (Stabilize → Thrive → Scale)
+ * - Role-based personalization by department
+ * - Sacred Paradox wisdom
+ * - Decision validation against Master Governing Principle
+ * - Purpose and impact reminders
  */
 
 import { devStore } from "@/lib/data/devStore";
+import {
+  supermind,
+  type Department,
+  type Phase,
+  PHASES,
+  ROLE_CONTEXTS,
+  SACRED_PARADOX,
+  NORTH_STAR,
+  MASTER_GOVERNING_PRINCIPLE,
+  GROWTH_GENERATOR_STEPS,
+} from "./supermind";
 
 // ============ TYPES ============
 
@@ -155,6 +173,98 @@ export const DATA_SOURCES: DataSource[] = [
 class BrezBrain {
   private recommendations: AIRecommendation[] = [];
   private conversationHistory: Array<{ role: "user" | "ai"; content: string }> = [];
+  private currentUserDepartment: Department = "exec";
+
+  // ============ SUPERMIND INTEGRATION ============
+
+  setUserDepartment(department: Department): void {
+    this.currentUserDepartment = department;
+  }
+
+  getUserDepartment(): Department {
+    return this.currentUserDepartment;
+  }
+
+  // Get current operating phase
+  getCurrentPhase(): { phase: Phase; config: typeof PHASES[Phase]; progress: string } {
+    const phase = supermind.getCurrentPhase();
+    const metrics = this.getSystemMetrics();
+
+    let progress = "";
+    if (phase.name === "stabilize") {
+      const dtcImprovement = 0; // Would calculate from historical data
+      progress = `DTC improvement: ${(dtcImprovement * 100).toFixed(0)}% of 20% target`;
+    } else if (phase.name === "thrive") {
+      progress = metrics.accountsPayable > 0
+        ? "AP reduction in progress"
+        : "Cash flow stabilizing";
+    } else {
+      progress = "Scaling with proven margin";
+    }
+
+    return { phase: phase.name, config: phase, progress };
+  }
+
+  // Get personalized dashboard for user's role
+  getRoleDashboard(): {
+    dailyFocus: string;
+    topPriorities: string[];
+    purposeReminder: string;
+    sacredParadox: string;
+    achievements: string[];
+    phaseContext: string;
+  } {
+    const metrics = this.getSystemMetrics();
+    const metricsRecord: Record<string, number> = {
+      cac: metrics.dtcCAC,
+      runway: metrics.runway,
+      velocity: metrics.retailVelocity,
+      cashOnHand: metrics.cashOnHand,
+      revenue: metrics.monthlyRevenue,
+      conversionRate: metrics.dtcConversionRate,
+    };
+
+    const recommendations = supermind.getRecommendationsForRole(
+      this.currentUserDepartment,
+      metricsRecord
+    );
+
+    const achievements = supermind.checkAchievements(metricsRecord);
+    const phase = supermind.getCurrentPhase();
+
+    return {
+      dailyFocus: recommendations.dailyFocus,
+      topPriorities: recommendations.topPriorities,
+      purposeReminder: recommendations.purposeReminder,
+      sacredParadox: recommendations.sacredParadox,
+      achievements,
+      phaseContext: `[${phase.displayName}] ${phase.description}`,
+    };
+  }
+
+  // Validate a decision against the Master Governing Principle
+  validateDecision(decision: {
+    description: string;
+    expectedCMImpact: number;
+    protectsSurvival: boolean;
+  }): { valid: boolean; warnings: string[] } {
+    return supermind.validateAgainstGoverningPrinciple(decision);
+  }
+
+  // Get wisdom from the Sacred Paradox
+  getWisdom(): { quote: string; source: string } {
+    return supermind.getPurposeReminder();
+  }
+
+  // Get Growth Generator step guidance
+  getGrowthGeneratorGuidance(): typeof GROWTH_GENERATOR_STEPS {
+    return GROWTH_GENERATOR_STEPS;
+  }
+
+  // Get the North Star reminder
+  getNorthStar(): typeof NORTH_STAR {
+    return NORTH_STAR;
+  }
 
   // Get current system metrics
   getSystemMetrics(): SystemMetrics {
@@ -364,7 +474,19 @@ class BrezBrain {
   generateRecommendations(): AIRecommendation[] {
     const metrics = this.getSystemMetrics();
     const dataStatus = this.getDataSourceStatus();
+    const phase = supermind.getCurrentPhase();
     const recommendations: AIRecommendation[] = [];
+
+    // Phase-specific top priority
+    recommendations.push({
+      id: `rec-phase-${Date.now()}`,
+      type: "insight",
+      priority: "high",
+      title: `[${phase.displayName} Phase] ${phase.rules[0]}`,
+      description: phase.description,
+      reasoning: `Current phase rule: ${phase.rules.join(", ")}`,
+      createdAt: new Date().toISOString(),
+    });
 
     // Critical: Low runway
     if (metrics.runway < 6) {
@@ -697,3 +819,16 @@ class BrezBrain {
 
 // Export singleton
 export const brain = new BrezBrain();
+
+// Re-export Supermind types and constants for convenience
+export {
+  supermind,
+  type Department,
+  type Phase,
+  PHASES,
+  ROLE_CONTEXTS,
+  SACRED_PARADOX,
+  NORTH_STAR,
+  MASTER_GOVERNING_PRINCIPLE,
+  GROWTH_GENERATOR_STEPS,
+} from "./supermind";
