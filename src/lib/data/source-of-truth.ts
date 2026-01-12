@@ -11,21 +11,27 @@ export const VALIDATED_METRICS = {
   // Source: Supermind Export, validated against velocity data
   alpha: 0.137,
 
-  // 2025 Revenue (Projected Full Year)
+  // 2025 Revenue (Actual Full Year)
   revenue2025: {
+    totalActual: 47_000_000, // $47MM actual
     sellThrough: 6_021_594, // Actual retail velocity (from velocity spreadsheet)
     sellIn: 13_450_000, // Wholesale/distributor orders
     ratio: 2.23, // Sell-in to sell-through ratio (inventory in channel)
-    dtcProjected: 25_000_000, // DTC target for 2025
-    totalTarget: 45_000_000, // Company total target
+    dtcActual: 25_000_000, // DTC approximate
   },
 
   // 2024 Revenue (Actual)
   revenue2024: {
+    totalActual: 28_900_000, // $28.9MM actual
     retailVelocity: 1_197_061,
     uniqueStores: 1_898,
     totalUnits: 84_644,
     adSpend: 2_800_702.59,
+  },
+
+  // 2023 Revenue (Actual)
+  revenue2023: {
+    totalActual: 1_250_000, // $1.25MM actual - first year
   },
 
   // YoY Growth
