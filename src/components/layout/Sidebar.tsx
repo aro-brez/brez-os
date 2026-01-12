@@ -22,6 +22,7 @@ import {
   Command,
   Calendar,
   BarChart3,
+  Map,
 } from "lucide-react";
 import { devStore } from "@/lib/data/devStore";
 import { Avatar } from "@/components/ui";
@@ -39,6 +40,7 @@ const mainNavItems = [
 
 const toolNavItems = [
   { href: "/growth", label: "Growth Generator", icon: TrendingUp },
+  { href: "/journey", label: "Journey & Impact", icon: Map },
   { href: "/insights", label: "Customer Insights", icon: BarChart3 },
   { href: "/financials", label: "Financials", icon: DollarSign },
   { href: "/files", label: "Data Hub", icon: Database },
