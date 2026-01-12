@@ -695,6 +695,156 @@ export const STABILIZATION_PLAN = {
 };
 
 // =============================================================================
+// ORG CHART & TEAM STRUCTURE (From 2025 Org Chart PDF)
+// =============================================================================
+
+export const ORG_CHART = {
+  executive: {
+    ceo: { name: 'Aaron J. Nosbisch', title: 'Chief Executive Officer' },
+    cro: { name: 'Brian Dewey', title: 'Chief Revenue Officer' },
+    coo: { name: 'Dan Gelshteyn', title: 'Chief Operations Officer' },
+    generalCounsel: { name: 'Andrea Golan', title: 'General Counsel' },
+    executiveAssistant: { name: 'Brittani Risk', title: 'Executive Assistant' },
+  },
+
+  finance: {
+    head: { name: 'Abla Jad', title: 'VP of Finance Executive' },
+    team: [
+      { name: 'Caitlin Morrison', title: 'Controller' },
+      { name: 'Cesar Lamprea', title: 'Accounts Manager' },
+      { name: 'Jade Distor', title: 'AR' },
+    ],
+  },
+
+  marketing: {
+    head: { name: 'Amy Endemann', title: 'VP of Marketing' },
+    team: [
+      { name: 'Alan Huynh', title: 'Head of Growth' },
+      { name: 'Andrew Deitsch', title: 'Creative Director' },
+      { name: 'Brandon Fink', title: 'Acquisition' },
+      { name: 'Corbin Martin', title: 'Brand Manager' },
+      { name: 'Daniel Crocker', title: 'Creative Strategist' },
+      { name: 'David Alvarado', title: 'Paid Advertising Lead' },
+      { name: 'Jem Bourouh', title: 'Acquisition' },
+      { name: 'Katie Caselli', title: 'Social Community Specialist' },
+      { name: 'Sarah Summerlin', title: 'Director of Influencer' },
+      { name: 'Arman (Armine) Chakhalyan', title: 'Designer' },
+      { name: 'Josephine Le', title: 'Designer' },
+    ],
+  },
+
+  digital: {
+    head: { name: 'Mikey Krieger', title: 'Director of CX/CRO' },
+    team: [
+      { name: 'Nenad Calma', title: 'Web Developer' },
+      { name: 'Sameh Baki', title: 'Web Developer' },
+    ],
+  },
+
+  customerSuccess: {
+    head: { name: 'Chelsea Willkinson', title: 'Customer Success Manager' },
+    team: [
+      { name: 'Ashley Hammond', title: 'Customer Success Rep' },
+      { name: 'Bianka Kureti', title: 'Customer Success Rep' },
+      { name: 'Caily Kaminski', title: 'Customer Success Rep' },
+      { name: 'Lindsey Baker', title: 'Customer Success Rep' },
+      { name: 'Veronica Fresta', title: 'Customer Success Rep' },
+    ],
+  },
+
+  experience: {
+    head: { name: 'Liana Bogran', title: 'Head of Experience' },
+    team: [
+      { name: 'Alessandra Ramirez', title: 'Brand Ambassador' },
+      { name: 'Ashton Moore', title: 'Brand Ambassador' },
+      { name: 'Jewel Eckhoff', title: 'Brand Ambassador' },
+      { name: 'Kaitlyn Powers', title: 'Brand Ambassador' },
+      { name: 'Robbie Alvarez', title: 'Brand Ambassador' },
+    ],
+  },
+
+  retention: {
+    head: { name: 'Nick Shackleford', title: 'Head of Retention' },
+  },
+
+  sales: {
+    head: { name: 'Niall Little', title: 'VP of Sales' },
+    directors: [
+      { name: 'Justin Weinstein', title: 'Director of National Accounts' },
+      { name: 'Blake Knight', title: 'Director of Sales: TX' },
+      { name: 'Lucas Cravero', title: 'Director of Sales: FL' },
+      { name: 'Michael Bonham', title: 'Regional Sales Manager' },
+    ],
+    keyAccounts: [
+      { name: 'Chad Zani', title: 'Key Account Manager' },
+      { name: 'Darren Masucci', title: 'Key Account Manager' },
+    ],
+    marketManagers: [
+      { name: 'Cat Shell', title: 'Sales Market Manager' },
+      { name: 'Daniel Walsh', title: 'Sales Market Manager' },
+      { name: 'Erik Hines', title: 'Sales Market Manager' },
+      { name: 'Kevin Zarelli', title: 'Sales Market Manager' },
+      { name: 'Nick Sharrell', title: 'Sales Market Manager' },
+      { name: 'Robert Gaynor', title: 'Sales Market Manager' },
+      { name: 'Zachary Anderson', title: 'Sales Market Manager' },
+    ],
+  },
+
+  operations: {
+    head: { name: 'Dan Gelshteyn', title: 'Chief Operations Officer' },
+    team: [
+      { name: 'Amber Huelle', title: 'Compliance, Regulatory Manager' },
+      { name: 'David Case', title: 'Sales Operations Manager' },
+      { name: 'Sondra Barba', title: 'Operations Manager' },
+      // VP of Ops - TBD
+      // Head of Production - TBD
+    ],
+  },
+
+  people: {
+    head: { name: 'Malia Steel', title: 'Head of People' },
+    team: [
+      { name: 'Geremie Ingrao', title: 'People Operations Manager' },
+    ],
+  },
+
+  product: {
+    head: { name: 'Travis Duncan', title: 'Head of Product' },
+    team: [
+      { name: 'James Preston Campbell', title: 'Chief of Science' },
+      { name: 'Alejandra Cordova', title: 'R+D Tech' },
+    ],
+  },
+};
+
+// Team metrics from ELT meeting
+export const TEAM_METRICS = {
+  startingHeadcount2025: 21, // All 1099 contractors
+  currentHeadcount: 60, // W2 & 1099
+  headcountGrowthPercent: 186,
+  retentionYTD: 0.84, // 84%
+  attritionYTD: 0.16, // 16%
+  targetVacancyRate: 0.95, // Fill 95% of roles within quarter
+};
+
+// Department to team member mapping for onboarding
+export const DEPARTMENT_LEADS: Record<string, { name: string; title: string }> = {
+  executive: { name: 'Aaron J. Nosbisch', title: 'CEO' },
+  finance: { name: 'Abla Jad', title: 'VP of Finance' },
+  marketing: { name: 'Amy Endemann', title: 'VP of Marketing' },
+  growth: { name: 'Alan Huynh', title: 'Head of Growth' },
+  creative: { name: 'Andrew Deitsch', title: 'Creative Director' },
+  sales: { name: 'Niall Little', title: 'VP of Sales' },
+  retail: { name: 'Brian Dewey', title: 'CRO' },
+  operations: { name: 'Dan Gelshteyn', title: 'COO' },
+  product: { name: 'Travis Duncan', title: 'Head of Product' },
+  customer_success: { name: 'Chelsea Willkinson', title: 'CS Manager' },
+  people: { name: 'Malia Steel', title: 'Head of People' },
+  retention: { name: 'Nick Shackleford', title: 'Head of Retention' },
+  experience: { name: 'Liana Bogran', title: 'Head of Experience' },
+};
+
+// =============================================================================
 // HELPER FUNCTIONS
 // =============================================================================
 
