@@ -271,13 +271,17 @@ export const CURRENT_KPIS: KPIMetric[] = [
 ];
 
 // Unit economics constants
+// Updated Jan 2026: CM higher than expected, push CAC for volume
 export const UNIT_ECONOMICS = {
   baseUnit: '4-pack',
   cashCogs: 4.76, // per 4-pack
   cogsPerCan: 1.19,
+  dtcCM: 0.43, // 43% actual (Nov close, Cramer confirmed)
+  dtcCMFloor: 0.35, // Min acceptable when pushing spend
   retailCM: 0.30, // 30% after trade
   retailDSO: 55, // days
-  dtcCAC: 55, // target
+  dtcCAC: 65, // target (raised from 55 - push for volume)
+  dtcCACMax: 85, // ceiling when cash healthy
   subConversionRate: 0.5049, // 50.49%
   ltvMultiples: {
     month3: 2.5,

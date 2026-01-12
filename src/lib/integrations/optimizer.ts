@@ -30,10 +30,13 @@ export interface TeamAction {
 }
 
 // Unit economics from CLAUDE.md
+// Updated Jan 2026: CM averaging higher (40%), DTC at 43% per Cramer
+// Strategy: Pressurize CAC and spend for higher CM$ (not CM%)
 const UNIT_ECONOMICS = {
   aov: 72, // Average order value
   cogsPerUnit: 4.76, // COGS per 4-pack
-  dtcCM: 0.32, // DTC contribution margin
+  dtcCM: 0.43, // DTC contribution margin (actual, Nov close)
+  dtcCMFloor: 0.35, // Minimum acceptable CM% when pushing spend
   retailCM: 0.30, // Retail contribution margin
   subConversion: 0.5049, // Subscription conversion rate
   ltv3mo: 2.5, // 3-month LTV multiple
@@ -57,11 +60,15 @@ export function runOptimization(metrics: UnifiedMetrics): OptimizationResult {
   const maxSafeSpend = Math.max(0, (currentCash - UNIT_ECONOMICS.cashFloor) * 0.3);
 
   // Optimize CAC - find the ceiling based on payback
-  let optimalCAC = 55; // Default target
+  // Jan 2026 strategy shift: Pressurize CAC for CM$ growth
+  // With 43% CM, we can afford higher CAC if it drives more volume
+  let optimalCAC = 65; // Default target (raised from 55)
   if (metrics.cash.status === "healthy") {
-    optimalCAC = 65; // Can be more aggressive
+    optimalCAC = 85; // Push hard for volume - CM% can drop if CM$ grows
+  } else if (metrics.cash.status === "watch") {
+    optimalCAC = 70; // Still aggressive, but monitored
   } else if (metrics.cash.status === "critical") {
-    optimalCAC = 45; // Must be conservative
+    optimalCAC = 55; // Conservative only when cash-critical
   }
 
   // Calculate projected outcomes
@@ -162,19 +169,37 @@ function generateTeamActions(
   }
 
   // HIGH PRIORITY - Growth optimization
+  // Jan 2026: Strategy shift - prioritize CM$ over CAC%
+  // Allow higher CAC if it drives more total contribution margin dollars
   if (metrics.dtc.cac > optimalCAC) {
     actions.push({
       role: "growth",
-      action: `Reduce CAC from $${metrics.dtc.cac} to $${optimalCAC}`,
-      why: `Every $5 CAC reduction = ${Math.round(maxSpend / 5)} more customers at same spend`,
+      action: `Evaluate CAC $${metrics.dtc.cac} vs target $${optimalCAC} - push spend if CM$ growing`,
+      why: `With 43% DTC CM, higher CAC acceptable if total CM$ increases. Focus on volume.`,
       steps: [
-        "Pull ad performance by campaign from Meta",
-        "Identify bottom 20% performers by CAC",
-        "Pause or cut budget on bottom performers",
-        "Reallocate to top 20% performers",
-        "Document what's working for creative team",
+        "Pull total CM$ (not %) by week - is it growing?",
+        "If CM$ up: maintain/increase spend even at higher CAC",
+        "If CM$ flat/down: optimize campaigns for efficiency",
+        "Track both CAC and total new customer revenue",
+        "Report CM$ trend, not just CAC",
       ],
-      expectedImpact: `-$${metrics.dtc.cac - optimalCAC} CAC`,
+      expectedImpact: `+CM$ from volume growth`,
+      priority: "high",
+      xpReward: 75,
+    });
+  } else {
+    // CAC is efficient - push harder
+    actions.push({
+      role: "growth",
+      action: `CAC at $${metrics.dtc.cac} below $${optimalCAC} ceiling - increase spend for more CM$`,
+      why: `Room to push spend. 43% CM means we can afford higher CAC for more volume.`,
+      steps: [
+        "Increase daily budgets on top performers by 20%",
+        "Test new audiences at current CAC efficiency",
+        "Monitor CM$ growth, not just CAC",
+        "Push until CAC hits $${optimalCAC} ceiling",
+      ],
+      expectedImpact: `+${Math.round((optimalCAC - metrics.dtc.cac) * 100 / metrics.dtc.cac)}% more customers`,
       priority: "high",
       xpReward: 75,
     });

@@ -61,10 +61,13 @@ export const UNIT_ECONOMICS = {
   },
 
   // Channel Margins
+  // Updated Jan 2026: Cramer confirmed CM averaging higher (up to 40%), DTC at 43%
+  // Strategy: Pressurize CAC and spend to drive lower CM% but higher CM dollars
   margins: {
     dtc: {
       grossMargin: 0.81, // 81% before marketing
-      contributionMarginTarget: 0.40, // 40% after all variable costs
+      contributionMarginActual: 0.43, // 43% actual (Nov close review)
+      contributionMarginTarget: 0.40, // 40% floor - can go lower if CM$ increases
     },
     retail: {
       contributionMargin: 0.30, // ~30% after trade, freight, distributor fees
@@ -982,16 +985,25 @@ export const AP_VENDORS = [
 export const GROWTH_GENERATOR = {
   currentStep: 1, // Improve contribution margin
   currentMetrics: {
-    dtcCM: 0.32, // 32% - need to hit 35%
+    dtcCM: 0.43, // 43% actual (Nov close, confirmed by Cramer)
     retailCM: 0.30,
     cac: 55,
     subConversion: 0.5049,
   },
   targets: {
-    dtcCM: 0.35,
+    // Strategy shift (Jan 2026): Pressurize CAC & spend for higher CM$
+    // Accept lower CM% if it drives more total contribution margin dollars
+    dtcCM: 0.35, // Floor - can go lower if CM$ increases
     retailCM: 0.30,
-    maxCAC: 65, // Stabilize phase
-    maxPaybackMonths: 4,
+    maxCAC: 85, // Aggressive - push spend for volume
+    maxPaybackMonths: 5, // Extended payback acceptable for CM$ growth
+  },
+  strategy: {
+    // Dan's guidance: "pressurize cac and spend to drive lower CM but higher CM$"
+    mode: 'cm_dollars' as const, // Optimize for CM$ not CM%
+    cmFloor: 0.35, // Don't go below 35% CM
+    spendAggressiveness: 'high' as const, // Push spend hard
+    rationale: 'With DTC at 43% CM, room to increase CAC for more volume. Lower CM% acceptable if absolute CM$ grows.',
   },
 };
 
