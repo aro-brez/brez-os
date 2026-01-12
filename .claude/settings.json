@@ -1,0 +1,37 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(npm install)",
+      "Bash(npm install:*)",
+      "Bash(npm run build:*)",
+      "Bash(npm run lint:*)",
+      "Bash(npm run dev:*)",
+      "Bash(npm test:*)",
+      "Bash(npm cache clean:*)",
+      "Bash(node:*)",
+      "Bash(npx:*)",
+      "Bash(git status:*)",
+      "Bash(git diff:*)",
+      "Bash(git log:*)",
+      "Bash(git branch:*)",
+      "Bash(git add:*)",
+      "Bash(git commit:*)",
+      "Bash(mkdir:*)",
+      "Bash(ls:*)",
+      "Bash(cat:*)",
+      "Bash(curl:*)",
+      "Bash(which:*)",
+      "Bash(sleep:*)",
+      "WebFetch(domain:drinkbrez.com)",
+      "WebFetch(domain:www.drinkbrez.com)",
+      "WebSearch"
+    ],
+    "deny": [
+      "Read(.env.local)",
+      "Read(./secrets/**)"
+    ],
+    "defaultMode": "acceptEdits"
+  },
+  "model": "opus",
+  "respectGitignore": true
+}

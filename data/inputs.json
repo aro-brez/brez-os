@@ -1,0 +1,144 @@
+{
+  "meta": {
+    "org": "BREZ",
+    "unit": "4-pack",
+    "notes": "V1 uses manual inputs + CSV upload. V2 wires Shopify/QuickBooks/Ads APIs."
+  },
+  "time": {
+    "startDate": "2026-01-10",
+    "weeks": 52,
+    "weeklyRetailDSOWeeks": 8
+  },
+  "cash": {
+    "cashOnHand": 380000,
+    "reserveFloor": 100000
+  },
+  "fixedStack": {
+    "weeklyFixedBase": {
+      "payroll": 117000,
+      "budgetedExpenses": 35000,
+      "petrichorPlan": 8700,
+      "canasoolPlan": 24400
+    },
+    "weeklyDebt": [
+      {
+        "name": "Wayflyer",
+        "weeklyPayment": 130000,
+        "endDate": "2026-04-16"
+      },
+      {
+        "name": "ClearCo",
+        "weeklyPayment": 30000,
+        "endDate": "2026-03-09"
+      }
+    ],
+    "weeklyAPMinimum": 0,
+    "notes": "Set weeklyAPMinimum to what must be paid weekly to prevent stop-ship beyond the plans above."
+  },
+  "loan": {
+    "enabled": false,
+    "maxFacility": 3200000,
+    "drawWeek": 0,
+    "drawAmount": 0,
+    "factorRateFullTerm": 1.31,
+    "monthlyPayment": 349333,
+    "prepayFactors": {
+      "30d": 1.13,
+      "60d": 1.15,
+      "90d": 1.17
+    },
+    "assumePaymentStartsSameWeekAsDraw": true,
+    "notes": "V1 models weekly debt service as monthlyPayment/(52/12). V2 adds prepay as a lump-sum option."
+  },
+  "dtc": {
+    "spendPlan": {
+      "mode": "constant",
+      "weeklySpend": 45000,
+      "laneSplit": {
+        "national": 0.8,
+        "retailIgnition": 0.2
+      },
+      "retailIgnitionMarkets": [
+        "FL",
+        "NY",
+        "IL",
+        "TX"
+      ],
+      "notes": "V1 keeps spend constant unless you change it. V2 adds ramp + spend governor."
+    },
+    "cacModel": {
+      "mode": "constant",
+      "cac": 55,
+      "curve": {
+        "baseSpend": 45000,
+        "baseCAC": 55,
+        "slope": 0.0008
+      },
+      "notes": "Switch mode to 'curve' once you want CAC to rise with spend."
+    },
+    "firstOrder": {
+      "firstOrderAOV": 105.57,
+      "dtcContributionMargin": 0.5211
+    },
+    "nonSubReturningBase": {
+      "enabled": true,
+      "weeklyBaseRevenue": 119224,
+      "weeklyDecay": 0.98,
+      "notes": "Brand memory baseline. V2 can learn it from Shopify automatically."
+    }
+  },
+  "subs": {
+    "subShareOfNewCustomers": 0.5049,
+    "startingActiveSubs": 13382,
+    "weeklySurvival_sw": 0.96481,
+    "weeklyRepeatPerActive_pw": 13.94,
+    "notes": "Derived from Nick: 6mo retention ~0.393, 6mo LTV mult 3.5x on $102 AOV0."
+  },
+  "retail": {
+    "alpha": 0.137,
+    "lagWeeks": 0,
+    "retailContributionMargin": 0.3,
+    "mode": "sellThroughProxy",
+    "alphaSellInScaled": 0.306,
+    "notes": "alpha=0.137 measured 2025 coupling on sell-through proxy; alphaSellInScaled=0.306 aggressive sell-in-scaled scenario."
+  },
+  "ops": {
+    "cogsPer4PackCash": 4.76,
+    "productionCashScheduleByWeek": [
+      0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+      0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+      0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+      0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+      0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+      0, 0
+    ],
+    "productionPaymentPolicy": {
+      "preProduction": 0.5,
+      "packIn": 0.2,
+      "net30": 0.3
+    },
+    "notes": "Replace productionCashScheduleByWeek with Parker's week-by-week cash due schedule (next 12 weeks + zeros after)."
+  },
+  "csvSchemas": {
+    "weeklySpendCsv": [
+      "week_start",
+      "spend_total"
+    ],
+    "weeklyRetailVelocityCsv": [
+      "week_start",
+      "retail_revenue",
+      "units",
+      "doors"
+    ],
+    "weeklyProductionCashCsv": [
+      "week_start",
+      "production_cash_due"
+    ],
+    "weeklyCashSnapshotCsv": [
+      "week_start",
+      "cash_on_hand",
+      "ap_due_next_2w",
+      "ar_expected_next_2w"
+    ]
+  }
+}
