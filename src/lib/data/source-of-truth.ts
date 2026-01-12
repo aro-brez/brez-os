@@ -616,6 +616,85 @@ export const MEETING_INSIGHTS_JAN_6_2026 = {
 };
 
 // =============================================================================
+// STABILIZATION PLAN (From Dan's Update)
+// =============================================================================
+
+export const STABILIZATION_PLAN = {
+  // Core Principle
+  coreGoal: 'Stability, predictability, and cash discipline - NOT top-line experimentation',
+
+  financialFocus: [
+    'Maximize gross and contribution margins',
+    'Preserve liquidity and extend cash runway',
+    'Reduce AP aging (target: eliminate balances >60 days)',
+    'Close debt and equity financing',
+  ],
+
+  operationalFocus: [
+    'Maintain core revenue and service levels with high operational consistency',
+    'Prioritize core SKUs and existing revenue streams',
+    'Strengthen planning cadence, forecasting accuracy, and execution discipline',
+    'Reduce variability and noise across cross-functional teams',
+  ],
+
+  // H1 2026 Revenue and Profit Targets (from Dan's stabilization update)
+  h1Targets: {
+    january: { revenue: 2_761_130, profit: 232_966 },
+    february: { revenue: 2_643_133, profit: 167_884 },
+    march: { revenue: 2_692_267, profit: 170_383 },
+    april: { revenue: 2_820_255, profit: 229_332 },
+    may: { revenue: 3_331_667, profit: 101_067 },
+    june: { revenue: 3_423_488, profit: 148_039 },
+    h1Total: {
+      revenue: 17_671_940,
+      profit: 1_049_671,
+    },
+  },
+
+  // AP Status
+  apStatus: {
+    currentBalance: 8_600_000,
+    paidSinceRestructuring: 900_000,
+    deltaToStabilize: 3_000_000, // To be closed by debt financing in January
+    workingCapitalNeeds: 'April production onwards - solve via equity in Q1',
+  },
+
+  // Vendor Payment Tiers
+  vendorProgress: {
+    paymentPlansSecured: ['Cannasol', 'Petrichor', 'Wayflyer', 'Clear Co', 'Tondo', 'Legacy'],
+    tier1MissionCritical: {
+      status: 'Complete',
+      note: 'December production complete, final Best Bev payment outstanding',
+    },
+    tier2MissionCritical: {
+      status: 'In Progress',
+      description: 'Department unlocks, future production partners',
+    },
+    tier3: {
+      status: 'Pending',
+      approach: 'Convert to equity or accept 50% payment upon funding event',
+    },
+  },
+
+  // Guardrails - What to pause/defer
+  guardrails: {
+    pauseOrDefer: [
+      'New SKUs introducing incremental complexity or cash exposure',
+      'Products requiring inventory builds without clear near-term payback',
+      'Offerings with materially lower margins than core products',
+      'Bundles that fragment demand signals or complicate planning',
+      'Channel expansion requiring upfront inventory commitments',
+      'Actions increasing working capital without clear short-term returns',
+    ],
+    exceptionFramework: [
+      'Q1 cash neutrality or cash positivity',
+      'Minimal incremental inventory exposure',
+      'Limited impact on overall working capital and operational complexity',
+    ],
+  },
+};
+
+// =============================================================================
 // HELPER FUNCTIONS
 // =============================================================================
 
