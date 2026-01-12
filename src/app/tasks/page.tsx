@@ -7,12 +7,10 @@ import {
   Plus,
   Calendar,
   Clock,
-  Filter,
   MoreHorizontal,
   Trash2,
   MessageSquare,
   Target,
-  Sparkles,
 } from "lucide-react";
 import { Card, Button, Badge, Modal, Input, Textarea, Select, Avatar, Tabs } from "@/components/ui";
 import { devStore } from "@/lib/data/devStore";

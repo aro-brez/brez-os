@@ -1,6 +1,6 @@
 // Quest Generation & Management System
 
-import { Quest, QuestCategory, Department, UserProfile, Achievement } from './types';
+import { Quest, UserProfile, Achievement } from './types';
 
 // Pre-defined quests that the system can assign
 export const QUEST_TEMPLATES: Omit<Quest, 'id' | 'status' | 'createdAt'>[] = [
@@ -496,7 +496,6 @@ export function getQuestRecommendations(
 ): { quest: Quest; reason: string }[] {
   const recommendations: { quest: Quest; reason: string }[] = [];
   const focusAreas = userProfile.focusAreas || [];
-  const metrics = userProfile.primaryMetrics || [];
 
   for (const quest of availableQuests.slice(0, 5)) {
     let reason = '';

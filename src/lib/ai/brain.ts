@@ -18,10 +18,7 @@ import {
   type Department,
   type Phase,
   PHASES,
-  ROLE_CONTEXTS,
-  SACRED_PARADOX,
   NORTH_STAR,
-  MASTER_GOVERNING_PRINCIPLE,
   GROWTH_GENERATOR_STEPS,
 } from "./supermind";
 
@@ -654,7 +651,6 @@ class BrezBrain {
         response = `**Simulation: CAC change from $${metrics.dtcCAC} to $${newValue}**\n\n`;
         results.forEach((r) => {
           const arrow = r.impact === "positive" ? "↑" : r.impact === "negative" ? "↓" : "→";
-          const color = r.impact === "positive" ? "green" : r.impact === "negative" ? "red" : "neutral";
           response += `• **${r.metric}**: ${r.currentValue.toLocaleString()} → ${r.projectedValue.toLocaleString()} (${r.changePercent > 0 ? "+" : ""}${r.changePercent.toFixed(1)}% ${arrow})\n`;
           if (r.warnings) {
             response += `  ⚠️ ${r.warnings.join(", ")}\n`;

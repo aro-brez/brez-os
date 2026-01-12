@@ -25,7 +25,6 @@ import {
   Settings,
   Users,
   ExternalLink,
-  RefreshCw,
   Sparkles,
   ArrowRight,
 } from "lucide-react";
@@ -450,7 +449,6 @@ export default function DataHubPage() {
         file={selectedFile}
         onClose={() => setSelectedFile(null)}
         onDelete={deleteFile}
-        onUpdate={loadFiles}
       />
     </div>
   );
@@ -460,12 +458,10 @@ function FileDetailsModal({
   file,
   onClose,
   onDelete,
-  onUpdate,
 }: {
   file: File | null;
   onClose: () => void;
   onDelete: (id: string) => void;
-  onUpdate: () => void;
 }) {
   const [tags, setTags] = useState<string[]>([]);
   const [newTag, setNewTag] = useState("");

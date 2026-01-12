@@ -7,7 +7,6 @@ import {
   Message,
   Goal,
   Task,
-  Project,
   File,
   CustomerMessage,
   CustomerDemographicSnapshot,

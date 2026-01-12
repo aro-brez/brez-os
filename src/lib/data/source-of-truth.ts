@@ -957,3 +957,128 @@ export function getCriticalCashDates(): { description: string; date: string; amo
     },
   ];
 }
+
+// =============================================================================
+// AP VENDORS - For brez-intelligence.ts
+// =============================================================================
+
+export const AP_VENDORS = [
+  { name: 'Best Bev', balance: 166_563, riskLevel: 'stop-ship' as const, status: 'negotiating' as const, contact: 'Dan' },
+  { name: 'Cannasol', balance: 1_763_141, riskLevel: 'high' as const, status: 'negotiating' as const, contact: 'Dan' },
+  { name: 'Petrichor', balance: 468_398, riskLevel: 'high' as const, status: 'payment-plan' as const, contact: 'Abla' },
+  { name: 'Apex', balance: 306_068, riskLevel: 'medium' as const, status: 'negotiating' as const, contact: 'Dan' },
+];
+
+// =============================================================================
+// GROWTH GENERATOR STATE
+// =============================================================================
+
+export const GROWTH_GENERATOR = {
+  currentStep: 1, // Improve contribution margin
+  currentMetrics: {
+    dtcCM: 0.32, // 32% - need to hit 35%
+    retailCM: 0.30,
+    cac: 55,
+    subConversion: 0.5049,
+  },
+  targets: {
+    dtcCM: 0.35,
+    retailCM: 0.30,
+    maxCAC: 65, // Stabilize phase
+    maxPaybackMonths: 4,
+  },
+};
+
+// =============================================================================
+// TEAM STRUCTURE (Single Writers from governance)
+// =============================================================================
+
+export const TEAM_STRUCTURE = {
+  singleWriters: {
+    'DTC/Growth': { owner: 'Al Huynh', backup: 'Brian Dewey' },
+    'Retail/Sales': { owner: 'Niall Little', backup: 'Brian Dewey' },
+    'Finance/Cash': { owner: 'Abla Jad', backup: 'Dan' },
+    'Operations': { owner: 'Dan', backup: 'Sondra' },
+    'Product': { owner: 'Travis Duncan', backup: 'Preston' },
+    'Creative': { owner: 'Andrew Deitsch', backup: 'Amy' },
+    'Marketing': { owner: 'Amy Endemann', backup: 'Al' },
+    'People': { owner: 'Malia Steel', backup: 'Geremie' },
+    'Legal/Compliance': { owner: 'Andrea Golan', backup: 'Amber' },
+  },
+};
+
+// =============================================================================
+// CURRENT STATE - For real-time tracking
+// =============================================================================
+
+export const CURRENT_STATE = {
+  currentScenario: 'stabilize' as const, // stabilize | thrive | scale | downside
+  activePriorities: [
+    'AP Resolution',
+    'DTC CM Optimization',
+    'Cash Management',
+  ],
+  lastUpdated: {
+    cash: '2025-01-10',
+    dtcMetrics: '2025-01-08',
+    retailVelocity: '2025-01-05',
+    apAging: '2025-01-09',
+  },
+};
+
+// =============================================================================
+// REGULATORY TIMELINE (Nov 2026 deadline)
+// =============================================================================
+
+export const REGULATORY_TIMELINE = {
+  deadline: '2026-11-01',
+  thcCapMgPerContainer: 0.4,
+  phase1: {
+    name: 'Research & Planning',
+    deadline: '2026-05-01',
+    completed: false,
+    tasks: ['Identify compliant formulations', 'Bench-test top 3', 'Finalize spec'],
+  },
+  phase2: {
+    name: 'Pilot Production',
+    deadline: '2026-08-01',
+    requiresThrive: true,
+    estimatedCost: 20_000,
+  },
+  phase3: {
+    name: 'Full Production Transition',
+    deadline: '2026-11-01',
+    requiresSignificantCash: true,
+  },
+};
+
+// =============================================================================
+// DECISIONS NEEDED (From governance)
+// =============================================================================
+
+export const DECISIONS_NEEDED = [
+  {
+    id: 'spend-cap-weekly',
+    title: 'Approve weekly ad spend cap',
+    context: 'Current: $45k/week. CAC at $55.',
+    owner: 'Al Huynh',
+    department: 'growth',
+    deadline: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString(), // 7 days
+    defaultAction: 'Keep at previous week cap',
+  },
+];
+
+// =============================================================================
+// THE RALPH PARADOX - Iteration tracking
+// =============================================================================
+
+export const RALPH_PARADOX = {
+  principle: 'Deterministic failure creates undeterministic success',
+  insight: 'The willingness to fail 1000 times guarantees eventual breakthrough',
+  application: 'When stuck, dont optimize—iterate. Ship ugly. Learn fast.',
+  tracking: {
+    experimentsRun: 0,
+    experimentsSucceeded: 0,
+    lessonsLearned: [] as string[],
+  },
+};

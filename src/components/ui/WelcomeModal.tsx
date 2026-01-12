@@ -7,7 +7,6 @@ import {
   ArrowRight,
   MessageSquare,
   Target,
-  CheckSquare,
   TrendingUp,
   Command,
   Zap,

@@ -23,7 +23,6 @@ import {
   CartesianGrid,
   Tooltip,
   ResponsiveContainer,
-  ReferenceLine,
 } from "recharts";
 
 export default function FinancialsPage() {

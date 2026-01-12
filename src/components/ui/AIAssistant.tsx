@@ -158,7 +158,7 @@ export function AIAssistantProvider({ children }: { children: ReactNode }) {
         suggestions,
       };
       setMessages((prev) => [...prev, assistantMessage]);
-    } catch (error) {
+    } catch {
       const assistantMessage: Message = {
         id: `msg-${Date.now()}-ai`,
         role: "assistant",

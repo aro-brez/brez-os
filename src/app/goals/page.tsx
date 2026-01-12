@@ -5,12 +5,10 @@ import { format } from "date-fns";
 import {
   Target,
   Plus,
-  Filter,
   TrendingUp,
   AlertTriangle,
   CheckCircle,
   Clock,
-  Users,
 } from "lucide-react";
 import { Card, Button, Badge, Modal, Input, Textarea, Select, ProgressBar, Avatar } from "@/components/ui";
 import { devStore } from "@/lib/data/devStore";
@@ -142,7 +140,6 @@ export default function GoalsPage() {
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
         {filteredGoals.map((goal) => {
           const owner = devStore.getUser(goal.ownerId);
-          const linkedTasks = goal.linkedTaskIds.map((id) => devStore.getTask(id)).filter(Boolean);
 
           return (
             <Card

@@ -10,17 +10,12 @@
  */
 
 import {
-  JourneyStage,
   JOURNEY_STAGES,
-  EntryChannel,
-  MarketingMoment,
   SamplingEvent,
-  ImpactCorrelation,
   ChangeLogEntry,
   DataRequest,
   DataContribution,
   JourneyStageMetrics,
-  CustomerJourneyRecord,
 } from "./types";
 
 // ============ SAMPLE DATA (Will be replaced with real data) ============
@@ -402,7 +397,6 @@ class JourneyEngine {
     dataNeeded: string[];
   } {
     const eventSummary = this.getCansInHandsSummary(3);
-    const correlations = this.getImpactCorrelations();
 
     // Determine focus based on data
     let currentFocus = "Improve contribution margin through channel optimization";

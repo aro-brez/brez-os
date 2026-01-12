@@ -1,14 +1,11 @@
 "use client";
 
 import { useState, useEffect, useMemo } from "react";
-import Image from "next/image";
 import {
   TrendingUp,
   Copy,
   RotateCcw,
-  Info,
   Sparkles,
-  ArrowRight,
   ArrowUp,
   ArrowDown,
   Play,
@@ -36,7 +33,7 @@ import {
 } from "@/components/Charts";
 import { generateInsights } from "@/lib/insights-engine";
 import { InsightsPanel } from "@/components/ai/InsightsPanel";
-import { Card, Button, Badge, Tabs, Input } from "@/components/ui";
+import { Card, Button, Tabs } from "@/components/ui";
 import defaultInputs from "../../../data/inputs.json";
 import { brain, SimulationInput, SimulationResult } from "@/lib/ai/brain";
 
@@ -64,7 +61,6 @@ export default function GrowthGenerator() {
   const [showConfetti, setShowConfetti] = useState(false);
 
   // Quick simulation state
-  const [showQuickSim, setShowQuickSim] = useState(true);
   const [quickSimType, setQuickSimType] = useState<SimulationInput["type"]>("cac");
   const [quickSimValue, setQuickSimValue] = useState("");
   const [quickSimResults, setQuickSimResults] = useState<SimulationResult[]>([]);

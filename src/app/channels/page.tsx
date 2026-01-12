@@ -6,31 +6,16 @@ import {
   Hash,
   Send,
   Smile,
-  Paperclip,
   Phone,
   Target,
   CheckSquare,
-  TrendingUp,
-  MoreHorizontal,
   Reply,
-  ChevronRight,
   Zap,
 } from "lucide-react";
-import { Card, Button, Input, Avatar, Badge, Modal, Textarea } from "@/components/ui";
+import { Card, Button, Avatar, Badge, Modal, Textarea } from "@/components/ui";
 import { devStore } from "@/lib/data/devStore";
 import { Channel, Message, Department } from "@/lib/data/schemas";
-import { getDepartmentPriorities, getNextBestAction } from "@/lib/ai/prioritizer";
-
-const CHANNEL_ICONS: Record<string, string> = {
-  growth: "TrendingUp",
-  retail: "Store",
-  finance: "DollarSign",
-  ops: "Truck",
-  product: "Package",
-  cx: "Heart",
-  creative: "Palette",
-  exec: "Crown",
-};
+import { getNextBestAction } from "@/lib/ai/prioritizer";
 
 const EMOJI_OPTIONS = ["thumbsup", "heart", "fire", "tada", "rocket", "eyes", "think", "100"];
 

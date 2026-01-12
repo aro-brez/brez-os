@@ -73,7 +73,6 @@ export function QuestPanel({
 
   const handleCompleteQuest = (quest: Quest) => {
     // In a real app, this would validate completion and update the database
-    const newXp = xp + quest.xpReward;
     onQuestComplete?.(quest, quest.xpReward);
 
     // Check for achievement unlock

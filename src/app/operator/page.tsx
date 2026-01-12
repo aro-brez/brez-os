@@ -6,18 +6,15 @@ import {
   ChevronRight,
   Sparkles,
   Target,
-  CheckSquare,
   MessageSquare,
   TrendingUp,
   DollarSign,
   Users,
-  FolderOpen,
-  Settings,
   Keyboard,
   Lightbulb,
   Zap,
 } from "lucide-react";
-import { Card, Badge } from "@/components/ui";
+import { Card } from "@/components/ui";
 
 const guides = [
   {

@@ -1,14 +1,13 @@
 "use client";
 
 import { useState, useEffect, useRef } from "react";
-import { format, subMonths } from "date-fns";
+import { format } from "date-fns";
 import {
   Users,
   TrendingUp,
   TrendingDown,
   Minus,
   MapPin,
-  Calendar,
   ArrowRight,
   ChevronLeft,
   ChevronRight,
@@ -22,8 +21,6 @@ import {
   AlertCircle,
   Database,
   Sparkles,
-  Upload,
-  Link as LinkIcon,
 } from "lucide-react";
 import { Card, Button, Badge, Select } from "@/components/ui";
 import { devStore } from "@/lib/data/devStore";
@@ -63,26 +60,6 @@ export default function CustomerInsightsPage() {
     value: d.date,
     label: format(new Date(d.date), "MMMM yyyy"),
   }));
-
-  const formatChange = (change: number, isPercent = false) => {
-    const prefix = change > 0 ? "+" : "";
-    if (isPercent) {
-      return `${prefix}${change.toFixed(1)}%`;
-    }
-    return `${prefix}${change.toLocaleString()}`;
-  };
-
-  const getChangeColor = (change: number) => {
-    if (change > 0) return "text-[#6BCB77]";
-    if (change < 0) return "text-[#ff6b6b]";
-    return "text-[#676986]";
-  };
-
-  const getChangeIcon = (change: number) => {
-    if (change > 0) return <TrendingUp className="w-4 h-4 text-[#6BCB77]" />;
-    if (change < 0) return <TrendingDown className="w-4 h-4 text-[#ff6b6b]" />;
-    return <Minus className="w-4 h-4 text-[#676986]" />;
-  };
 
   const getSentimentIcon = (sentiment?: string) => {
     if (sentiment === "positive") return <ThumbsUp className="w-4 h-4 text-[#6BCB77]" />;

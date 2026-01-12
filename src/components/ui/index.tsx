@@ -402,9 +402,10 @@ interface ProgressBarProps {
   variant?: "default" | "success" | "warning" | "danger";
   size?: "sm" | "md";
   showLabel?: boolean;
+  className?: string;
 }
 
-export function ProgressBar({ value, max = 100, variant = "default", size = "md", showLabel = false }: ProgressBarProps) {
+export function ProgressBar({ value, max = 100, variant = "default", size = "md", showLabel = false, className }: ProgressBarProps) {
   const percent = Math.min(100, Math.max(0, (value / max) * 100));
 
   const variants = {
@@ -420,7 +421,7 @@ export function ProgressBar({ value, max = 100, variant = "default", size = "md"
   };
 
   return (
-    <div className="w-full">
+    <div className={clsx("w-full", className)}>
       <div className={clsx("w-full bg-white/10 rounded-full overflow-hidden", sizes[size])}>
         <div
           className={clsx("h-full rounded-full transition-all", variants[variant])}

@@ -168,7 +168,6 @@ export function TeamOnboarding({
                     question={currentQuestion}
                     value={answers[currentQuestion?.id]}
                     onChange={handleAnswer}
-                    selectedDepartment={selectedDepartment}
                   />
 
                   {/* Navigation */}
@@ -222,12 +221,10 @@ function QuestionRenderer({
   question,
   value,
   onChange,
-  selectedDepartment,
 }: {
   question: OnboardingQuestion;
   value: string | string[] | undefined;
   onChange: (value: string | string[]) => void;
-  selectedDepartment: Department | null;
 }) {
   if (!question) return null;
 

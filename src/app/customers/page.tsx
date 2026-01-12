@@ -11,12 +11,10 @@ import {
   ThumbsDown,
   Minus,
   DollarSign,
-  TrendingUp,
-  TrendingDown,
   Star,
   AlertTriangle,
 } from "lucide-react";
-import { Card, Button, Badge, Input, Textarea, EmptyState, ProgressBar } from "@/components/ui";
+import { Card, Button, Badge, Input, EmptyState, ProgressBar } from "@/components/ui";
 import { devStore } from "@/lib/data/devStore";
 import { CustomerMessage } from "@/lib/data/schemas";
 import { analyzeCustomerFeedback, CustomerInsights } from "@/lib/ai/summarizer";

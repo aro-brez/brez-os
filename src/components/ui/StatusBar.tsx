@@ -5,11 +5,6 @@ import Link from "next/link";
 import { clsx } from "clsx";
 import {
   TrendingUp,
-  TrendingDown,
-  DollarSign,
-  Target,
-  AlertTriangle,
-  CheckCircle,
   Clock,
   Zap,
   Shield,
@@ -26,7 +21,7 @@ interface MetricPulse {
 
 export function StatusBar() {
   const [metrics, setMetrics] = useState<MetricPulse[]>([]);
-  const [phase, setPhase] = useState<"stabilize" | "thrive" | "scale">("stabilize");
+  const [phase] = useState<"stabilize" | "thrive" | "scale">("stabilize");
   const [currentTime, setCurrentTime] = useState(new Date());
 
   useEffect(() => {
@@ -44,7 +39,6 @@ export function StatusBar() {
 
       const atRiskGoals = goals.filter((g) => g.status === "at_risk" || g.status === "behind");
       const inProgressTasks = tasks.filter((t) => t.status === "doing");
-      const completedTasks = tasks.filter((t) => t.status === "done");
 
       setMetrics([
         {

@@ -2,7 +2,7 @@
 
 import { useState, useEffect, createContext, useContext, ReactNode, useCallback } from "react";
 import { clsx } from "clsx";
-import { CheckCircle, AlertTriangle, Info, X, Sparkles, Target, CheckSquare } from "lucide-react";
+import { CheckCircle, AlertTriangle, Info, X, Sparkles } from "lucide-react";
 
 interface Toast {
   id: string;

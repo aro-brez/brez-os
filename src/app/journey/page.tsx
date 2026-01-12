@@ -10,9 +10,7 @@ import {
   Calendar,
   ChevronRight,
   Award,
-  Zap,
   Target,
-  ArrowRight,
   ArrowDown,
   Package,
   MapPin,
@@ -23,16 +21,11 @@ import {
   Sparkles,
   AlertCircle,
   CheckCircle,
-  Clock,
 } from "lucide-react";
-import { Card, Badge, Button, ProgressBar } from "@/components/ui";
+import { Card, Badge, Button } from "@/components/ui";
 import { journeyEngine } from "@/lib/journey/engine";
 import { JOURNEY_STAGES, SamplingEvent } from "@/lib/journey/types";
-import { useToast } from "@/components/ui/Toast";
-
 export default function JourneyPage() {
-  const { celebrate } = useToast();
-
   // State
   const [cansMetrics, setCansMetrics] = useState<ReturnType<typeof journeyEngine.getCansInHandsSummary> | null>(null);
   const [stageMetrics, setStageMetrics] = useState<ReturnType<typeof journeyEngine.getJourneyStageMetrics>>([]);

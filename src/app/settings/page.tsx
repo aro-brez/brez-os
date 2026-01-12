@@ -10,8 +10,6 @@ import {
   BarChart3,
   HardDrive,
   RefreshCw,
-  Check,
-  X,
   Upload,
   AlertTriangle,
   Sparkles,
@@ -26,7 +24,6 @@ import {
 import { Card, Button, Badge, Input, Tabs, Modal } from "@/components/ui";
 import { devStore } from "@/lib/data/devStore";
 import { Connector } from "@/lib/data/schemas";
-import { isSupabaseEnabled, isDevMode } from "@/lib/supabaseClient";
 
 interface DeploymentInfo {
   ok: boolean;
@@ -49,7 +46,7 @@ interface DeploymentInfo {
 export default function SettingsPage() {
   const [activeTab, setActiveTab] = useState("connectors");
   const [connectors, setConnectors] = useState<Connector[]>([]);
-  const [devMode, setDevMode] = useState(true);
+  const [, setDevMode] = useState(true);
   const [showResetModal, setShowResetModal] = useState(false);
   const [deploymentInfo, setDeploymentInfo] = useState<DeploymentInfo | null>(null);
 
