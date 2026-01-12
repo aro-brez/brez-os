@@ -845,6 +845,51 @@ export const DEPARTMENT_LEADS: Record<string, { name: string; title: string }> =
 };
 
 // =============================================================================
+// EQUITY INCENTIVE PLAN (EIP) 2025/2026
+// =============================================================================
+
+export const EQUITY_INCENTIVE_PLAN = {
+  // Grant ranges by level
+  grantRanges: {
+    rankAndFile: { min: 0.0001, max: 0.0005 }, // 0.01% to 0.05%
+    directorManager: { min: 0.0015, max: 0.003 }, // 0.15% to 0.3%
+    cSuiteVP: { min: 0.005, max: 0.01 }, // 0.50% to 1%
+    advisors: { min: 0.0005, max: 0.0025 }, // 0.05% to 0.25%
+  },
+
+  // Initial distribution plan
+  distribution: {
+    rankAndFile: { employees: 22, grantPercent: 0.00025, totalPercent: 0.0055 }, // 0.55%
+    directorManager: { employees: 7, grantPercent: 0.002, totalPercent: 0.014 }, // 1.4%
+    cSuiteVP: { employees: 6, grantPercent: 0.0033, totalPercent: 0.0198 }, // 1.98%
+  },
+
+  // Totals
+  totals: {
+    initialGrants: 0.0393, // 3.93%
+    leftOverEquity: 0.0107, // 1.07%
+    totalPool: 0.05, // 5% total pool
+  },
+
+  // Timeline (from calendar)
+  timeline: {
+    kickoff: '2025-12-03',
+    planningComplete: '2025-12-15',
+    executiveApproval: '2025-12-22',
+    initialAnnouncement: '2025-12-29',
+    allHandsRollout: '2026-01-05',
+  },
+
+  // Key stakeholders for EIP
+  stakeholders: {
+    legal: 'Andrea Golan',
+    finance: 'Brian Cramer',
+    people: 'Malia Steel',
+    executive: 'Aaron J. Nosbisch',
+  },
+};
+
+// =============================================================================
 // HELPER FUNCTIONS
 // =============================================================================
 
