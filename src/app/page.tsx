@@ -1,16 +1,14 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import Link from "next/link";
-import { format } from "date-fns";
+import { format, formatDistanceToNow } from "date-fns";
 import {
   Zap,
-  Clock,
   Check,
   Heart,
   Sparkles,
   ArrowRight,
-  CheckCircle,
   RefreshCw,
   DollarSign,
   TrendingUp,
@@ -26,6 +24,14 @@ import {
   ChevronRight,
   Play,
   Shield,
+  Trophy,
+  Flame,
+  Wifi,
+  WifiOff,
+  Brain,
+  PartyPopper,
+  Gift,
+  Rocket,
 } from "lucide-react";
 import { Card, Badge, Button, ProgressBar } from "@/components/ui";
 import { BrezLogo } from "@/components/ui/BrezLogo";
@@ -39,228 +45,163 @@ import {
 import {
   GROWTH_GENERATOR_STEPS,
   SACRED_PARADOX,
-  type Department,
 } from "@/lib/ai/supermind";
+import type { UnifiedMetrics, DynamicAction } from "@/lib/integrations/unified";
+import {
+  runOptimization,
+  calculateLevel,
+  xpToNextLevel,
+  ACHIEVEMENTS,
+  type OptimizationResult,
+  type UserProgress,
+} from "@/lib/integrations/optimizer";
 
-// ============ CURRENT REALITY DATA ============
-const CURRENT_REALITY = {
-  cash: {
-    onHand: 420000,
-    runway: 6,
-    floor: 300000,
-    status: "watch" as const,
-  },
-  revenue: {
-    monthly: 3100000,
-    dtc: 1860000, // 60%
-    retail: 1240000, // 40%
-    trend: "+4%",
-  },
-  contributionMargin: {
-    dtc: 0.32,
-    retail: 0.30,
-    blended: 0.31,
-    target: 0.35,
-  },
-  ap: {
-    total: 8200000,
-    critical: 2100000,
-    onPlan: 4500000,
-    unresolved: 1600000,
-    stopShipRisks: 2,
-  },
-  cac: {
-    current: 58,
-    target: 55,
-    paybackMonths: 4.2,
-  },
-  subscribers: 14200,
-  velocity: {
-    doorsActive: 3200,
-    unitsPerDoorWeek: 2.1,
-  },
-};
-
-// ============ SIMULATED FUTURE (IF EXECUTED) ============
-const SIMULATED_FUTURE = {
-  week4: {
-    cash: 520000,
-    runway: 8,
-    cm: 0.34,
-    apReduced: 400000,
-  },
-  week8: {
-    cash: 680000,
-    runway: 10,
-    cm: 0.36,
-    apReduced: 900000,
-    thriveUnlocked: true,
-  },
-  assumptions: [
-    "Execute ONE THING daily across all roles",
-    "CAC stays below $55 ceiling",
-    "Retail velocity maintains 2.0+ units/door/week",
-    "No new AP created during Stabilize",
-  ],
-};
-
-// ============ ROLE-SPECIFIC ACTIONS ============
-const ROLE_ACTIONS: Record<Department, {
-  action: string;
-  why: string;
-  steps: string[];
-  metric: string;
-  timeEstimate: string;
-  impact: string;
-}> = {
-  exec: {
-    action: "Review cash position and make one AP decision",
-    why: "Cash is the #1 bottleneck. Every day without a decision costs us optionality.",
-    steps: [
-      "Open QuickBooks and note exact cash balance",
-      "Review AP aging - identify the highest-priority vendor",
-      "Decide: Pay now, negotiate payment plan, or convert to equity",
-      "Document the decision and communicate to Dan/Abla",
-    ],
-    metric: "AP decision logged",
-    timeEstimate: "30 min",
-    impact: "+$50k cash clarity",
-  },
-  growth: {
-    action: "Find one way to improve conversion without increasing spend",
-    why: "Every 0.1% conversion improvement = more cash without more risk.",
-    steps: [
-      "Check yesterday's conversion rate vs. 7-day average",
-      "Review the top-performing ad creative - what's working?",
-      "Identify one landing page element to test",
-      "Set up the A/B test or make the change",
-    ],
-    metric: "Conversion rate improvement",
-    timeEstimate: "45 min",
-    impact: "+0.1% CVR = +$15k/mo",
-  },
-  retail: {
-    action: "Identify your highest-margin account and ensure they're stocked",
-    why: "Retail CM is 30% - the most profitable channel. Don't let shelves go empty.",
-    steps: [
-      "Pull your account list sorted by contribution margin",
-      "Check inventory status at top 3 accounts",
-      "If low inventory: place reorder or escalate to ops",
-      "Log any at-risk accounts in the system",
-    ],
-    metric: "Top accounts stocked",
-    timeEstimate: "30 min",
-    impact: "Protects $40k/mo revenue",
-  },
-  finance: {
-    action: "Update the cash forecast and flag any risks",
-    why: "We can't make good decisions with stale data. Cash clarity = survival.",
-    steps: [
-      "Pull current bank balance",
-      "Update this week's expected inflows/outflows",
-      "Calculate runway at current burn",
-      "Flag if runway drops below 6 weeks",
-    ],
-    metric: "Cash forecast updated",
-    timeEstimate: "20 min",
-    impact: "Enables $100k decisions",
-  },
-  ops: {
-    action: "Find one way to reduce COGS or fulfillment cost",
-    why: "Every dollar saved on operations is a dollar toward paying off AP.",
-    steps: [
-      "Review last week's fulfillment costs per order",
-      "Identify highest-cost line item",
-      "Research one alternative (supplier, process, packaging)",
-      "Document potential savings and next steps",
-    ],
-    metric: "Cost reduction identified",
-    timeEstimate: "45 min",
-    impact: "-$0.05/unit = +$30k/yr",
-  },
-  product: {
-    action: "Read 5 customer reviews and identify one product insight",
-    why: "Validation = Flavor + Effect. Customer voice tells us if we're winning.",
-    steps: [
-      "Go to reviews (Amazon, website, or social)",
-      "Read 5 recent reviews - note patterns",
-      "Identify one actionable insight",
-      "Share the insight with the team in Slack",
-    ],
-    metric: "Product insight shared",
-    timeEstimate: "20 min",
-    impact: "Drives retention +2%",
-  },
-  cx: {
-    action: "Resolve your oldest open ticket and document the root cause",
-    why: "Every unresolved ticket is a customer who might not come back.",
-    steps: [
-      "Sort tickets by age - oldest first",
-      "Resolve the oldest ticket completely",
-      "Document: What was the issue? What was the root cause?",
-      "If it's a pattern, flag for the team",
-    ],
-    metric: "Ticket resolved + documented",
-    timeEstimate: "30 min",
-    impact: "Saves 1 customer = $200 LTV",
-  },
-  creative: {
-    action: "Review yesterday's top ad and identify what made it work",
-    why: "The best creative makes people FEEL what BREZ does. Learn from winners.",
-    steps: [
-      "Pull yesterday's ad performance data",
-      "Identify the top-performing creative",
-      "Analyze: Hook, message, visual - what worked?",
-      "Document the pattern for future creative",
-    ],
-    metric: "Creative insight documented",
-    timeEstimate: "30 min",
-    impact: "-$5 CAC on next campaign",
-  },
-};
-
-// ============ NAVIGATION MODULES ============
-const MODULES = [
-  { name: "Financials", href: "/financials", icon: DollarSign, description: "Cash, AP, runway tracking", color: "text-[#6BCB77]" },
-  { name: "Growth Simulator", href: "/growth", icon: TrendingUp, description: "Model scenarios & CAC", color: "text-[#e3f98a]" },
-  { name: "Tasks", href: "/tasks", icon: ListTodo, description: "Team action items", color: "text-[#65cdd8]" },
-  { name: "Goals", href: "/goals", icon: Flag, description: "OKRs & milestones", color: "text-[#ffce33]" },
-  { name: "Insights", href: "/insights", icon: Lightbulb, description: "AI-generated learnings", color: "text-[#8533fc]" },
-  { name: "Channels", href: "/channels", icon: BarChart3, description: "DTC & Retail performance", color: "text-[#ff6b6b]" },
-  { name: "Customers", href: "/customers", icon: Users, description: "Cohorts & retention", color: "text-[#65cdd8]" },
-  { name: "Journey", href: "/journey", icon: Map, description: "Customer lifecycle", color: "text-[#e3f98a]" },
+// ============ CELEBRATION MESSAGES ============
+const CELEBRATIONS = [
+  "You're a legend! 🌟",
+  "That's what champions do! 💪",
+  "Moving the needle! 📈",
+  "The team thanks you! 🤝",
+  "One step closer to Thrive! 🚀",
+  "Contribution margin loves you! 💚",
+  "Cash flow hero! 💰",
+  "Making BREZ unstoppable! ⚡",
 ];
+
+// ============ QUICK MODULES ============
+const MODULES = [
+  { name: "Financials", href: "/financials", icon: DollarSign, description: "Cash, AP, runway", color: "text-[#6BCB77]" },
+  { name: "Growth", href: "/growth", icon: TrendingUp, description: "CAC & spend", color: "text-[#e3f98a]" },
+  { name: "Tasks", href: "/tasks", icon: ListTodo, description: "Team actions", color: "text-[#65cdd8]" },
+  { name: "Goals", href: "/goals", icon: Flag, description: "OKRs", color: "text-[#ffce33]" },
+  { name: "Insights", href: "/insights", icon: Lightbulb, description: "AI learnings", color: "text-[#8533fc]" },
+  { name: "Channels", href: "/channels", icon: BarChart3, description: "Performance", color: "text-[#ff6b6b]" },
+  { name: "Customers", href: "/customers", icon: Users, description: "Retention", color: "text-[#65cdd8]" },
+  { name: "Journey", href: "/journey", icon: Map, description: "Lifecycle", color: "text-[#e3f98a]" },
+];
+
+// Default fallback metrics (used when API unavailable)
+const FALLBACK_METRICS: UnifiedMetrics = {
+  cash: { balance: 420000, runway: 6, status: "watch", floor: 300000 },
+  ap: { total: 8200000, critical: 2100000, stopShipRisks: 2 },
+  revenue: { today: 103000, mtd: 2480000, monthlyRun: 3100000, trend: "+4%" },
+  dtc: { orders: 2800, aov: 72, cac: 58, conversionRate: 2.8, contributionMargin: 0.32 },
+  subscriptions: { active: 14200, newThisWeek: 340, churnRate: 4.2 },
+  sources: {
+    shopify: { connected: false, lastUpdated: "" },
+    quickbooks: { connected: false, lastUpdated: "" },
+  },
+  lastUpdated: new Date().toISOString(),
+};
 
 export default function CommandCenter() {
   const [user, setUser] = useState<BrezUser | null>(null);
-  const [greeting, setGreeting] = useState({ text: "", time: "" });
+  const [greeting, setGreeting] = useState({ text: "", emoji: "" });
   const [completedSteps, setCompletedSteps] = useState<number[]>([]);
   const [showSimulation, setShowSimulation] = useState(false);
-  const { celebrate } = useToast();
+  const [showOptimizer, setShowOptimizer] = useState(false);
+  const [isOptimizing, setIsOptimizing] = useState(false);
+  const [metrics, setMetrics] = useState<UnifiedMetrics>(FALLBACK_METRICS);
+  const [oneThing, setOneThing] = useState<DynamicAction | null>(null);
+  const [optimization, setOptimization] = useState<OptimizationResult | null>(null);
+  const [isLive, setIsLive] = useState(false);
+  const [lastFetch, setLastFetch] = useState<Date | null>(null);
+  const [userProgress, setUserProgress] = useState<UserProgress>({
+    xp: 125, // Starting XP
+    level: 2,
+    streak: 3,
+    achievements: [ACHIEVEMENTS[0], ACHIEVEMENTS[1]], // First Step, On Fire
+    completedToday: [],
+  });
+  const [showAchievement, setShowAchievement] = useState<typeof ACHIEVEMENTS[0] | null>(null);
+
+  const { celebrate, toast } = useToast();
   const { toggle: toggleAI } = useAIAssistant();
 
+  // Fetch live metrics
+  const fetchMetrics = useCallback(async () => {
+    try {
+      const dept = user?.department || "exec";
+      const res = await fetch(`/api/metrics?department=${dept}`);
+      if (!res.ok) throw new Error("Failed to fetch metrics");
+      const data = await res.json();
+
+      if (data.success && data.metrics) {
+        setMetrics(data.metrics);
+        setOneThing(data.oneThing);
+        setIsLive(data.metrics.sources.shopify.connected || data.metrics.sources.quickbooks.connected);
+        setLastFetch(new Date());
+
+        // Run optimization with live data
+        const opt = runOptimization(data.metrics);
+        setOptimization(opt);
+      }
+    } catch (error) {
+      console.error("Metrics fetch error:", error);
+      // Keep using fallback metrics
+      const opt = runOptimization(FALLBACK_METRICS);
+      setOptimization(opt);
+    }
+  }, [user?.department]);
+
+  // Initial load and refresh
   useEffect(() => {
     const selectedUser = getSelectedUser();
     setUser(selectedUser);
 
     const hour = new Date().getHours();
-    if (hour < 12) setGreeting({ text: "Good morning", time: "morning" });
-    else if (hour < 17) setGreeting({ text: "Good afternoon", time: "afternoon" });
-    else if (hour < 21) setGreeting({ text: "Good evening", time: "evening" });
-    else setGreeting({ text: "Burning midnight oil", time: "night" });
+    if (hour < 12) setGreeting({ text: "Good morning", emoji: "☀️" });
+    else if (hour < 17) setGreeting({ text: "Good afternoon", emoji: "🌤️" });
+    else if (hour < 21) setGreeting({ text: "Good evening", emoji: "🌅" });
+    else setGreeting({ text: "Burning midnight oil", emoji: "🌙" });
   }, []);
+
+  // Fetch metrics when user loads
+  useEffect(() => {
+    if (user) {
+      fetchMetrics();
+      // Refresh every 5 minutes
+      const interval = setInterval(fetchMetrics, 5 * 60 * 1000);
+      return () => clearInterval(interval);
+    }
+  }, [user, fetchMetrics]);
 
   if (!user) {
     return (
-      <div className="min-h-screen flex items-center justify-center">
-        <RefreshCw className="w-8 h-8 text-[#e3f98a] animate-spin" />
+      <div className="min-h-screen flex items-center justify-center bg-[#0D0D2A]">
+        <div className="text-center">
+          <BrezLogo variant="icon" size="lg" className="mx-auto mb-4 animate-pulse" />
+          <p className="text-[#676986]">Loading your command center...</p>
+        </div>
       </div>
     );
   }
 
   const roleContext = getUserRoleContext(user.department);
-  const roleAction = ROLE_ACTIONS[user.department];
   const growthStep = GROWTH_GENERATOR_STEPS[roleContext.growthGeneratorFocus - 1];
+
+  // Use dynamic oneThing from API or fallback
+  const currentAction = oneThing || {
+    action: "Review your highest-priority item",
+    why: "Clarity drives action. Action drives results.",
+    steps: ["Check your dashboard", "Identify the top priority", "Take one step forward", "Document progress"],
+    impact: "Momentum",
+    urgency: "medium" as const,
+    dataSource: "Fallback",
+    confidence: 0.5,
+  };
+
+  // Get role-specific action from optimization
+  const roleAction = optimization?.teamActions.find(a => a.role === user.department) ||
+    optimization?.teamActions[0] || {
+      role: user.department,
+      action: currentAction.action,
+      why: currentAction.why,
+      steps: currentAction.steps,
+      expectedImpact: currentAction.impact,
+      priority: "medium" as const,
+      xpReward: 25,
+    };
 
   const handleStepComplete = (stepIndex: number) => {
     if (completedSteps.includes(stepIndex)) {
@@ -268,36 +209,154 @@ export default function CommandCenter() {
     } else {
       const newCompleted = [...completedSteps, stepIndex];
       setCompletedSteps(newCompleted);
+
+      // XP for each step
+      const xpGain = Math.floor(roleAction.xpReward / roleAction.steps.length);
+      setUserProgress(prev => ({
+        ...prev,
+        xp: prev.xp + xpGain,
+        level: calculateLevel(prev.xp + xpGain),
+      }));
+      toast(`+${xpGain} XP`, "success");
+
+      // All steps complete!
       if (newCompleted.length === roleAction.steps.length) {
-        celebrate("THE ONE THING complete! You're moving us toward Thrive.");
+        const bonusXP = 25;
+        const randomCelebration = CELEBRATIONS[Math.floor(Math.random() * CELEBRATIONS.length)];
+        celebrate(randomCelebration);
+
+        // Update progress
+        setUserProgress(prev => {
+          const newXP = prev.xp + bonusXP;
+          const newLevel = calculateLevel(newXP);
+          const leveledUp = newLevel > prev.level;
+
+          if (leveledUp) {
+            setTimeout(() => celebrate(`🎉 LEVEL UP! You're now level ${newLevel}!`), 1500);
+          }
+
+          // Check for new achievements
+          const newStreak = prev.streak + 1;
+          const newAchievements = [...prev.achievements];
+
+          if (newStreak === 7 && !prev.achievements.find(a => a.id === "streak_7")) {
+            const achievement = ACHIEVEMENTS.find(a => a.id === "streak_7")!;
+            newAchievements.push({ ...achievement, unlockedAt: new Date().toISOString() });
+            setTimeout(() => setShowAchievement(achievement), 2500);
+          }
+
+          return {
+            ...prev,
+            xp: newXP,
+            level: newLevel,
+            streak: newStreak,
+            achievements: newAchievements,
+            completedToday: [...prev.completedToday, roleAction.action],
+          };
+        });
       }
     }
   };
 
-  const cashStatus = CURRENT_REALITY.cash.onHand > 500000 ? "healthy" :
-                     CURRENT_REALITY.cash.onHand > 300000 ? "watch" : "critical";
+  const runOptimizationAnalysis = async () => {
+    setIsOptimizing(true);
+    toast("🧠 Analyzing data to find optimal strategy...", "info");
+
+    // Simulate some processing time for effect
+    await new Promise(resolve => setTimeout(resolve, 1500));
+
+    const opt = runOptimization(metrics);
+    setOptimization(opt);
+    setShowOptimizer(true);
+    setIsOptimizing(false);
+    toast("✨ Optimization complete!", "success");
+  };
+
+  const cashStatus = metrics.cash.status;
+  const xpProgress = xpToNextLevel(userProgress.xp);
 
   return (
     <div className="min-h-screen p-4 md:p-6 lg:p-8 max-w-7xl mx-auto">
+      {/* Achievement Unlock Modal */}
+      {showAchievement && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 animate-fade-in">
+          <div className="bg-gradient-to-br from-[#e3f98a]/20 to-[#8533fc]/20 border border-[#e3f98a] rounded-2xl p-8 text-center max-w-sm mx-4 animate-scale-in">
+            <div className="text-6xl mb-4">{showAchievement.icon}</div>
+            <h2 className="text-2xl font-bold text-[#e3f98a] mb-2">Achievement Unlocked!</h2>
+            <h3 className="text-xl font-bold text-white mb-2">{showAchievement.name}</h3>
+            <p className="text-[#a8a8a8] mb-6">{showAchievement.description}</p>
+            <Button onClick={() => setShowAchievement(null)}>
+              <PartyPopper className="w-4 h-4 mr-2" /> Awesome!
+            </Button>
+          </div>
+        </div>
+      )}
+
       {/* ============ HEADER ============ */}
       <div className="mb-6">
-        <div className="flex items-center justify-between">
+        <div className="flex items-center justify-between flex-wrap gap-4">
           <div className="flex items-center gap-3">
-            <BrezLogo variant="icon" size="lg" />
+            <div className="relative">
+              <BrezLogo variant="icon" size="lg" />
+              {isLive && (
+                <div className="absolute -top-1 -right-1 w-3 h-3 bg-[#6BCB77] rounded-full animate-pulse" />
+              )}
+            </div>
             <div>
-              <h1 className="text-xl md:text-2xl font-bold text-white">
-                {greeting.text}, {user.name.split(" ")[0]}
+              <h1 className="text-xl md:text-2xl font-bold text-white flex items-center gap-2">
+                {greeting.text}, {user.name.split(" ")[0]} {greeting.emoji}
               </h1>
               <p className="text-sm text-[#676986]">
                 {user.title} • {format(new Date(), "EEEE, MMMM d")}
               </p>
             </div>
           </div>
-          <div className="flex items-center gap-2">
+
+          <div className="flex items-center gap-2 flex-wrap">
+            {/* XP & Level Badge */}
+            <div className="flex items-center gap-2 bg-[#1a1a3a] rounded-full px-3 py-1.5">
+              <Trophy className="w-4 h-4 text-[#ffce33]" />
+              <span className="text-sm font-bold text-[#ffce33]">Lv.{userProgress.level}</span>
+              <div className="w-16 h-1.5 bg-[#0D0D2A] rounded-full overflow-hidden">
+                <div
+                  className="h-full bg-gradient-to-r from-[#ffce33] to-[#e3f98a] transition-all duration-500"
+                  style={{ width: `${(xpProgress.current / xpProgress.needed) * 100}%` }}
+                />
+              </div>
+              <span className="text-xs text-[#676986]">{userProgress.xp} XP</span>
+            </div>
+
+            {/* Streak Badge */}
+            {userProgress.streak > 0 && (
+              <Badge className="bg-[#ff6b6b]/20 text-[#ff6b6b] border-[#ff6b6b]/30">
+                <Flame className="w-3 h-3 mr-1" />
+                {userProgress.streak} day streak
+              </Badge>
+            )}
+
+            {/* Phase Badge */}
             <Badge className="bg-[#ffce33]/20 text-[#ffce33] border-[#ffce33]/30">
               <Shield className="w-3 h-3 mr-1" />
               STABILIZE
             </Badge>
+
+            {/* Data Status */}
+            <Button
+              variant="secondary"
+              size="sm"
+              onClick={fetchMetrics}
+              className={isLive ? "border-[#6BCB77]/30" : "border-[#ff6b6b]/30"}
+            >
+              {isLive ? (
+                <Wifi className="w-4 h-4 text-[#6BCB77]" />
+              ) : (
+                <WifiOff className="w-4 h-4 text-[#ff6b6b]" />
+              )}
+              <span className="hidden md:inline ml-1 text-xs">
+                {lastFetch ? formatDistanceToNow(lastFetch, { addSuffix: true }) : "Sync"}
+              </span>
+            </Button>
+
             <Button variant="secondary" size="sm" onClick={toggleAI}>
               <Sparkles className="w-4 h-4" />
               <span className="hidden md:inline ml-1">Ask AI</span>
@@ -308,79 +367,119 @@ export default function CommandCenter() {
 
       {/* ============ CURRENT REALITY - KEY METRICS ============ */}
       <div className="mb-6">
-        <h2 className="text-sm font-semibold text-[#676986] uppercase tracking-wider mb-3">
-          Current Reality
-        </h2>
+        <div className="flex items-center justify-between mb-3">
+          <h2 className="text-sm font-semibold text-[#676986] uppercase tracking-wider flex items-center gap-2">
+            Current Reality
+            {isLive && <span className="text-[#6BCB77] text-xs font-normal">(Live)</span>}
+          </h2>
+          {lastFetch && (
+            <span className="text-xs text-[#676986]">
+              Updated {formatDistanceToNow(lastFetch, { addSuffix: true })}
+            </span>
+          )}
+        </div>
         <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-3">
           <Link href="/financials">
-            <Card className="p-3 hover:border-[#e3f98a]/30 transition-all cursor-pointer">
+            <Card className="p-3 hover:border-[#e3f98a]/30 transition-all cursor-pointer group">
               <div className="flex items-center justify-between mb-1">
                 <DollarSign className={`w-4 h-4 ${cashStatus === 'healthy' ? 'text-[#6BCB77]' : cashStatus === 'watch' ? 'text-[#ffce33]' : 'text-[#ff6b6b]'}`} />
                 <span className={`text-lg font-bold ${cashStatus === 'healthy' ? 'text-[#6BCB77]' : cashStatus === 'watch' ? 'text-[#ffce33]' : 'text-[#ff6b6b]'}`}>
-                  ${(CURRENT_REALITY.cash.onHand / 1000).toFixed(0)}K
+                  ${(metrics.cash.balance / 1000).toFixed(0)}K
                 </span>
               </div>
-              <p className="text-xs text-[#676986]">Cash ({CURRENT_REALITY.cash.runway}wk)</p>
+              <p className="text-xs text-[#676986] group-hover:text-[#a8a8a8]">
+                Cash ({metrics.cash.runway}wk runway)
+              </p>
+              <div className="mt-1 text-xs text-[#676986]">
+                Floor: ${(metrics.cash.floor / 1000).toFixed(0)}K
+              </div>
             </Card>
           </Link>
 
           <Link href="/financials">
-            <Card className="p-3 hover:border-[#e3f98a]/30 transition-all cursor-pointer">
+            <Card className="p-3 hover:border-[#e3f98a]/30 transition-all cursor-pointer group">
               <div className="flex items-center justify-between mb-1">
-                <AlertTriangle className={`w-4 h-4 ${CURRENT_REALITY.ap.stopShipRisks > 0 ? 'text-[#ff6b6b]' : 'text-[#6BCB77]'}`} />
+                <AlertTriangle className={`w-4 h-4 ${metrics.ap.stopShipRisks > 0 ? 'text-[#ff6b6b]' : 'text-[#ffce33]'}`} />
                 <span className="text-lg font-bold text-white">
-                  ${(CURRENT_REALITY.ap.total / 1000000).toFixed(1)}M
+                  ${(metrics.ap.total / 1000000).toFixed(1)}M
                 </span>
               </div>
-              <p className="text-xs text-[#676986]">AP ({CURRENT_REALITY.ap.stopShipRisks} risks)</p>
+              <p className="text-xs text-[#676986] group-hover:text-[#a8a8a8]">
+                AP Total
+              </p>
+              {metrics.ap.stopShipRisks > 0 && (
+                <div className="mt-1 text-xs text-[#ff6b6b]">
+                  ⚠️ {metrics.ap.stopShipRisks} stop-ship risks
+                </div>
+              )}
             </Card>
           </Link>
 
           <Link href="/channels">
-            <Card className="p-3 hover:border-[#e3f98a]/30 transition-all cursor-pointer">
+            <Card className="p-3 hover:border-[#e3f98a]/30 transition-all cursor-pointer group">
               <div className="flex items-center justify-between mb-1">
                 <TrendingUp className="w-4 h-4 text-[#6BCB77]" />
                 <span className="text-lg font-bold text-white">
-                  ${(CURRENT_REALITY.revenue.monthly / 1000000).toFixed(1)}M
+                  ${(metrics.revenue.monthlyRun / 1000000).toFixed(1)}M
                 </span>
               </div>
-              <p className="text-xs text-[#676986]">Revenue/mo {CURRENT_REALITY.revenue.trend}</p>
+              <p className="text-xs text-[#676986] group-hover:text-[#a8a8a8]">
+                Revenue run rate {metrics.revenue.trend}
+              </p>
+              <div className="mt-1 text-xs text-[#676986]">
+                MTD: ${(metrics.revenue.mtd / 1000000).toFixed(2)}M
+              </div>
             </Card>
           </Link>
 
           <Link href="/growth">
-            <Card className="p-3 hover:border-[#e3f98a]/30 transition-all cursor-pointer">
+            <Card className="p-3 hover:border-[#e3f98a]/30 transition-all cursor-pointer group">
               <div className="flex items-center justify-between mb-1">
-                <BarChart3 className={`w-4 h-4 ${CURRENT_REALITY.contributionMargin.blended >= CURRENT_REALITY.contributionMargin.target ? 'text-[#6BCB77]' : 'text-[#ffce33]'}`} />
+                <BarChart3 className={`w-4 h-4 ${metrics.dtc.contributionMargin >= 0.35 ? 'text-[#6BCB77]' : 'text-[#ffce33]'}`} />
                 <span className="text-lg font-bold text-white">
-                  {(CURRENT_REALITY.contributionMargin.blended * 100).toFixed(0)}%
+                  {(metrics.dtc.contributionMargin * 100).toFixed(0)}%
                 </span>
               </div>
-              <p className="text-xs text-[#676986]">CM (target {(CURRENT_REALITY.contributionMargin.target * 100).toFixed(0)}%)</p>
+              <p className="text-xs text-[#676986] group-hover:text-[#a8a8a8]">
+                DTC Margin
+              </p>
+              <div className="mt-1 text-xs text-[#676986]">
+                Target: 35%+
+              </div>
             </Card>
           </Link>
 
           <Link href="/growth">
-            <Card className="p-3 hover:border-[#e3f98a]/30 transition-all cursor-pointer">
+            <Card className="p-3 hover:border-[#e3f98a]/30 transition-all cursor-pointer group">
               <div className="flex items-center justify-between mb-1">
-                <Target className={`w-4 h-4 ${CURRENT_REALITY.cac.current <= CURRENT_REALITY.cac.target ? 'text-[#6BCB77]' : 'text-[#ffce33]'}`} />
+                <Target className={`w-4 h-4 ${metrics.dtc.cac <= 55 ? 'text-[#6BCB77]' : 'text-[#ffce33]'}`} />
                 <span className="text-lg font-bold text-white">
-                  ${CURRENT_REALITY.cac.current}
+                  ${metrics.dtc.cac}
                 </span>
               </div>
-              <p className="text-xs text-[#676986]">CAC (max ${CURRENT_REALITY.cac.target})</p>
+              <p className="text-xs text-[#676986] group-hover:text-[#a8a8a8]">
+                CAC
+              </p>
+              <div className="mt-1 text-xs text-[#676986]">
+                Ceiling: $55
+              </div>
             </Card>
           </Link>
 
           <Link href="/customers">
-            <Card className="p-3 hover:border-[#e3f98a]/30 transition-all cursor-pointer">
+            <Card className="p-3 hover:border-[#e3f98a]/30 transition-all cursor-pointer group">
               <div className="flex items-center justify-between mb-1">
                 <Users className="w-4 h-4 text-[#65cdd8]" />
                 <span className="text-lg font-bold text-white">
-                  {(CURRENT_REALITY.subscribers / 1000).toFixed(1)}K
+                  {(metrics.subscriptions.active / 1000).toFixed(1)}K
                 </span>
               </div>
-              <p className="text-xs text-[#676986]">Subscribers</p>
+              <p className="text-xs text-[#676986] group-hover:text-[#a8a8a8]">
+                Subscribers
+              </p>
+              <div className="mt-1 text-xs text-[#6BCB77]">
+                +{metrics.subscriptions.newThisWeek} this week
+              </div>
             </Card>
           </Link>
         </div>
@@ -389,6 +488,97 @@ export default function CommandCenter() {
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         {/* ============ LEFT COLUMN - THE ONE THING ============ */}
         <div className="lg:col-span-2 space-y-6">
+          {/* FIND BEST MOVE BUTTON */}
+          <Button
+            onClick={runOptimizationAnalysis}
+            disabled={isOptimizing}
+            className="w-full bg-gradient-to-r from-[#8533fc] to-[#e3f98a] hover:from-[#9544ff] hover:to-[#f0ff9a] text-black font-bold py-4 text-lg"
+          >
+            {isOptimizing ? (
+              <>
+                <Brain className="w-5 h-5 mr-2 animate-pulse" />
+                Analyzing...
+              </>
+            ) : (
+              <>
+                <Brain className="w-5 h-5 mr-2" />
+                🎯 Find My Best Move
+              </>
+            )}
+          </Button>
+
+          {/* OPTIMIZATION RESULTS */}
+          {showOptimizer && optimization && (
+            <Card className="border-2 border-[#8533fc]/40 bg-gradient-to-br from-[#8533fc]/10 via-[#0D0D2A] to-transparent overflow-hidden animate-fade-in">
+              <div className="p-4 md:p-6">
+                <div className="flex items-center justify-between mb-4">
+                  <div className="flex items-center gap-2">
+                    <Rocket className="w-5 h-5 text-[#8533fc]" />
+                    <h3 className="font-bold text-white">Optimization Results</h3>
+                    <Badge className="bg-[#6BCB77]/20 text-[#6BCB77] border-[#6BCB77]/30 text-xs">
+                      {(optimization.confidence * 100).toFixed(0)}% confident
+                    </Badge>
+                  </div>
+                  <Button variant="ghost" size="sm" onClick={() => setShowOptimizer(false)}>
+                    ✕
+                  </Button>
+                </div>
+
+                <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-4">
+                  <div className="p-3 rounded-lg bg-white/5">
+                    <p className="text-xs text-[#676986] mb-1">Best Spend</p>
+                    <p className="text-xl font-bold text-[#e3f98a]">
+                      ${(optimization.recommendedSpend / 1000).toFixed(0)}K
+                    </p>
+                    <p className="text-xs text-[#676986]">/week</p>
+                  </div>
+                  <div className="p-3 rounded-lg bg-white/5">
+                    <p className="text-xs text-[#676986] mb-1">Target CAC</p>
+                    <p className="text-xl font-bold text-[#65cdd8]">
+                      ${optimization.recommendedCAC}
+                    </p>
+                    <p className="text-xs text-[#676986]">ceiling</p>
+                  </div>
+                  <div className="p-3 rounded-lg bg-white/5">
+                    <p className="text-xs text-[#676986] mb-1">Week 4 Cash</p>
+                    <p className="text-xl font-bold text-[#6BCB77]">
+                      ${(optimization.projectedCash4Week / 1000).toFixed(0)}K
+                    </p>
+                  </div>
+                  <div className="p-3 rounded-lg bg-[#6BCB77]/10 border border-[#6BCB77]/20">
+                    <p className="text-xs text-[#6BCB77] mb-1">Upside</p>
+                    <p className="text-lg font-bold text-[#6BCB77]">
+                      {optimization.upside}
+                    </p>
+                  </div>
+                </div>
+
+                <div className="mb-4">
+                  <p className="text-sm font-semibold text-white mb-2">Why this works:</p>
+                  <ul className="space-y-1">
+                    {optimization.rationale.map((r, i) => (
+                      <li key={i} className="text-sm text-[#a8a8a8] flex items-start gap-2">
+                        <Check className="w-4 h-4 text-[#6BCB77] flex-shrink-0 mt-0.5" />
+                        {r}
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+
+                {optimization.risks.length > 0 && (
+                  <div className="p-3 rounded-lg bg-[#ff6b6b]/10 border border-[#ff6b6b]/20">
+                    <p className="text-sm font-semibold text-[#ff6b6b] mb-1">Watch out for:</p>
+                    <ul className="space-y-1">
+                      {optimization.risks.map((r, i) => (
+                        <li key={i} className="text-sm text-[#ff6b6b]">• {r}</li>
+                      ))}
+                    </ul>
+                  </div>
+                )}
+              </div>
+            </Card>
+          )}
+
           {/* YOUR ONE THING */}
           <Card className="overflow-hidden border-2 border-[#e3f98a]/40 bg-gradient-to-br from-[#e3f98a]/10 via-[#0D0D2A] to-transparent">
             <div className="p-4 md:p-6">
@@ -405,15 +595,22 @@ export default function CommandCenter() {
                       <Badge className="bg-[#8533fc]/20 text-[#8533fc] border-[#8533fc]/30 text-xs">
                         {roleContext.displayName}
                       </Badge>
-                      <span className="text-xs text-[#676986]">
-                        <Clock className="w-3 h-3 inline mr-1" />{roleAction.timeEstimate}
-                      </span>
+                      <Badge className={`text-xs ${
+                        roleAction.priority === 'critical' ? 'bg-[#ff6b6b]/20 text-[#ff6b6b] border-[#ff6b6b]/30' :
+                        roleAction.priority === 'high' ? 'bg-[#ffce33]/20 text-[#ffce33] border-[#ffce33]/30' :
+                        'bg-[#6BCB77]/20 text-[#6BCB77] border-[#6BCB77]/30'
+                      }`}>
+                        {roleAction.priority.toUpperCase()}
+                      </Badge>
                     </div>
                   </div>
                 </div>
-                <Badge variant="success" className="text-xs">
-                  {roleAction.impact}
-                </Badge>
+                <div className="text-right">
+                  <div className="flex items-center gap-1 text-[#ffce33]">
+                    <Gift className="w-4 h-4" />
+                    <span className="font-bold">+{roleAction.xpReward} XP</span>
+                  </div>
+                </div>
               </div>
 
               <h2 className="text-xl md:text-2xl font-bold text-white mb-3">
@@ -435,7 +632,7 @@ export default function CommandCenter() {
                       className={`w-full flex items-start gap-3 p-3 rounded-lg transition-all text-left ${
                         isComplete
                           ? "bg-[#6BCB77]/20 border border-[#6BCB77]/30"
-                          : "bg-white/5 hover:bg-white/10 border border-transparent"
+                          : "bg-white/5 hover:bg-white/10 border border-transparent hover:border-[#e3f98a]/20"
                       }`}
                     >
                       <div className={`w-6 h-6 rounded-full flex items-center justify-center flex-shrink-0 ${
@@ -447,9 +644,16 @@ export default function CommandCenter() {
                           <span className="text-xs font-bold text-[#e3f98a]">{i + 1}</span>
                         )}
                       </div>
-                      <p className={`text-sm ${isComplete ? "text-[#6BCB77] line-through" : "text-white"}`}>
-                        {step}
-                      </p>
+                      <div className="flex-1">
+                        <p className={`text-sm ${isComplete ? "text-[#6BCB77] line-through" : "text-white"}`}>
+                          {step}
+                        </p>
+                        {isComplete && (
+                          <p className="text-xs text-[#6BCB77] mt-1">
+                            +{Math.floor(roleAction.xpReward / roleAction.steps.length)} XP earned!
+                          </p>
+                        )}
+                      </div>
                     </button>
                   );
                 })}
@@ -469,9 +673,10 @@ export default function CommandCenter() {
               />
 
               {completedSteps.length === roleAction.steps.length && (
-                <div className="mt-4 p-3 rounded-lg bg-[#6BCB77]/20 border border-[#6BCB77]/30 text-center">
-                  <CheckCircle className="w-6 h-6 text-[#6BCB77] mx-auto mb-1" />
-                  <p className="text-[#6BCB77] font-semibold text-sm">Complete! You moved us forward today.</p>
+                <div className="mt-4 p-4 rounded-lg bg-gradient-to-r from-[#6BCB77]/20 to-[#e3f98a]/20 border border-[#6BCB77]/30 text-center">
+                  <PartyPopper className="w-8 h-8 text-[#6BCB77] mx-auto mb-2" />
+                  <p className="text-[#6BCB77] font-bold text-lg">Complete!</p>
+                  <p className="text-[#a8a8a8] text-sm">You moved BREZ forward today. The team thanks you! 💚</p>
                 </div>
               )}
             </div>
@@ -488,40 +693,33 @@ export default function CommandCenter() {
                   <Play className="w-5 h-5 text-[#8533fc]" />
                   <h3 className="font-semibold text-white">Simulated Future</h3>
                   <Badge className="bg-[#8533fc]/20 text-[#8533fc] border-[#8533fc]/30 text-xs">
-                    If we execute
+                    If we all execute
                   </Badge>
                 </div>
                 <ChevronRight className={`w-5 h-5 text-[#676986] transition-transform ${showSimulation ? 'rotate-90' : ''}`} />
               </div>
 
-              {showSimulation && (
-                <div className="mt-4 space-y-4">
+              {showSimulation && optimization && (
+                <div className="mt-4 space-y-4 animate-fade-in">
                   <div className="grid grid-cols-2 gap-4">
                     <div className="p-3 rounded-lg bg-white/5">
                       <p className="text-xs text-[#676986] mb-1">Week 4</p>
                       <div className="space-y-1">
-                        <p className="text-sm text-white">Cash: <span className="text-[#6BCB77]">${(SIMULATED_FUTURE.week4.cash / 1000).toFixed(0)}K</span></p>
-                        <p className="text-sm text-white">CM: <span className="text-[#6BCB77]">{(SIMULATED_FUTURE.week4.cm * 100).toFixed(0)}%</span></p>
-                        <p className="text-sm text-white">AP Reduced: <span className="text-[#6BCB77]">-${(SIMULATED_FUTURE.week4.apReduced / 1000).toFixed(0)}K</span></p>
+                        <p className="text-sm text-white">Cash: <span className="text-[#6BCB77]">${(optimization.projectedCash4Week / 1000).toFixed(0)}K</span></p>
+                        <p className="text-sm text-white">CM: <span className="text-[#6BCB77]">{(optimization.projectedCM * 100).toFixed(0)}%</span></p>
                       </div>
                     </div>
                     <div className="p-3 rounded-lg bg-[#6BCB77]/10 border border-[#6BCB77]/20">
-                      <p className="text-xs text-[#6BCB77] mb-1">Week 8 - THRIVE UNLOCKED</p>
+                      <p className="text-xs text-[#6BCB77] mb-1">Week 8 - THRIVE</p>
                       <div className="space-y-1">
-                        <p className="text-sm text-white">Cash: <span className="text-[#6BCB77]">${(SIMULATED_FUTURE.week8.cash / 1000).toFixed(0)}K</span></p>
-                        <p className="text-sm text-white">CM: <span className="text-[#6BCB77]">{(SIMULATED_FUTURE.week8.cm * 100).toFixed(0)}%</span></p>
-                        <p className="text-sm text-white">AP Reduced: <span className="text-[#6BCB77]">-${(SIMULATED_FUTURE.week8.apReduced / 1000).toFixed(0)}K</span></p>
+                        <p className="text-sm text-white">Cash: <span className="text-[#6BCB77]">${(optimization.projectedCash8Week / 1000).toFixed(0)}K</span></p>
+                        <p className="text-sm text-white">Total Gain: <span className="text-[#6BCB77]">{optimization.upside}</span></p>
                       </div>
                     </div>
                   </div>
-                  <div className="text-xs text-[#676986]">
-                    <p className="font-semibold mb-1">Assumptions:</p>
-                    <ul className="space-y-0.5">
-                      {SIMULATED_FUTURE.assumptions.map((a, i) => (
-                        <li key={i}>• {a}</li>
-                      ))}
-                    </ul>
-                  </div>
+                  <p className="text-xs text-[#676986] italic">
+                    Assumptions: Team completes daily ONE THINGs, CAC stays at ${optimization.recommendedCAC}, no new AP
+                  </p>
                 </div>
               )}
             </div>
@@ -535,8 +733,8 @@ export default function CommandCenter() {
             <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
               {MODULES.map((module) => (
                 <Link key={module.name} href={module.href}>
-                  <Card className="p-3 hover:border-[#e3f98a]/30 transition-all cursor-pointer h-full">
-                    <module.icon className={`w-5 h-5 ${module.color} mb-2`} />
+                  <Card className="p-3 hover:border-[#e3f98a]/30 transition-all cursor-pointer h-full group">
+                    <module.icon className={`w-5 h-5 ${module.color} mb-2 group-hover:scale-110 transition-transform`} />
                     <p className="text-sm font-medium text-white">{module.name}</p>
                     <p className="text-xs text-[#676986]">{module.description}</p>
                   </Card>
@@ -548,6 +746,46 @@ export default function CommandCenter() {
 
         {/* ============ RIGHT COLUMN - CONTEXT ============ */}
         <div className="space-y-6">
+          {/* YOUR STATS */}
+          <Card className="p-4 bg-gradient-to-br from-[#ffce33]/10 to-transparent border-[#ffce33]/20">
+            <div className="flex items-center gap-2 mb-3">
+              <Trophy className="w-5 h-5 text-[#ffce33]" />
+              <h3 className="font-semibold text-white">Your Progress</h3>
+            </div>
+            <div className="space-y-3">
+              <div className="flex items-center justify-between">
+                <span className="text-sm text-[#a8a8a8]">Level</span>
+                <span className="text-lg font-bold text-[#ffce33]">{userProgress.level}</span>
+              </div>
+              <div>
+                <div className="flex items-center justify-between text-xs mb-1">
+                  <span className="text-[#676986]">{xpProgress.current} / {xpProgress.needed} XP</span>
+                  <span className="text-[#ffce33]">Level {userProgress.level + 1}</span>
+                </div>
+                <div className="h-2 bg-[#0D0D2A] rounded-full overflow-hidden">
+                  <div
+                    className="h-full bg-gradient-to-r from-[#ffce33] to-[#e3f98a] transition-all duration-500"
+                    style={{ width: `${(xpProgress.current / xpProgress.needed) * 100}%` }}
+                  />
+                </div>
+              </div>
+              <div className="flex items-center justify-between">
+                <span className="text-sm text-[#a8a8a8]">Current Streak</span>
+                <span className="text-lg font-bold text-[#ff6b6b] flex items-center gap-1">
+                  <Flame className="w-4 h-4" /> {userProgress.streak} days
+                </span>
+              </div>
+              <div className="pt-2 border-t border-white/10">
+                <p className="text-xs text-[#676986] mb-2">Recent Achievements</p>
+                <div className="flex flex-wrap gap-2">
+                  {userProgress.achievements.slice(-4).map((a) => (
+                    <span key={a.id} className="text-xl" title={a.name}>{a.icon}</span>
+                  ))}
+                </div>
+              </div>
+            </div>
+          </Card>
+
           {/* PHASE STATUS */}
           <Card className="border-2 border-[#ffce33]/20 bg-gradient-to-br from-[#ffce33]/5 to-transparent">
             <div className="p-4">
@@ -560,21 +798,17 @@ export default function CommandCenter() {
               </p>
               <div className="space-y-2 text-xs">
                 <p className="font-semibold text-white mb-2">Exit to THRIVE when:</p>
-                <div className="flex items-center gap-2 text-[#676986]">
-                  <Check className="w-3 h-3 text-[#6BCB77]" />
+                <div className={`flex items-center gap-2 ${metrics.ap.total < 6000000 ? 'text-[#6BCB77]' : 'text-[#676986]'}`}>
+                  {metrics.ap.total < 6000000 ? <Check className="w-3 h-3" /> : <RefreshCw className="w-3 h-3 text-[#ffce33]" />}
                   <span>AP under active management</span>
                 </div>
-                <div className="flex items-center gap-2 text-[#676986]">
-                  <RefreshCw className="w-3 h-3 text-[#ffce33]" />
-                  <span>Cash reserves &gt; $500k (4 weeks)</span>
+                <div className={`flex items-center gap-2 ${metrics.cash.balance > 500000 ? 'text-[#6BCB77]' : 'text-[#676986]'}`}>
+                  {metrics.cash.balance > 500000 ? <Check className="w-3 h-3" /> : <RefreshCw className="w-3 h-3 text-[#ffce33]" />}
+                  <span>Cash reserves &gt; $500k</span>
                 </div>
-                <div className="flex items-center gap-2 text-[#676986]">
-                  <RefreshCw className="w-3 h-3 text-[#ffce33]" />
+                <div className={`flex items-center gap-2 ${metrics.dtc.contributionMargin >= 0.35 ? 'text-[#6BCB77]' : 'text-[#676986]'}`}>
+                  {metrics.dtc.contributionMargin >= 0.35 ? <Check className="w-3 h-3" /> : <RefreshCw className="w-3 h-3 text-[#ffce33]" />}
                   <span>DTC CM &gt; 35%</span>
-                </div>
-                <div className="flex items-center gap-2 text-[#676986]">
-                  <RefreshCw className="w-3 h-3 text-[#ffce33]" />
-                  <span>+20% DTC at same spend</span>
                 </div>
               </div>
             </div>
@@ -644,9 +878,31 @@ export default function CommandCenter() {
       {/* ============ FOOTER ============ */}
       <div className="mt-8 text-center">
         <p className="text-xs text-[#676986]">
-          BREZ Supermind • Building a $200B company through conscious capitalism
+          BREZ Supermind • Building a $200B company through conscious capitalism 💚
+        </p>
+        <p className="text-xs text-[#676986]/50 mt-1">
+          {isLive ? "Connected to live data" : "Using cached data"} •
+          Last update: {lastFetch ? format(lastFetch, "h:mm a") : "Never"}
         </p>
       </div>
+
+      {/* CSS for animations */}
+      <style jsx>{`
+        @keyframes fade-in {
+          from { opacity: 0; }
+          to { opacity: 1; }
+        }
+        @keyframes scale-in {
+          from { transform: scale(0.9); opacity: 0; }
+          to { transform: scale(1); opacity: 1; }
+        }
+        .animate-fade-in {
+          animation: fade-in 0.3s ease-out;
+        }
+        .animate-scale-in {
+          animation: scale-in 0.3s ease-out;
+        }
+      `}</style>
     </div>
   );
 }

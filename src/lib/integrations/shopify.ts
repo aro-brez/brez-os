@@ -109,19 +109,30 @@ export async function fetchShopifyMetrics(): Promise<ShopifyMetrics> {
       client.getOrders(startOfMonth()),
     ]);
 
-    // Calculate metrics
-    const calcRevenue = (orders: any[]) =>
-      orders.reduce((sum, o) => sum + parseFloat(o.total_price || 0), 0);
+    // Define order type for Shopify responses
+    type ShopifyOrder = {
+      total_price?: string;
+      created_at?: string;
+      tags?: string;
+      note?: string;
+      line_items?: Array<{
+        properties?: Array<{ name: string; value: string }>;
+      }>;
+    };
 
-    const calcAOV = (orders: any[]) =>
+    // Calculate metrics
+    const calcRevenue = (orders: ShopifyOrder[]) =>
+      orders.reduce((sum, o) => sum + parseFloat(o.total_price || "0"), 0);
+
+    const calcAOV = (orders: ShopifyOrder[]) =>
       orders.length > 0 ? calcRevenue(orders) / orders.length : 0;
 
     // Subscription detection (orders with subscription tag or recurring)
-    const countSubscriptions = (orders: any[]) =>
+    const countSubscriptions = (orders: ShopifyOrder[]) =>
       orders.filter(o =>
         o.tags?.includes("subscription") ||
         o.note?.includes("subscription") ||
-        o.line_items?.some((li: any) => li.properties?.some((p: any) => p.name === "subscription"))
+        o.line_items?.some((li) => li.properties?.some((p) => p.name === "subscription"))
       ).length;
 
     const todayData = todayOrders.orders || [];
@@ -137,14 +148,14 @@ export async function fetchShopifyMetrics(): Promise<ShopifyMetrics> {
     const yesterdayEnd = new Date(yesterday);
     yesterdayEnd.setHours(23, 59, 59, 999);
 
-    const yesterdayOrders = last7Data.filter((o: any) => {
-      const created = new Date(o.created_at);
+    const yesterdayOrders = last7Data.filter((o: ShopifyOrder) => {
+      const created = new Date(o.created_at || "");
       return created >= yesterdayStart && created <= yesterdayEnd;
     });
 
     // New vs churned subscriptions (simplified)
-    const newSubs = countSubscriptions(last7Data.filter((o: any) =>
-      new Date(o.created_at) >= new Date(getDateRange(7))
+    const newSubs = countSubscriptions(last7Data.filter((o: ShopifyOrder) =>
+      new Date(o.created_at || "") >= new Date(getDateRange(7))
     ));
 
     return {

@@ -3,8 +3,8 @@
  * Pulls from Shopify + QuickBooks, generates dynamic guidance
  */
 
-import { getShopifyMetrics, type ShopifyMetrics } from "./shopify";
-import { getQuickBooksMetrics, type QuickBooksMetrics } from "./quickbooks";
+import { getShopifyMetrics } from "./shopify";
+import { getQuickBooksMetrics } from "./quickbooks";
 
 export interface UnifiedMetrics {
   cash: { balance: number; runway: number; status: "healthy" | "watch" | "critical"; floor: number };

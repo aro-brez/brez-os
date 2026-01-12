@@ -120,10 +120,13 @@ export async function fetchQuickBooksMetrics(): Promise<QuickBooksMetrics> {
       }),
     ]);
 
+    // Define account type
+    type BankAccount = { CurrentBalance?: number };
+
     // Calculate cash balance from bank accounts
-    const bankAccounts = accountsResult.QueryResponse?.Account || [];
+    const bankAccounts: BankAccount[] = accountsResult.QueryResponse?.Account || [];
     const totalCash = bankAccounts.reduce(
-      (sum: number, acc: any) => sum + (acc.CurrentBalance || 0),
+      (sum: number, acc: BankAccount) => sum + (acc.CurrentBalance || 0),
       0
     );
 
@@ -187,8 +190,18 @@ export async function fetchQuickBooksMetrics(): Promise<QuickBooksMetrics> {
   }
 }
 
+// Aging report types
+type AgingReportRow = {
+  type?: string;
+  ColData?: Array<{ value?: string }>;
+};
+
+type AgingReport = {
+  Rows?: { Row?: AgingReportRow[] };
+};
+
 // Parse aging report into buckets
-function parseAgingReport(report: any) {
+function parseAgingReport(report: AgingReport) {
   const result = {
     total: 0,
     current: 0,
@@ -208,11 +221,11 @@ function parseAgingReport(report: any) {
         // Typical aging columns: Name, Current, 1-30, 31-60, 61-90, 91+, Total
         if (cols.length >= 6) {
           vendors.add(cols[0]?.value || "");
-          result.current += parseFloat(cols[1]?.value || 0);
-          result.overdue30 += parseFloat(cols[2]?.value || 0);
-          result.overdue60 += parseFloat(cols[3]?.value || 0);
-          result.overdue90Plus += parseFloat(cols[4]?.value || 0) + parseFloat(cols[5]?.value || 0);
-          result.total += parseFloat(cols[cols.length - 1]?.value || 0);
+          result.current += parseFloat(cols[1]?.value || "0");
+          result.overdue30 += parseFloat(cols[2]?.value || "0");
+          result.overdue60 += parseFloat(cols[3]?.value || "0");
+          result.overdue90Plus += parseFloat(cols[4]?.value || "0") + parseFloat(cols[5]?.value || "0");
+          result.total += parseFloat(cols[cols.length - 1]?.value || "0");
         }
       }
     }
@@ -224,15 +237,27 @@ function parseAgingReport(report: any) {
   return result;
 }
 
+// P&L report types
+type PnLReportRow = {
+  type?: string;
+  group?: string;
+  Summary?: { ColData?: Array<{ value?: string }> };
+  Header?: { ColData?: Array<{ value?: string }> };
+};
+
+type PnLReport = {
+  Rows?: { Row?: PnLReportRow[] };
+};
+
 // Parse P&L report
-function parsePnLReport(report: any) {
+function parsePnLReport(report: PnLReport) {
   const result = { revenue: 0, expenses: 0, netIncome: 0 };
 
   try {
     const rows = report.Rows?.Row || [];
     for (const row of rows) {
       if (row.Summary?.ColData) {
-        const value = parseFloat(row.Summary.ColData[1]?.value || 0);
+        const value = parseFloat(row.Summary.ColData[1]?.value || "0");
         if (row.group === "Income") result.revenue = value;
         else if (row.group === "Expenses") result.expenses = value;
         else if (row.type === "Section" && row.Header?.ColData?.[0]?.value === "Net Income") {
