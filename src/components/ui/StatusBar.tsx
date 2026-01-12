@@ -10,6 +10,8 @@ import {
   Shield,
 } from "lucide-react";
 import { devStore } from "@/lib/data/devStore";
+import { getRealMetrics } from "@/lib/ai/brez-intelligence";
+import { CURRENT_STATE } from "@/lib/data/source-of-truth";
 
 interface MetricPulse {
   label: string;
@@ -19,17 +21,22 @@ interface MetricPulse {
   href?: string;
 }
 
+type Phase = "stabilize" | "thrive" | "scale";
+
 export function StatusBar() {
   const [metrics, setMetrics] = useState<MetricPulse[]>([]);
-  const [phase] = useState<"stabilize" | "thrive" | "scale">("stabilize");
   const [currentTime, setCurrentTime] = useState(new Date());
+
+  // Use real phase from source-of-truth
+  const phase: Phase = CURRENT_STATE.currentScenario as Phase;
 
   useEffect(() => {
     const updateMetrics = () => {
       const tasks = devStore.getTasks();
       const goals = devStore.getGoals();
-      const snapshots = devStore.getFinancialSnapshots();
-      const latestSnapshot = snapshots[0];
+
+      // Use real metrics from source-of-truth instead of devStore
+      const realMetrics = getRealMetrics();
 
       const overdueTasks = tasks.filter((t) => {
         if (t.status === "done") return false;
@@ -43,14 +50,14 @@ export function StatusBar() {
       setMetrics([
         {
           label: "Cash",
-          value: latestSnapshot ? `$${(latestSnapshot.cashOnHand / 1000).toFixed(0)}K` : "$300K",
-          status: latestSnapshot && latestSnapshot.cashOnHand > 250000 ? "good" : "warning",
+          value: `$${(realMetrics.cash.onHand / 1000).toFixed(0)}K`,
+          status: realMetrics.cash.status === 'healthy' ? "good" : "warning",
           href: "/financials",
         },
         {
           label: "Runway",
-          value: latestSnapshot ? `${Math.floor(latestSnapshot.cashOnHand / latestSnapshot.fixedWeeklyStack)}wk` : "5wk",
-          status: latestSnapshot && (latestSnapshot.cashOnHand / latestSnapshot.fixedWeeklyStack) > 6 ? "good" : "warning",
+          value: `${realMetrics.cash.runway}wk`,
+          status: realMetrics.cash.runway > 6 ? "good" : "warning",
           href: "/financials",
         },
         {

@@ -17,18 +17,18 @@ import {
   BookOpen,
   ChevronLeft,
   ChevronRight,
-  Sparkles,
   Search,
   Command,
   Calendar,
   BarChart3,
   Map,
+  Bot,
 } from "lucide-react";
 import { devStore } from "@/lib/data/devStore";
 import { Avatar } from "@/components/ui";
+import { BrezLogo, BrezAILogo } from "@/components/ui/BrezLogo";
 import { useCommandPalette } from "@/components/ui/CommandPalette";
 import { useAIAssistant } from "@/components/ui/AIAssistant";
-import { Bot } from "lucide-react";
 
 const mainNavItems = [
   { href: "/", label: "Command Center", icon: LayoutDashboard },
@@ -93,16 +93,9 @@ export function Sidebar() {
       {/* Logo */}
       <div className="p-4 flex items-center justify-between border-b border-white/5">
         <Link href="/" className="flex items-center gap-2">
-          <div className="w-8 h-8 rounded-xl bg-gradient-to-br from-[#e3f98a] to-[#65cdd8] flex items-center justify-center">
-            <Sparkles className="w-4 h-4 text-[#0D0D2A]" />
-          </div>
+          <BrezLogo variant="icon" size="md" />
           {!collapsed && (
-            <div>
-              <h1 className="text-lg font-bold text-white tracking-tight">
-                BRĒZ <span className="text-[#e3f98a]">AI</span>
-              </h1>
-              <p className="text-[10px] text-[#676986] -mt-0.5">V1 • DEV MODE</p>
-            </div>
+            <BrezAILogo size="md" showVersion />
           )}
         </Link>
         <button

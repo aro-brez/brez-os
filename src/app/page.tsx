@@ -25,6 +25,7 @@ import {
   ChevronUp,
 } from "lucide-react";
 import { Card, Badge, Button, ProgressBar } from "@/components/ui";
+import { BrezLogo } from "@/components/ui/BrezLogo";
 import { devStore } from "@/lib/data/devStore";
 import { useToast } from "@/components/ui/Toast";
 import { useAIAssistant } from "@/components/ui/AIAssistant";
@@ -93,9 +94,7 @@ export default function CommandCenter() {
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-3">
             {/* BREZ Logo */}
-            <div className="w-10 h-10 md:w-12 md:h-12 rounded-xl bg-gradient-to-br from-[#e3f98a] to-[#65cdd8] flex items-center justify-center">
-              <span className="text-[#0D0D2A] font-bold text-lg md:text-xl">B</span>
-            </div>
+            <BrezLogo variant="icon" size="lg" />
             <div>
               <h1 className="text-xl md:text-2xl lg:text-3xl font-bold text-white">
                 {greeting.emoji} {greeting.text}, {currentUser.name.split(" ")[0]}
