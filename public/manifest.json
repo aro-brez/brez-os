@@ -1,0 +1,26 @@
+{
+  "name": "BRĒZ Growth Generator",
+  "short_name": "BRĒZ AI",
+  "description": "Your team's AI-powered operating system for growth",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#0D0D2A",
+  "theme_color": "#0D0D2A",
+  "orientation": "portrait-primary",
+  "icons": [
+    {
+      "src": "/images/favicon.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/images/favicon.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ],
+  "categories": ["business", "finance", "productivity"],
+  "lang": "en-US"
+}
