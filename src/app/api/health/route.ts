@@ -9,6 +9,11 @@ export async function GET() {
     process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
   );
 
+  const isShopifyConfigured = !!(
+    process.env.SHOPIFY_SHOP_DOMAIN &&
+    process.env.SHOPIFY_ACCESS_TOKEN
+  );
+
   const response = {
     ok: true,
     version: APP_VERSION,
@@ -19,6 +24,7 @@ export async function GET() {
       devMode: !isSupabaseConfigured,
       googleAuth: !!(process.env.GOOGLE_CLIENT_ID && process.env.GOOGLE_CLIENT_SECRET),
       anthropicAI: !!process.env.ANTHROPIC_API_KEY,
+      shopify: isShopifyConfigured,
     },
     build: {
       // Vercel provides these automatically

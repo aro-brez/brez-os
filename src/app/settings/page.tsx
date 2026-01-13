@@ -109,13 +109,8 @@ export default function SettingsPage() {
         <div className="space-y-6">
           {/* Connector Cards */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <ConnectorCard
+            <ShopifyConnectorCard
               connector={connectors.find((c) => c.type === "shopify")}
-              icon={<ShoppingBag className="w-6 h-6" />}
-              name="Shopify"
-              description="Import orders, customers, and product data"
-              docsUrl="https://shopify.dev/docs/admin-api"
-              envVars={["SHOPIFY_STORE_URL", "SHOPIFY_ACCESS_TOKEN"]}
             />
             <ConnectorCard
               connector={connectors.find((c) => c.type === "quickbooks")}
@@ -346,6 +341,23 @@ export default function SettingsPage() {
                   )}
                 </div>
               </div>
+
+              <div className="flex items-center justify-between p-3 bg-[#1a1a3e] rounded-xl">
+                <div className="flex items-center gap-3">
+                  <ShoppingBag className="w-5 h-5 text-[#8533fc]" />
+                  <div>
+                    <p className="font-medium text-white">Shopify</p>
+                    <p className="text-xs text-[#676986]">E-commerce data integration</p>
+                  </div>
+                </div>
+                <div className="flex items-center gap-2">
+                  {(deploymentInfo?.features as { shopify?: boolean })?.shopify ? (
+                    <><CheckCircle className="w-4 h-4 text-[#6BCB77]" /><Badge variant="success">Configured</Badge></>
+                  ) : (
+                    <><XCircle className="w-4 h-4 text-[#676986]" /><Badge variant="default">Not Configured</Badge></>
+                  )}
+                </div>
+              </div>
             </div>
           </Card>
 
@@ -452,6 +464,190 @@ export default function SettingsPage() {
         </div>
       </Modal>
     </div>
+  );
+}
+
+// Shopify-specific Connector Card with live connection testing
+function ShopifyConnectorCard({
+  connector,
+}: {
+  connector?: Connector;
+}) {
+  const fileInputRef = useRef<HTMLInputElement>(null);
+  const [showConfig, setShowConfig] = useState(false);
+  const [connectionStatus, setConnectionStatus] = useState<{
+    loading: boolean;
+    connected: boolean;
+    configured: boolean;
+    shop?: { name: string; domain: string };
+    error?: string;
+  }>({
+    loading: false,
+    connected: false,
+    configured: false,
+  });
+
+  // Test connection on mount
+  useEffect(() => {
+    testConnection();
+  }, []);
+
+  const testConnection = async () => {
+    setConnectionStatus((prev) => ({ ...prev, loading: true }));
+    try {
+      const res = await fetch("/api/shopify/test");
+      const data = await res.json();
+      setConnectionStatus({
+        loading: false,
+        connected: data.connected,
+        configured: data.configured,
+        shop: data.shop,
+        error: data.error,
+      });
+    } catch {
+      setConnectionStatus({
+        loading: false,
+        connected: false,
+        configured: false,
+        error: "Failed to test connection",
+      });
+    }
+  };
+
+  const isConnected = connectionStatus.connected;
+
+  return (
+    <Card>
+      <div className="flex items-start justify-between mb-4">
+        <div className="flex items-center gap-3">
+          <div className={`w-12 h-12 rounded-xl flex items-center justify-center ${
+            isConnected ? "bg-[#6BCB77]/20 text-[#6BCB77]" : "bg-white/5 text-[#676986]"
+          }`}>
+            <ShoppingBag className="w-6 h-6" />
+          </div>
+          <div>
+            <h3 className="font-semibold text-white">Shopify</h3>
+            <p className="text-xs text-[#676986]">Import orders, customers, and product data</p>
+          </div>
+        </div>
+        <div className="flex items-center gap-2">
+          {connectionStatus.loading ? (
+            <Badge variant="default" className="animate-pulse">Testing...</Badge>
+          ) : isConnected ? (
+            <Badge variant="success">Connected</Badge>
+          ) : connectionStatus.configured ? (
+            <Badge variant="warning">Auth Error</Badge>
+          ) : (
+            <Badge variant="default">Not Connected</Badge>
+          )}
+        </div>
+      </div>
+
+      {/* Connection Status Details */}
+      {isConnected && connectionStatus.shop && (
+        <div className="mb-4 p-3 bg-[#6BCB77]/10 rounded-xl border border-[#6BCB77]/20">
+          <div className="flex items-center gap-2 mb-2">
+            <CheckCircle className="w-4 h-4 text-[#6BCB77]" />
+            <span className="text-sm font-medium text-[#6BCB77]">Live Connection</span>
+          </div>
+          <p className="text-sm text-white">{connectionStatus.shop.name}</p>
+          <p className="text-xs text-[#676986]">{connectionStatus.shop.domain}</p>
+        </div>
+      )}
+
+      {connectionStatus.error && !isConnected && (
+        <div className="mb-4 p-3 bg-[#ff6b6b]/10 rounded-xl border border-[#ff6b6b]/20">
+          <div className="flex items-center gap-2 mb-1">
+            <XCircle className="w-4 h-4 text-[#ff6b6b]" />
+            <span className="text-sm font-medium text-[#ff6b6b]">Connection Error</span>
+          </div>
+          <p className="text-xs text-[#a8a8a8]">{connectionStatus.error}</p>
+        </div>
+      )}
+
+      <div className="space-y-3">
+        {/* V1: CSV Import */}
+        <div className="p-3 bg-[#1a1a3e] rounded-xl">
+          <div className="flex items-center justify-between mb-2">
+            <span className="text-xs font-medium text-[#e3f98a] uppercase tracking-wider">V1: CSV Import</span>
+            <Badge variant="success" size="sm">Available</Badge>
+          </div>
+          <p className="text-xs text-[#676986] mb-2">Import data manually via CSV file</p>
+          <Button
+            variant="secondary"
+            size="sm"
+            onClick={() => fileInputRef.current?.click()}
+            className="w-full"
+          >
+            <Upload className="w-4 h-4" />
+            Import CSV
+          </Button>
+          <input
+            ref={fileInputRef}
+            type="file"
+            accept=".csv"
+            className="hidden"
+            onChange={(e) => {
+              console.log("CSV import for Shopify", e.target.files?.[0]);
+            }}
+          />
+        </div>
+
+        {/* V2: API Integration */}
+        <div className={`p-3 bg-[#1a1a3e]/50 rounded-xl ${isConnected ? "" : "opacity-60"}`}>
+          <div className="flex items-center justify-between mb-2">
+            <span className="text-xs font-medium text-[#676986] uppercase tracking-wider">V2: API Integration</span>
+            {isConnected ? (
+              <Badge variant="success" size="sm">Active</Badge>
+            ) : (
+              <Badge variant="default" size="sm">{connectionStatus.configured ? "Check Config" : "Set Env Vars"}</Badge>
+            )}
+          </div>
+          <div className="flex items-center gap-2 mb-2">
+            <button
+              onClick={() => setShowConfig(!showConfig)}
+              className="text-xs text-[#65cdd8] hover:underline"
+            >
+              {showConfig ? "Hide" : "Show"} required env vars
+            </button>
+            <span className="text-[#676986]">|</span>
+            <button
+              onClick={testConnection}
+              className="text-xs text-[#e3f98a] hover:underline"
+              disabled={connectionStatus.loading}
+            >
+              {connectionStatus.loading ? "Testing..." : "Test Connection"}
+            </button>
+          </div>
+          {showConfig && (
+            <div className="mt-2 space-y-1 font-mono text-xs">
+              <div className={`p-1.5 rounded flex items-center gap-2 ${
+                connectionStatus.configured ? "bg-[#6BCB77]/10 text-[#6BCB77]" : "bg-[#0D0D2A] text-[#676986]"
+              }`}>
+                {connectionStatus.configured && <CheckCircle className="w-3 h-3" />}
+                SHOPIFY_SHOP_DOMAIN
+              </div>
+              <div className={`p-1.5 rounded flex items-center gap-2 ${
+                connectionStatus.configured ? "bg-[#6BCB77]/10 text-[#6BCB77]" : "bg-[#0D0D2A] text-[#676986]"
+              }`}>
+                {connectionStatus.configured && <CheckCircle className="w-3 h-3" />}
+                SHOPIFY_ACCESS_TOKEN
+              </div>
+            </div>
+          )}
+        </div>
+      </div>
+
+      {/* Docs Link */}
+      <a
+        href="https://shopify.dev/docs/admin-api"
+        target="_blank"
+        rel="noopener noreferrer"
+        className="block text-xs text-[#65cdd8] hover:underline mt-3 pt-3 border-t border-white/5"
+      >
+        View API Documentation →
+      </a>
+    </Card>
   );
 }
 
