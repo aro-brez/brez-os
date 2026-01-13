@@ -23,10 +23,12 @@ import {
   BarChart3,
   Map,
   Bot,
+  Sparkles,
+  Zap,
 } from "lucide-react";
 import { devStore } from "@/lib/data/devStore";
 import { Avatar } from "@/components/ui";
-import { BrezLogo, BrezAILogo } from "@/components/ui/BrezLogo";
+import { BrezLogo, XPBadge, StreakBadge } from "@/components/ui/BrezLogo";
 import { useCommandPalette } from "@/components/ui/CommandPalette";
 import { useAIAssistant } from "@/components/ui/AIAssistant";
 
@@ -59,6 +61,11 @@ export function Sidebar() {
   const { open: openCommandPalette } = useCommandPalette();
   const { toggle: toggleAI } = useAIAssistant();
 
+  // Mock gamification data - in production, this would come from user context
+  const userXP = 2450;
+  const userLevel = 7;
+  const streakDays = 12;
+
   const NavLink = ({ href, label, icon: Icon }: { href: string; label: string; icon: typeof LayoutDashboard }) => {
     const isActive = pathname === href || (href !== "/" && pathname.startsWith(href));
 
@@ -66,18 +73,22 @@ export function Sidebar() {
       <Link
         href={href}
         className={clsx(
-          "flex items-center gap-3 px-3 py-2.5 rounded-xl transition-all group",
+          "flex items-center gap-3 px-3 py-2.5 rounded-xl transition-all duration-200 group",
           isActive
-            ? "bg-[#e3f98a]/10 text-[#e3f98a]"
+            ? "bg-[#e3f98a]/10 text-[#e3f98a] shadow-[0_0_20px_rgba(227,249,138,0.1)]"
             : "text-[#a8a8a8] hover:text-white hover:bg-white/5"
         )}
       >
-        <Icon className={clsx("w-5 h-5 flex-shrink-0", isActive && "text-[#e3f98a]")} />
+        <Icon className={clsx(
+          "w-5 h-5 flex-shrink-0 transition-transform duration-200",
+          isActive && "text-[#e3f98a]",
+          "group-hover:scale-110"
+        )} />
         {!collapsed && (
           <span className="text-sm font-medium truncate">{label}</span>
         )}
         {isActive && !collapsed && (
-          <div className="ml-auto w-1.5 h-1.5 rounded-full bg-[#e3f98a]" />
+          <div className="ml-auto w-1.5 h-1.5 rounded-full bg-[#e3f98a] shadow-[0_0_8px_rgba(227,249,138,0.8)]" />
         )}
       </Link>
     );
@@ -90,29 +101,58 @@ export function Sidebar() {
         collapsed ? "w-16" : "w-64"
       )}
     >
-      {/* Logo */}
-      <div className="p-4 flex items-center justify-between border-b border-white/5">
-        <Link href="/" className="flex items-center gap-2">
-          <BrezLogo variant="icon" size="md" />
-          {!collapsed && (
-            <BrezAILogo size="md" showVersion />
-          )}
-        </Link>
-        <button
-          onClick={() => setCollapsed(!collapsed)}
-          className="p-1.5 rounded-lg text-[#676986] hover:text-white hover:bg-white/5 transition-colors"
-        >
-          {collapsed ? <ChevronRight className="w-4 h-4" /> : <ChevronLeft className="w-4 h-4" />}
-        </button>
+      {/* Logo Section - Enhanced with BREZ Wordmark */}
+      <div className="p-4 border-b border-white/5">
+        <div className="flex items-center justify-between">
+          <Link href="/" className="flex items-center gap-3 group">
+            {/* Logo with glow effect */}
+            <div className="relative">
+              {/* Glow backdrop */}
+              <div className="absolute inset-0 blur-xl opacity-50 group-hover:opacity-70 transition-opacity duration-500"
+                style={{ background: "radial-gradient(circle, rgba(227, 249, 138, 0.3) 0%, transparent 70%)" }}
+              />
+              <BrezLogo variant="wordmark-glow" size={collapsed ? "sm" : "md"} animated />
+            </div>
+          </Link>
+          <button
+            onClick={() => setCollapsed(!collapsed)}
+            className="p-1.5 rounded-lg text-[#676986] hover:text-[#e3f98a] hover:bg-[#e3f98a]/10 transition-all duration-200"
+          >
+            {collapsed ? <ChevronRight className="w-4 h-4" /> : <ChevronLeft className="w-4 h-4" />}
+          </button>
+        </div>
+
+        {/* Supermind subtitle - only when expanded */}
+        {!collapsed && (
+          <div className="mt-2 flex items-center gap-1.5">
+            <Sparkles className="w-3 h-3 text-[#65cdd8]" />
+            <span className="text-[10px] font-medium text-[#676986] tracking-wide uppercase">
+              Supermind
+            </span>
+            <span className="text-[8px] px-1.5 py-0.5 rounded-full bg-[#8533fc]/20 text-[#8533fc] font-semibold">
+              BETA
+            </span>
+          </div>
+        )}
       </div>
+
+      {/* Gamification Stats - XP & Streak (when expanded) */}
+      {!collapsed && (
+        <div className="px-4 py-3 border-b border-white/5">
+          <div className="flex items-center justify-between gap-2">
+            <XPBadge xp={userXP} level={userLevel} size="sm" />
+            <StreakBadge days={streakDays} size="sm" />
+          </div>
+        </div>
+      )}
 
       {/* Quick Actions */}
       <div className="p-3 space-y-2">
         <button
           onClick={openCommandPalette}
           className={clsx(
-            "w-full flex items-center gap-3 px-3 py-2.5 rounded-xl transition-all",
-            "bg-white/5 hover:bg-white/10 text-[#676986] hover:text-white border border-white/5"
+            "w-full flex items-center gap-3 px-3 py-2.5 rounded-xl transition-all duration-200",
+            "bg-white/5 hover:bg-white/10 text-[#676986] hover:text-white border border-white/5 hover:border-white/10"
           )}
         >
           <Search className="w-4 h-4" />
@@ -128,14 +168,16 @@ export function Sidebar() {
         <button
           onClick={toggleAI}
           className={clsx(
-            "w-full flex items-center gap-3 px-3 py-2.5 rounded-xl transition-all",
-            "bg-gradient-to-r from-[#e3f98a]/10 to-[#65cdd8]/10 hover:from-[#e3f98a]/20 hover:to-[#65cdd8]/20 text-[#e3f98a] border border-[#e3f98a]/20"
+            "w-full flex items-center gap-3 px-3 py-2.5 rounded-xl transition-all duration-200 group",
+            "bg-gradient-to-r from-[#e3f98a]/10 to-[#65cdd8]/10 hover:from-[#e3f98a]/20 hover:to-[#65cdd8]/20",
+            "text-[#e3f98a] border border-[#e3f98a]/20 hover:border-[#e3f98a]/40",
+            "shadow-[0_0_20px_rgba(227,249,138,0.05)] hover:shadow-[0_0_30px_rgba(227,249,138,0.15)]"
           )}
         >
-          <Bot className="w-4 h-4" />
+          <Bot className="w-4 h-4 group-hover:animate-pulse" />
           {!collapsed && (
             <>
-              <span className="flex-1 text-sm text-left">Ask AI</span>
+              <span className="flex-1 text-sm text-left font-medium">Ask AI</span>
               <div className="flex items-center gap-0.5 px-1.5 py-0.5 rounded bg-white/5 text-[10px] text-[#676986]">
                 <Command className="w-3 h-3" />J
               </div>
@@ -154,7 +196,8 @@ export function Sidebar() {
 
         {!collapsed && (
           <div className="pt-4 pb-2">
-            <p className="px-3 text-[10px] font-semibold text-[#676986] uppercase tracking-wider">
+            <p className="px-3 text-[10px] font-semibold text-[#676986] uppercase tracking-wider flex items-center gap-2">
+              <Zap className="w-3 h-3 text-[#65cdd8]" />
               Tools
             </p>
           </div>
@@ -174,14 +217,19 @@ export function Sidebar() {
           <NavLink key={item.href} {...item} />
         ))}
 
-        {/* User Profile */}
+        {/* User Profile - Enhanced */}
         <div
           className={clsx(
-            "flex items-center gap-3 px-3 py-2.5 mt-2 rounded-xl bg-[#1a1a3e] border border-white/5",
+            "flex items-center gap-3 px-3 py-2.5 mt-2 rounded-xl transition-all duration-200",
+            "bg-gradient-to-r from-[#1a1a3e] to-[#1a1a3e]/80 border border-white/5 hover:border-[#e3f98a]/20",
             collapsed && "justify-center"
           )}
         >
-          <Avatar name={currentUser.name} size="sm" />
+          <div className="relative">
+            <Avatar name={currentUser.name} size="sm" />
+            {/* Online indicator */}
+            <div className="absolute -bottom-0.5 -right-0.5 w-2.5 h-2.5 rounded-full bg-[#6BCB77] border-2 border-[#1a1a3e]" />
+          </div>
           {!collapsed && (
             <div className="min-w-0 flex-1">
               <p className="text-sm font-medium text-white truncate">{currentUser.name}</p>
@@ -194,7 +242,7 @@ export function Sidebar() {
   );
 }
 
-// Mobile bottom navigation
+// Mobile bottom navigation - Enhanced
 export function MobileNav() {
   const pathname = usePathname();
 
@@ -216,11 +264,16 @@ export function MobileNav() {
               key={item.href}
               href={item.href}
               className={clsx(
-                "flex flex-col items-center gap-1 px-3 py-1.5 rounded-xl transition-all",
-                isActive ? "text-[#e3f98a]" : "text-[#676986]"
+                "flex flex-col items-center gap-1 px-3 py-1.5 rounded-xl transition-all duration-200",
+                isActive
+                  ? "text-[#e3f98a] bg-[#e3f98a]/10"
+                  : "text-[#676986] active:bg-white/5"
               )}
             >
-              <item.icon className="w-5 h-5" />
+              <item.icon className={clsx(
+                "w-5 h-5",
+                isActive && "drop-shadow-[0_0_8px_rgba(227,249,138,0.5)]"
+              )} />
               <span className="text-[10px] font-medium">{item.label}</span>
             </Link>
           );
