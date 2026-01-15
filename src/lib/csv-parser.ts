@@ -25,10 +25,10 @@ interface ParseResult<T> {
 /**
  * Parse CSV file content and return typed data
  */
-export function parseCSV<T>(
+export async function parseCSV<T>(
   content: string,
   expectedColumns: string[]
-): ParseResult<T> {
+): Promise<ParseResult<T>> {
   return new Promise<ParseResult<T>>((resolve) => {
     Papa.parse(content, {
       header: true,
@@ -61,7 +61,7 @@ export function parseCSV<T>(
         });
       },
     });
-  }) as unknown as ParseResult<T>;
+  });
 }
 
 /**

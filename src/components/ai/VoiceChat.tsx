@@ -61,6 +61,11 @@ interface SpeechRecognitionAlternative {
   confidence: number;
 }
 
+interface SpeechRecognitionErrorEvent extends Event {
+  error: "no-speech" | "aborted" | "audio-capture" | "network" | "not-allowed" | "service-not-allowed" | "bad-grammar" | "language-not-supported";
+  message?: string;
+}
+
 interface SpeechRecognition extends EventTarget {
   continuous: boolean;
   interimResults: boolean;
@@ -69,7 +74,7 @@ interface SpeechRecognition extends EventTarget {
   stop(): void;
   abort(): void;
   onresult: ((event: SpeechRecognitionEvent) => void) | null;
-  onerror: ((event: Event) => void) | null;
+  onerror: ((event: SpeechRecognitionErrorEvent) => void) | null;
   onend: (() => void) | null;
   onstart: (() => void) | null;
 }
@@ -143,6 +148,10 @@ export function VoiceChat({ isOpen, onClose, context }: VoiceChatProps) {
   const [isLoading, setIsLoading] = useState(false);
   const [interimTranscript, setInterimTranscript] = useState("");
 
+  // Constants
+  const MAX_MESSAGE_LENGTH = 4000;
+  const MAX_MESSAGES_PER_THREAD = 50;
+
   // Voice state
   const [isListening, setIsListening] = useState(false);
   const [isSpeaking, setIsSpeaking] = useState(false);
@@ -150,6 +159,7 @@ export function VoiceChat({ isOpen, onClose, context }: VoiceChatProps) {
   const [micPermission, setMicPermission] = useState<"granted" | "denied" | "prompt" | "checking">("checking");
   const [isOffline, setIsOffline] = useState(false);
   const [retryCount, setRetryCount] = useState(0);
+  const [pendingMessages, setPendingMessages] = useState<Array<{text: string; captured: CapturedItem | null; threadId: string}>>([]);
 
   // Refs
   const messagesEndRef = useRef<HTMLDivElement>(null);
@@ -253,13 +263,30 @@ export function VoiceChat({ isOpen, onClose, context }: VoiceChatProps) {
 
           setInterimTranscript(interim);
           if (final) {
-            setInput((prev) => prev + final);
+            setInput((prev) => {
+              const newValue = prev + final;
+              // Cap at max length
+              return newValue.slice(0, MAX_MESSAGE_LENGTH);
+            });
             setInterimTranscript("");
           }
         };
 
-        recognitionRef.current.onerror = () => {
-          setIsListening(false);
+        recognitionRef.current.onerror = (event: SpeechRecognitionErrorEvent) => {
+          // Handle different error types appropriately
+          const errorType = event?.error || "unknown";
+
+          // Only stop listening for critical errors
+          // "no-speech" is normal when user pauses - don't stop
+          // "aborted" happens when we manually stop - expected
+          if (errorType !== "no-speech" && errorType !== "aborted") {
+            setIsListening(false);
+
+            // Log non-critical errors for debugging
+            if (errorType === "not-allowed") {
+              setMicPermission("denied");
+            }
+          }
         };
 
         recognitionRef.current.onend = () => {
@@ -403,13 +430,33 @@ export function VoiceChat({ isOpen, onClose, context }: VoiceChatProps) {
     } catch (error) {
       if (attempt < MAX_RETRIES && !isOffline) {
         setRetryCount(attempt + 1);
-        const delay = BASE_DELAY * Math.pow(2, attempt);
-        await new Promise(resolve => setTimeout(resolve, delay));
+        // Exponential backoff with jitter to prevent thundering herd
+        const baseDelay = BASE_DELAY * Math.pow(2, attempt);
+        const jitter = baseDelay * (0.5 + Math.random() * 0.5);
+        await new Promise(resolve => setTimeout(resolve, jitter));
         return sendWithRetry(userText, captured, attempt + 1);
       }
       throw error;
     }
   }, [context, activeThreadId, messages, isOffline]);
+
+  // Sync pending messages when back online
+  useEffect(() => {
+    if (!isOffline && pendingMessages.length > 0) {
+      const syncMessages = async () => {
+        for (const pending of pendingMessages) {
+          try {
+            await sendWithRetry(pending.text, pending.captured);
+          } catch {
+            // Will retry next time online
+            return;
+          }
+        }
+        setPendingMessages([]);
+      };
+      syncMessages();
+    }
+  }, [isOffline, pendingMessages, sendWithRetry]);
 
   // Send message
   const handleSend = async () => {
@@ -461,8 +508,8 @@ export function VoiceChat({ isOpen, onClose, context }: VoiceChatProps) {
       };
 
       // Update thread with assistant message
-      setThreads((prev) =>
-        prev.map((t) =>
+      setThreads((prev) => {
+        const updated = prev.map((t) =>
           t.id === activeThreadId
             ? {
                 ...t,
@@ -470,8 +517,34 @@ export function VoiceChat({ isOpen, onClose, context }: VoiceChatProps) {
                 lastMessage: new Date(),
               }
             : t
-        )
-      );
+        );
+
+        // Check if thread rotation needed
+        const currentThread = updated.find((t) => t.id === activeThreadId);
+        if (currentThread && currentThread.messages.length >= MAX_MESSAGES_PER_THREAD) {
+          // Create continuation thread
+          const continuationThread: Thread = {
+            id: Date.now().toString(),
+            name: `${currentThread.name} (continued)`,
+            messages: [
+              {
+                id: "continuation",
+                role: "system",
+                content: `Continuing from "${currentThread.name}" which reached ${MAX_MESSAGES_PER_THREAD} messages.`,
+                timestamp: new Date(),
+              },
+            ],
+            createdAt: new Date(),
+          };
+
+          // Switch to new thread after a brief delay
+          setTimeout(() => setActiveThreadId(continuationThread.id), 100);
+
+          return [continuationThread, ...updated];
+        }
+
+        return updated;
+      });
 
       // Speak the response if voice is enabled
       if (voiceEnabled) {
@@ -481,11 +554,16 @@ export function VoiceChat({ isOpen, onClose, context }: VoiceChatProps) {
       console.error("Chat error:", error);
       const isOfflineError = error instanceof Error && error.message === "offline";
 
+      // Queue message for later if offline
+      if (isOfflineError && activeThreadId) {
+        setPendingMessages((prev) => [...prev, { text: userText, captured, threadId: activeThreadId }]);
+      }
+
       const errorMessage: ChatMessage = {
         id: (Date.now() + 1).toString(),
         role: "assistant",
         content: isOfflineError
-          ? "You're offline. Your message has been saved and will be sent when you're back online."
+          ? `You're offline. Your message has been queued (${pendingMessages.length + 1} pending) and will send when reconnected.`
           : `Sorry, I couldn't connect after ${retryCount + 1} attempts. Please check your connection and try again.`,
         timestamp: new Date(),
       };
@@ -904,16 +982,35 @@ export function VoiceChat({ isOpen, onClose, context }: VoiceChatProps) {
           </div>
 
           {/* Text input */}
-          <textarea
-            ref={inputRef}
-            value={input}
-            onChange={(e) => setInput(e.target.value)}
-            onKeyDown={handleKeyDown}
-            placeholder="Speak or type... Try 'Capture: [task]'"
-            className="flex-1 bg-[#242445] border border-white/10 rounded-xl px-4 py-3 text-sm text-white placeholder-[#676986] focus:outline-none focus:border-[#e3f98a]/50 resize-none min-h-[48px] max-h-32"
-            rows={1}
-            disabled={isLoading}
-          />
+          <div className="flex-1 relative">
+            <textarea
+              ref={inputRef}
+              value={input}
+              onChange={(e) => {
+                const newValue = e.target.value;
+                if (newValue.length <= MAX_MESSAGE_LENGTH) {
+                  setInput(newValue);
+                }
+              }}
+              onKeyDown={handleKeyDown}
+              placeholder="Speak or type... Try 'Capture: [task]'"
+              className={`w-full bg-[#242445] border rounded-xl px-4 py-3 text-sm text-white placeholder-[#676986] focus:outline-none resize-none min-h-[48px] max-h-32 ${
+                input.length > MAX_MESSAGE_LENGTH * 0.9
+                  ? "border-amber-500/50 focus:border-amber-500"
+                  : "border-white/10 focus:border-[#e3f98a]/50"
+              }`}
+              rows={1}
+              disabled={isLoading}
+            />
+            {/* Character count - show when >80% */}
+            {input.length > MAX_MESSAGE_LENGTH * 0.8 && (
+              <span className={`absolute bottom-1 right-2 text-xs ${
+                input.length > MAX_MESSAGE_LENGTH * 0.9 ? "text-amber-400" : "text-white/30"
+              }`}>
+                {input.length}/{MAX_MESSAGE_LENGTH}
+              </span>
+            )}
+          </div>
 
           {/* Send button */}
           <button

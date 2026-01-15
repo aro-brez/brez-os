@@ -1,11 +1,10 @@
 "use client";
 
-import { useParams, useRouter } from "next/navigation";
+import { useParams } from "next/navigation";
 import { useState, useEffect } from "react";
 import Link from "next/link";
 import {
   ArrowLeft,
-  Download,
   Share2,
   Eye,
   Calendar,
@@ -16,7 +15,6 @@ import {
   Printer,
 } from "lucide-react";
 import { Card, Badge, Button } from "@/components/ui";
-import { devStore } from "@/lib/data/devStore";
 
 interface StrategyMetadata {
   title: string;
@@ -46,12 +44,10 @@ const strategyMetadata: Record<string, StrategyMetadata> = {
 
 export default function StrategyViewerPage() {
   const params = useParams();
-  const router = useRouter();
   const slug = params.slug as string;
   const [isLoading, setIsLoading] = useState(true);
 
   const metadata = strategyMetadata[slug];
-  const currentUser = devStore.getCurrentUser();
 
   useEffect(() => {
     // Simulate loading

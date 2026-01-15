@@ -282,26 +282,32 @@ class BrezBrain {
       0
     );
 
+    // NOTE: Hardcoded values below are from Master Plan (Jan 2025)
+    // TODO (V2): Replace with real-time data from connected sources:
+    //   - Financial: QuickBooks integration
+    //   - DTC: Shopify integration
+    //   - Retail: ConduitIQ/retail CSV imports
+    // Data Priority: Cash/AP (daily) > CM (weekly) > DTC funnel (weekly) > Retail (weekly)
     return {
       // Financial - using real data where available, estimates otherwise
-      monthlyRevenue: 3300000, // From Master Plan
+      monthlyRevenue: 3300000, // Master Plan Jan 2025 - update via QuickBooks
       cashOnHand: latest?.cashOnHand || 300000,
-      accountsPayable: 8600000, // From Master Plan
+      accountsPayable: 8600000, // Master Plan Jan 2025 - update via QuickBooks
       runway: latest ? Math.floor(latest.cashOnHand / latest.fixedWeeklyStack) : 5,
-      contributionMargin: 0.42, // Estimated
+      contributionMargin: 0.42, // Master Plan estimate - update via P&L
 
       // DTC - these would come from Shopify
-      dtcRevenue: 2100000, // ~64% of revenue
-      dtcCAC: 42,
-      dtcLTV: 180,
-      dtcConversionRate: 0.032,
-      subscribers: 14000, // From Master Plan
-      churnRate: 0.085,
+      dtcRevenue: 2100000, // ~64% of revenue - update via Shopify
+      dtcCAC: 42, // Update via Meta/Google Ads
+      dtcLTV: 180, // Update via Shopify cohort analysis
+      dtcConversionRate: 0.032, // Update via Shopify/GA
+      subscribers: 14000, // Master Plan Jan 2025 - update via Shopify
+      churnRate: 0.085, // Update via subscription platform
 
       // Retail
-      retailRevenue: 1200000, // ~36% of revenue
-      retailDoors: 320,
-      retailVelocity: 2.1,
+      retailRevenue: 1200000, // ~36% of revenue - update via retail CSV
+      retailDoors: 320, // Update via retail partner data
+      retailVelocity: 2.1, // Update via retail CSV
 
       // Operations
       tasksCompleted: tasks.filter((t) => t.status === "done").length,

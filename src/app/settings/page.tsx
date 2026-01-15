@@ -469,10 +469,11 @@ export default function SettingsPage() {
 
 // Shopify-specific Connector Card with live connection testing
 function ShopifyConnectorCard({
-  connector,
+  connector: _connector,
 }: {
   connector?: Connector;
 }) {
+  // _connector reserved for V2 when connector config is stored
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [showConfig, setShowConfig] = useState(false);
   const [connectionStatus, setConnectionStatus] = useState<{

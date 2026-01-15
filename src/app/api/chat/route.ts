@@ -310,6 +310,9 @@ ${supermindRules}`;
       messages,
     });
 
+    if (!response.content || response.content.length === 0) {
+      throw new Error("Empty response from AI");
+    }
     const assistantMessage = response.content[0];
     if (assistantMessage.type !== "text") {
       throw new Error("Unexpected response type");

@@ -1,5 +1,20 @@
 "use client";
 
+/**
+ * Development In-Memory Data Store (V1)
+ *
+ * IMPORTANT: This store is for development/demo purposes only.
+ * - Data is in-memory and localStorage-backed (not persistent across devices)
+ * - Seed data timestamps are generated at runtime (new Date())
+ * - Financial/metric data is placeholder, not real BREZ data
+ *
+ * V2 TODO: Replace with Supabase for production:
+ * - Persistent database storage
+ * - Real-time sync across devices
+ * - Proper authentication/authorization
+ * - Real financial data from QuickBooks/Shopify integrations
+ */
+
 import {
   Database,
   User,
@@ -21,6 +36,7 @@ import {
 const STORAGE_KEY = "brez-ai-dev-db";
 
 // ============ SEED DATA ============
+// Note: Timestamps use new Date() - data appears "fresh" but is static placeholder data
 
 const seedUsers: User[] = [
   {

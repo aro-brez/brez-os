@@ -51,15 +51,15 @@ export function ServiceWorkerRegistration() {
 }
 
 // Hook for PWA install prompt
+// Returns install function when prompt is available
 export function useInstallPrompt() {
   useEffect(() => {
-    let deferredPrompt: BeforeInstallPromptEvent | null = null;
-
+    // Store prompt event for deferred installation
+    // Currently logs availability - UI install button can call window.__pwaInstallPrompt?.prompt()
     const handleBeforeInstallPrompt = (e: Event) => {
       e.preventDefault();
-      deferredPrompt = e as BeforeInstallPromptEvent;
-      // Could trigger UI to show install button
-      console.log("[PWA] Install prompt available");
+      // Store on window for manual trigger if needed
+      (window as Window & { __pwaInstallPrompt?: BeforeInstallPromptEvent }).__pwaInstallPrompt = e as BeforeInstallPromptEvent;
     };
 
     window.addEventListener("beforeinstallprompt", handleBeforeInstallPrompt);

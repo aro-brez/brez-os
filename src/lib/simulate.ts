@@ -221,6 +221,11 @@ export function requiredAlphaForCAC(
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   _horizonWeeks: number
 ): number {
+  // Guard against division by zero
+  if (targetCAC <= 0) {
+    return inputs.retail.alpha; // Return current alpha if invalid target
+  }
+
   // This is a simplified calculation
   // In reality, would need to solve the system of equations
   // _horizonWeeks reserved for V2 time-weighted calculations

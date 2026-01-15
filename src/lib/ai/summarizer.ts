@@ -227,9 +227,8 @@ export async function summarizeWithAI(
   _notes: string,
   _transcript?: string
 ): Promise<HuddleSummary> {
-  // V2: This will call Claude API for intelligent summarization
-  console.log("V2 TODO: Implement Claude API integration for smart summarization");
-
+  // V2: Will integrate with Claude API for intelligent summarization
+  // Currently uses rules-based extraction as fallback
   return summarizeHuddle(_notes, _transcript);
 }
 

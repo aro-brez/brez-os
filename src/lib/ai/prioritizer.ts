@@ -285,10 +285,8 @@ export async function analyzeWithAI(
   },
   _department?: Department
 ): Promise<AIAnalysis> {
-  // V2: This will call Claude API
-  // For now, use rules-based analysis
-  console.log("V2 TODO: Implement Claude API integration for AI analysis");
-
+  // V2: Will integrate with Claude API for intelligent analysis
+  // Currently uses rules-based prioritization as fallback
   return {
     priorities: getTopPriorities(),
     nextBestAction: getNextBestAction(_department),

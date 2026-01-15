@@ -14,14 +14,13 @@ import {
   Target,
   Lock,
   Eye,
-  Download,
   ChevronRight,
   Calendar,
   User,
   CheckCircle,
   Clock,
 } from "lucide-react";
-import { Card, Badge, Button } from "@/components/ui";
+import { Card, Badge } from "@/components/ui";
 import { devStore } from "@/lib/data/devStore";
 
 interface StrategyDocument {
@@ -285,9 +284,10 @@ export default function StrategiesPage() {
   );
 }
 
+// _StatusIcon passed for future status indicator display
 function StrategyCardContent({
   strategy,
-  StatusIcon,
+  StatusIcon: _StatusIcon,
   accessLevel,
   statusStyle,
   locked = false,
