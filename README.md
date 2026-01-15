@@ -1,14 +1,18 @@
-# BRĒZ AI
+# BREZ OS
 
-> Your team's AI-powered operating system for growth.
+> The company operating system that makes 60 people operate like 600.
 
-A Next.js 15 application that serves as a complete company operating system - combining communication, task management, financial simulation, and AI-driven insights in one unified platform.
+**Also known as**: BREZ AI, BREZ Growth Generator (all the same app)
+
+A Next.js 15 application that serves as BREZ's complete company operating system — combining AI-powered insights, team communication, task management, financial simulation, and the Growth Generator in one unified platform.
+
+**GitHub**: https://github.com/aro-brez/brez-growth-generator
 
 ## Quick Start
 
 ```bash
 # Clone the repository
-git clone https://github.com/YOUR_ORG/brez-growth-generator.git
+git clone https://github.com/aro-brez/brez-growth-generator.git
 cd brez-growth-generator
 
 # Install dependencies
@@ -62,7 +66,7 @@ Open [http://localhost:3000](http://localhost:3000) - the app runs in **DEV MODE
 
 ```bash
 # 1. Clone the repo
-git clone https://github.com/YOUR_ORG/brez-growth-generator.git
+git clone https://github.com/aro-brez/brez-growth-generator.git
 cd brez-growth-generator
 
 # 2. Install dependencies
@@ -184,7 +188,7 @@ git commit -m "Initial commit: BRĒZ AI V1"
 
 ```bash
 # Create repo on GitHub first, then:
-git remote add origin https://github.com/YOUR_ORG/brez-growth-generator.git
+git remote add origin https://github.com/aro-brez/brez-growth-generator.git
 git branch -M main
 git push -u origin main
 ```
@@ -332,7 +336,7 @@ Before going live with your team:
 ## Support
 
 - **Documentation**: Visit `/operator` in the app
-- **Issues**: [GitHub Issues](https://github.com/YOUR_ORG/brez-growth-generator/issues)
+- **Issues**: [GitHub Issues](https://github.com/aro-brez/brez-growth-generator/issues)
 - **Team**: #brez-ai channel in Slack
 
 ---

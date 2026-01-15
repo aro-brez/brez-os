@@ -1,6 +1,7 @@
 // BREZ Ultimate Source of Truth
 // Synthesized from all data sources - validated and cross-referenced
-// Last updated: January 12, 2025
+// Last updated: January 13, 2026
+// Data validated against: BREZ_Cash Flow Summary v1.6.26, SmartModel v5.0.2
 
 // =============================================================================
 // VALIDATED CORE METRICS
@@ -13,7 +14,7 @@ export const VALIDATED_METRICS = {
 
   // 2025 Revenue (Actual Full Year)
   revenue2025: {
-    totalActual: 47_000_000, // $47MM actual
+    totalActual: 47_566_451.05, // $47.6MM actual (SmartModel validated)
     sellThrough: 6_021_594, // Actual retail velocity (from velocity spreadsheet)
     sellIn: 13_450_000, // Wholesale/distributor orders
     ratio: 2.23, // Sell-in to sell-through ratio (inventory in channel)
@@ -22,7 +23,7 @@ export const VALIDATED_METRICS = {
 
   // 2024 Revenue (Actual)
   revenue2024: {
-    totalActual: 28_900_000, // $28.9MM actual
+    totalActual: 28_110_783.86, // $28.1MM actual (SmartModel validated)
     retailVelocity: 1_197_061,
     uniqueStores: 1_898,
     totalUnits: 84_644,
@@ -123,21 +124,23 @@ export const CASH_POSITION = {
     totalMonthly: 963_000,
   },
 
-  // Accounts Payable
+  // Accounts Payable (as of 2025-01-09)
   accountsPayable: {
-    total: 8_601_338.55,
-    current: 663_202.48,
-    days1to30: 463_281.34,
-    days30to60: 1_004_020.07,
-    days60plus: 6_470_834.66,
+    total: 8_639_276.84,
+    current: 596_379.34,
+    days1to30: 552_945.01,
+    days31to60: 989_768.89,
+    days61to90: 1_038_996.79,
+    days91plus: 5_461_186.81,
   },
 
   // Critical vendor balances (stop-ship risk)
   criticalVendors: {
-    bestBev: 166_563.34,
     cannasol: 1_763_140.99,
-    petrichor: 468_398.0,
-    apex: 306_067.8,
+    petrichor: 468_398.00,
+    peerless: 354_125.00, // Added 2026-01-13 - Tier 1 stop-ship risk
+    apex: 306_067.80,
+    bestBev: 166_563.34,
   },
 
   // Loan option available
@@ -158,6 +161,31 @@ export const CASH_POSITION = {
     terms: 'Net 30',
     actualDSO: 50,
     monthlyCollections: 1_148_127,
+  },
+
+  // Third-Party Debt (validated 2026-01-13)
+  thirdPartyDebt: {
+    wayflyer: 1_820_000,
+    clearco: 320_000,
+    parker: 520_000,
+    onward: 245_000,
+    kickfurther: 100_000,
+    total: 3_005_000,
+  },
+
+  // Vendor Note Payable
+  vendorNotePayable: {
+    principal: 6_053_612.85,
+    interestRate: 0.08,
+    annualInterest: 484_289.03,
+  },
+
+  // Insider Notes
+  insiderNotes: {
+    nickCreditCard: 225_789,
+    nickLoan: 538_850,
+    lucydLoan: 242_975,
+    total: 1_007_614,
   },
 };
 

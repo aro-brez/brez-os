@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import Link from "next/link";
 import { format } from "date-fns";
 import {
   Target,
@@ -22,6 +23,7 @@ import {
   BarChart3,
   ChevronDown,
   ChevronUp,
+  BookOpen,
 } from "lucide-react";
 import { Card, Button, Badge } from "@/components/ui";
 import { devStore } from "@/lib/data/devStore";
@@ -596,6 +598,35 @@ export default function PlanPage() {
           </div>
         </Card>
       </div>
+
+      {/* Strategy Documents Link */}
+      <Card className="mt-6 bg-gradient-to-r from-[#65cdd8]/10 to-transparent border-[#65cdd8]/30">
+        <div className="flex items-start gap-4">
+          <div className="w-10 h-10 rounded-xl bg-[#65cdd8]/20 flex items-center justify-center flex-shrink-0">
+            <BookOpen className="w-5 h-5 text-[#65cdd8]" />
+          </div>
+          <div className="flex-1">
+            <h4 className="font-semibold text-white mb-2">Strategy Documents</h4>
+            <p className="text-sm text-[#a8a8a8] mb-3">
+              Deep-dive strategy documents that feed into this master plan. Each owned by a domain expert.
+            </p>
+            <div className="flex items-center gap-3">
+              <Link href="/strategies">
+                <Button size="sm" variant="ghost" className="border border-[#65cdd8]/30 text-[#65cdd8] hover:bg-[#65cdd8]/10">
+                  <BookOpen className="w-4 h-4 mr-2" />
+                  View All Strategies
+                  <ArrowRight className="w-4 h-4 ml-2" />
+                </Button>
+              </Link>
+              <Link href="/strategies/capital-strategy-2026">
+                <Badge variant="success" className="cursor-pointer hover:opacity-80">
+                  Capital Strategy 2026 — Active
+                </Badge>
+              </Link>
+            </div>
+          </div>
+        </div>
+      </Card>
 
       {/* AI Integration Note */}
       <Card className="mt-6 bg-gradient-to-r from-[#8533fc]/20 to-transparent border-[#8533fc]/30">

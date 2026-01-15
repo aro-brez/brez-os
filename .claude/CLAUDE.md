@@ -1,7 +1,12 @@
-# BREZ Growth Generator
+# BREZ OS
+
+> **Also known as**: BREZ AI, BREZ Growth Generator (all the same app)
 
 ## Project Overview
-Next.js 15 application for financial simulation and growth planning. Features AI-powered insights, team collaboration, and beautiful aurora borealis UI.
+
+BREZ OS is the company operating system — a Next.js 15 application that combines AI-powered insights, team communication, financial simulation (Growth Generator), and task management. Features beautiful aurora borealis UI and is designed to make 60 people operate like 600.
+
+**GitHub**: https://github.com/aro-brez/brez-growth-generator
 
 ## Tech Stack
 - **Framework**: Next.js 15 (App Router)

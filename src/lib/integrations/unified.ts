@@ -5,14 +5,20 @@
 
 import { getShopifyMetrics } from "./shopify";
 import { getQuickBooksMetrics } from "./quickbooks";
+import { getAmazonMetrics, calculateAmazonCM } from "./amazon";
 
 export interface UnifiedMetrics {
   cash: { balance: number; runway: number; status: "healthy" | "watch" | "critical"; floor: number };
   ap: { total: number; critical: number; stopShipRisks: number };
   revenue: { today: number; mtd: number; monthlyRun: number; trend: string };
   dtc: { orders: number; aov: number; cac: number; conversionRate: number; contributionMargin: number };
+  amazon: { revenue: number; orders: number; fbaRevenue: number; fbmRevenue: number; contributionMargin: number };
   subscriptions: { active: number; newThisWeek: number; churnRate: number };
-  sources: { shopify: { connected: boolean; lastUpdated: string }; quickbooks: { connected: boolean; lastUpdated: string } };
+  sources: {
+    shopify: { connected: boolean; lastUpdated: string };
+    quickbooks: { connected: boolean; lastUpdated: string };
+    amazon: { connected: boolean; lastUpdated: string };
+  };
   lastUpdated: string;
 }
 
@@ -33,9 +39,10 @@ function getCashStatus(balance: number, floor: number): "healthy" | "watch" | "c
 }
 
 export async function getUnifiedMetrics(): Promise<UnifiedMetrics> {
-  const [shopify, quickbooks] = await Promise.all([
+  const [shopify, quickbooks, amazon] = await Promise.all([
     getShopifyMetrics().catch(() => null),
     getQuickBooksMetrics().catch(() => null),
+    getAmazonMetrics().catch(() => null),
   ]);
 
   const CASH_FLOOR = 300000;
@@ -50,13 +57,29 @@ export async function getUnifiedMetrics(): Promise<UnifiedMetrics> {
   const trend = shopify?.revenue.yesterday ? `${((revenueToday - shopify.revenue.yesterday) / shopify.revenue.yesterday * 100).toFixed(0)}%` : "+0%";
   const cm = revenueMTD > 0 ? (revenueMTD - revenueMTD * 0.4 - (shopify?.cac.current || 55) * (shopify?.orders.last30Days || 0)) / revenueMTD : 0;
 
+  // Amazon metrics
+  const amazonRevenue = amazon?.revenue.last30Days || 0;
+  const amazonOrders = amazon?.orders.last30Days || 0;
+  const amazonCM = amazon ? calculateAmazonCM(amazon) : 0;
+
   return {
     cash: { balance: cashBalance, runway: runwayWeeks, status: getCashStatus(cashBalance, CASH_FLOOR), floor: CASH_FLOOR },
     ap: { total: apTotal, critical: apCritical, stopShipRisks: apCritical > 500000 ? Math.ceil(apCritical / 500000) : 0 },
     revenue: { today: revenueToday, mtd: revenueMTD, monthlyRun: monthlyRunRate, trend },
     dtc: { orders: shopify?.orders.last30Days || 0, aov: shopify?.orders.aov || 0, cac: shopify?.cac.current || 55, conversionRate: shopify?.subscriptions.conversionRate || 0, contributionMargin: cm },
+    amazon: {
+      revenue: amazonRevenue,
+      orders: amazonOrders,
+      fbaRevenue: amazon?.channels.fba.revenue || 0,
+      fbmRevenue: amazon?.channels.fbm.revenue || 0,
+      contributionMargin: amazonCM,
+    },
     subscriptions: { active: shopify?.subscriptions.active || 0, newThisWeek: shopify?.subscriptions.newThisWeek || 0, churnRate: 0 },
-    sources: { shopify: { connected: !!shopify, lastUpdated: shopify?.lastUpdated || "" }, quickbooks: { connected: !!quickbooks, lastUpdated: quickbooks?.lastUpdated || "" } },
+    sources: {
+      shopify: { connected: !!shopify, lastUpdated: shopify?.lastUpdated || "" },
+      quickbooks: { connected: !!quickbooks, lastUpdated: quickbooks?.lastUpdated || "" },
+      amazon: { connected: !!amazon, lastUpdated: amazon?.lastUpdated || "" },
+    },
     lastUpdated: new Date().toISOString(),
   };
 }

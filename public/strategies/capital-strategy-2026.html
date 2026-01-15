@@ -1,0 +1,813 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BREZ Capital Strategy 2026</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+
+        :root {
+            /* BREZ Brand Colors */
+            --lime-accent: #e3f98a;
+            --lime-hover: #edfbab;
+            --deep-purple: #0D0D2A;
+            --bg-dark: #0D0D2A;
+            --bg-card: #1A1A2E;
+            --bg-elevated: #2D2D44;
+            --accent-purple: #8533fc;
+            --accent-pink: #ff6b6b;
+            --accent-cyan: #65cdd8;
+            --accent-success: #6BCB77;
+            --accent-warning: #ffce33;
+            --text-primary: #FFFFFF;
+            --text-secondary: #a8a8a8;
+            --text-muted: #676986;
+            --border-subtle: rgba(255,255,255,0.1);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            background: var(--bg-dark);
+            color: var(--text-primary);
+            line-height: 1.6;
+            min-height: 100vh;
+        }
+
+        .container {
+            max-width: 1000px;
+            margin: 0 auto;
+            padding: 40px 24px;
+        }
+
+        /* Header */
+        .header {
+            text-align: center;
+            margin-bottom: 48px;
+            padding-bottom: 32px;
+            border-bottom: 1px solid var(--border-subtle);
+        }
+
+        .logo {
+            display: flex;
+            justify-content: center;
+            margin-bottom: 16px;
+        }
+
+        .logo svg {
+            height: 48px;
+            width: auto;
+        }
+
+        .doc-title {
+            font-size: 42px;
+            font-weight: 700;
+            background: linear-gradient(135deg, var(--text-primary) 0%, var(--accent-purple) 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin-bottom: 16px;
+        }
+
+        .doc-meta {
+            display: flex;
+            justify-content: center;
+            gap: 24px;
+            flex-wrap: wrap;
+            color: var(--text-secondary);
+            font-size: 14px;
+        }
+
+        .meta-item {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .meta-label {
+            color: var(--text-muted);
+        }
+
+        .status-badge {
+            background: var(--lime-accent);
+            color: var(--bg-dark);
+            padding: 4px 12px;
+            border-radius: 100px;
+            font-size: 12px;
+            font-weight: 600;
+            text-transform: uppercase;
+        }
+
+        /* Executive Summary */
+        .executive-summary {
+            background: linear-gradient(135deg, var(--bg-card) 0%, var(--deep-purple) 100%);
+            border-radius: 16px;
+            padding: 32px;
+            margin-bottom: 40px;
+            border: 1px solid var(--border-subtle);
+        }
+
+        .executive-summary h2 {
+            color: var(--lime-accent);
+            font-size: 14px;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            margin-bottom: 16px;
+        }
+
+        .executive-summary p {
+            font-size: 18px;
+            color: var(--text-secondary);
+            margin-bottom: 24px;
+        }
+
+        .thesis-box {
+            background: rgba(0,0,0,0.3);
+            border-radius: 12px;
+            padding: 24px;
+            font-family: 'SF Mono', 'Fira Code', monospace;
+            font-size: 14px;
+            line-height: 2;
+        }
+
+        .thesis-box .step {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .thesis-box .arrow {
+            color: var(--lime-accent);
+        }
+
+        /* Section */
+        .section {
+            margin-bottom: 40px;
+        }
+
+        .section-header {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            margin-bottom: 24px;
+        }
+
+        .section-number {
+            width: 48px;
+            height: 48px;
+            background: linear-gradient(135deg, var(--accent-purple) 0%, var(--accent-pink) 100%);
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 20px;
+            font-weight: 700;
+        }
+
+        .section-title {
+            font-size: 28px;
+            font-weight: 700;
+        }
+
+        .section-subtitle {
+            color: var(--text-secondary);
+            font-size: 14px;
+        }
+
+        /* Cards */
+        .card {
+            background: var(--bg-card);
+            border-radius: 12px;
+            padding: 24px;
+            margin-bottom: 16px;
+            border: 1px solid var(--border-subtle);
+        }
+
+        .card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 16px;
+        }
+
+        .card-title {
+            font-size: 18px;
+            font-weight: 600;
+        }
+
+        .card-badge {
+            padding: 4px 12px;
+            border-radius: 100px;
+            font-size: 12px;
+            font-weight: 500;
+        }
+
+        .badge-active {
+            background: rgba(200, 255, 0, 0.2);
+            color: var(--lime-accent);
+        }
+
+        .badge-pending {
+            background: rgba(139, 92, 246, 0.2);
+            color: var(--accent-purple);
+        }
+
+        /* Tables */
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 16px 0;
+        }
+
+        th, td {
+            padding: 12px 16px;
+            text-align: left;
+            border-bottom: 1px solid var(--border-subtle);
+        }
+
+        th {
+            color: var(--text-muted);
+            font-size: 12px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            font-weight: 500;
+        }
+
+        td {
+            font-size: 14px;
+        }
+
+        tr:last-child td {
+            border-bottom: none;
+        }
+
+        .value-highlight {
+            color: var(--lime-accent);
+            font-weight: 600;
+        }
+
+        /* Metrics Grid */
+        .metrics-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 16px;
+            margin: 24px 0;
+        }
+
+        .metric-card {
+            background: var(--bg-elevated);
+            border-radius: 12px;
+            padding: 20px;
+            text-align: center;
+        }
+
+        .metric-value {
+            font-size: 32px;
+            font-weight: 700;
+            color: var(--lime-accent);
+            margin-bottom: 4px;
+        }
+
+        .metric-label {
+            font-size: 13px;
+            color: var(--text-secondary);
+        }
+
+        .metric-status {
+            font-size: 11px;
+            color: var(--accent-cyan);
+            margin-top: 8px;
+        }
+
+        /* Timeline */
+        .timeline {
+            position: relative;
+            padding-left: 32px;
+        }
+
+        .timeline::before {
+            content: '';
+            position: absolute;
+            left: 8px;
+            top: 0;
+            bottom: 0;
+            width: 2px;
+            background: linear-gradient(to bottom, var(--lime-accent), var(--accent-purple));
+        }
+
+        .timeline-item {
+            position: relative;
+            margin-bottom: 24px;
+        }
+
+        .timeline-item::before {
+            content: '';
+            position: absolute;
+            left: -28px;
+            top: 4px;
+            width: 12px;
+            height: 12px;
+            background: var(--lime-accent);
+            border-radius: 50%;
+        }
+
+        .timeline-date {
+            font-size: 12px;
+            color: var(--lime-accent);
+            font-weight: 600;
+            margin-bottom: 4px;
+        }
+
+        .timeline-content {
+            color: var(--text-secondary);
+        }
+
+        /* Action Items */
+        .action-list {
+            list-style: none;
+        }
+
+        .action-item {
+            display: flex;
+            align-items: flex-start;
+            gap: 12px;
+            padding: 12px 0;
+            border-bottom: 1px solid var(--border-subtle);
+        }
+
+        .action-item:last-child {
+            border-bottom: none;
+        }
+
+        .action-priority {
+            width: 24px;
+            height: 24px;
+            background: var(--lime-accent);
+            color: var(--bg-dark);
+            border-radius: 6px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 12px;
+            font-weight: 700;
+            flex-shrink: 0;
+        }
+
+        .action-content {
+            flex: 1;
+        }
+
+        .action-title {
+            font-weight: 500;
+            margin-bottom: 4px;
+        }
+
+        .action-meta {
+            font-size: 13px;
+            color: var(--text-muted);
+        }
+
+        /* Questions */
+        .questions-section {
+            background: linear-gradient(135deg, rgba(139, 92, 246, 0.1) 0%, rgba(236, 72, 153, 0.1) 100%);
+            border-radius: 12px;
+            padding: 24px;
+            border: 1px solid rgba(139, 92, 246, 0.3);
+        }
+
+        .questions-title {
+            color: var(--accent-purple);
+            font-size: 14px;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            margin-bottom: 16px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .question-item {
+            padding: 12px 0;
+            border-bottom: 1px solid rgba(139, 92, 246, 0.2);
+            color: var(--text-secondary);
+        }
+
+        .question-item:last-child {
+            border-bottom: none;
+        }
+
+        .question-number {
+            color: var(--accent-purple);
+            font-weight: 600;
+            margin-right: 8px;
+        }
+
+        /* Footer */
+        .footer {
+            margin-top: 64px;
+            padding-top: 32px;
+            border-top: 1px solid var(--border-subtle);
+            text-align: center;
+            color: var(--text-muted);
+            font-size: 13px;
+        }
+
+        .confidential-notice {
+            background: rgba(236, 72, 153, 0.1);
+            color: var(--accent-pink);
+            padding: 12px 24px;
+            border-radius: 8px;
+            display: inline-block;
+            margin-bottom: 16px;
+            font-size: 12px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        /* Print Styles */
+        @media print {
+            body {
+                background: white;
+                color: #1a1a1a;
+            }
+
+            .container {
+                max-width: 100%;
+                padding: 20px;
+            }
+
+            .doc-title {
+                background: none;
+                -webkit-text-fill-color: #1a1a1a;
+                color: #1a1a1a;
+            }
+
+            .card, .executive-summary, .metric-card, .questions-section {
+                background: #f5f5f5;
+                border: 1px solid #ddd;
+            }
+
+            .lime-accent, .value-highlight, .metric-value {
+                color: #0066cc;
+            }
+
+            .status-badge, .action-priority {
+                background: #0066cc;
+                color: white;
+            }
+        }
+
+        /* Export Button */
+        .export-btn {
+            position: fixed;
+            bottom: 24px;
+            right: 24px;
+            background: var(--lime-accent);
+            color: var(--bg-dark);
+            padding: 12px 24px;
+            border-radius: 100px;
+            font-weight: 600;
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            box-shadow: 0 4px 24px rgba(200, 255, 0, 0.3);
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+
+        .export-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 32px rgba(200, 255, 0, 0.4);
+        }
+
+        @media print {
+            .export-btn {
+                display: none;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Header -->
+        <header class="header">
+            <div class="logo">BREZ</div>
+            <h1 class="doc-title">Capital Strategy 2026</h1>
+            <div class="doc-meta">
+                <div class="meta-item">
+                    <span class="meta-label">Version</span>
+                    <span>1.0</span>
+                </div>
+                <div class="meta-item">
+                    <span class="meta-label">Updated</span>
+                    <span>January 14, 2026</span>
+                </div>
+                <div class="meta-item">
+                    <span class="meta-label">Owner</span>
+                    <span>Aaron Nosbisch</span>
+                </div>
+                <span class="status-badge">Active</span>
+            </div>
+        </header>
+
+        <!-- Executive Summary -->
+        <section class="executive-summary">
+            <h2>Executive Summary</h2>
+            <p>BREZ has multiple paths to capital, each serving different purposes and timelines. The optimal strategy is to <strong>parallel-path all options</strong> while building the D2C growth engine back to momentum.</p>
+
+            <div class="thesis-box">
+                <div class="step">Improve D2C Efficiency</div>
+                <div class="step"><span class="arrow">↓</span></div>
+                <div class="step">Generate Contribution Margin Dollars</div>
+                <div class="step"><span class="arrow">↓</span></div>
+                <div class="step">Use Low-Cost Debt for Timing Gaps</div>
+                <div class="step"><span class="arrow">↓</span></div>
+                <div class="step">Feed Profitable Growth Engine</div>
+                <div class="step"><span class="arrow">↓</span></div>
+                <div class="step" style="color: var(--lime-accent); font-weight: 600;">Equity Becomes Accelerant, Not Survival</div>
+            </div>
+        </section>
+
+        <!-- Current State -->
+        <section class="section">
+            <div class="section-header">
+                <div class="section-number">1</div>
+                <div>
+                    <h2 class="section-title">Current Financial State</h2>
+                    <p class="section-subtitle">As of January 2026</p>
+                </div>
+            </div>
+
+            <div class="metrics-grid">
+                <div class="metric-card">
+                    <div class="metric-value">~$8.6M</div>
+                    <div class="metric-label">Total AP</div>
+                    <div class="metric-status">Under Restructuring</div>
+                </div>
+                <div class="metric-card">
+                    <div class="metric-value">~$3.0M</div>
+                    <div class="metric-label">Third-Party Debt</div>
+                    <div class="metric-status">Active</div>
+                </div>
+                <div class="metric-card">
+                    <div class="metric-value">1.5mo</div>
+                    <div class="metric-label">CAC Payback</div>
+                    <div class="metric-status">Healthy (&lt;4mo threshold)</div>
+                </div>
+                <div class="metric-card">
+                    <div class="metric-value">51%</div>
+                    <div class="metric-label">DTC Contribution Margin</div>
+                    <div class="metric-status">Healthy</div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Capital Paths -->
+        <section class="section">
+            <div class="section-header">
+                <div class="section-number">2</div>
+                <div>
+                    <h2 class="section-title">Capital Paths</h2>
+                    <p class="section-subtitle">Multiple parallel options for optionality</p>
+                </div>
+            </div>
+
+            <!-- Path 1: AP Restructuring -->
+            <div class="card">
+                <div class="card-header">
+                    <h3 class="card-title">Path 1: AP Restructuring</h3>
+                    <span class="card-badge badge-active">Active</span>
+                </div>
+                <p style="color: var(--text-secondary); margin-bottom: 16px;">Converting ~$6M of AP into structured notes frees immediate working capital.</p>
+
+                <table>
+                    <tr>
+                        <th>Parameter</th>
+                        <th>Value</th>
+                    </tr>
+                    <tr>
+                        <td>Interest Rate</td>
+                        <td class="value-highlight">10% (annual)</td>
+                    </tr>
+                    <tr>
+                        <td>First 6 Months</td>
+                        <td>Interest-only, accruing</td>
+                    </tr>
+                    <tr>
+                        <td>Months 7-24</td>
+                        <td>Quarterly cash payments</td>
+                    </tr>
+                    <tr>
+                        <td>Working Capital Impact</td>
+                        <td class="value-highlight">+$3-6M freed</td>
+                    </tr>
+                </table>
+            </div>
+
+            <!-- Path 2: Kick Further -->
+            <div class="card">
+                <div class="card-header">
+                    <h3 class="card-title">Path 2: Kick Further PO Financing</h3>
+                    <span class="card-badge badge-active">Active</span>
+                </div>
+                <p style="color: var(--text-secondary); margin-bottom: 16px;">$500K in inventory-backed financing at competitive rates.</p>
+
+                <table>
+                    <tr>
+                        <th>Parameter</th>
+                        <th>Value</th>
+                    </tr>
+                    <tr>
+                        <td>Amount</td>
+                        <td class="value-highlight">$500K</td>
+                    </tr>
+                    <tr>
+                        <td>Cost of Capital</td>
+                        <td>7% (1mo) to 23% (9mo)</td>
+                    </tr>
+                    <tr>
+                        <td>Personal Guarantee</td>
+                        <td>First draw only</td>
+                    </tr>
+                    <tr>
+                        <td>Timeline</td>
+                        <td>Next 2-3 weeks</td>
+                    </tr>
+                </table>
+            </div>
+
+            <!-- Path 3: SPV -->
+            <div class="card">
+                <div class="card-header">
+                    <h3 class="card-title">Path 3: SPV Crowdfunding</h3>
+                    <span class="card-badge badge-pending">Q1 2026</span>
+                </div>
+                <p style="color: var(--text-secondary); margin-bottom: 16px;">Re-engage 90+ interested investors with fresh story.</p>
+
+                <table>
+                    <tr>
+                        <th>Parameter</th>
+                        <th>Value</th>
+                    </tr>
+                    <tr>
+                        <td>Target Raise</td>
+                        <td class="value-highlight">$1.25M</td>
+                    </tr>
+                    <tr>
+                        <td>Minimum Investment</td>
+                        <td>$20-25K</td>
+                    </tr>
+                    <tr>
+                        <td>Target Close</td>
+                        <td>May 1, 2026</td>
+                    </tr>
+                </table>
+            </div>
+
+            <!-- Path 4: Institutional -->
+            <div class="card">
+                <div class="card-header">
+                    <h3 class="card-title">Path 4: Institutional Equity</h3>
+                    <span class="card-badge badge-pending">Parallel Path</span>
+                </div>
+                <p style="color: var(--text-secondary); margin-bottom: 16px;">Josh Wand / Family Fund as potential lead investor.</p>
+
+                <table>
+                    <tr>
+                        <th>Parameter</th>
+                        <th>Value</th>
+                    </tr>
+                    <tr>
+                        <td>Potential Raise</td>
+                        <td class="value-highlight">$3-5M</td>
+                    </tr>
+                    <tr>
+                        <td>Lead</td>
+                        <td>Josh Wand / Family Fund</td>
+                    </tr>
+                    <tr>
+                        <td>Next Step</td>
+                        <td>Schedule meeting this week</td>
+                    </tr>
+                </table>
+            </div>
+        </section>
+
+        <!-- Timeline -->
+        <section class="section">
+            <div class="section-header">
+                <div class="section-number">3</div>
+                <div>
+                    <h2 class="section-title">Execution Timeline</h2>
+                    <p class="section-subtitle">This week's priorities</p>
+                </div>
+            </div>
+
+            <div class="card">
+                <ul class="action-list">
+                    <li class="action-item">
+                        <div class="action-priority">1</div>
+                        <div class="action-content">
+                            <div class="action-title">Finalize AP restructuring emails</div>
+                            <div class="action-meta">Owner: Brent/Nick → Aaron review • Due: Jan 15</div>
+                        </div>
+                    </li>
+                    <li class="action-item">
+                        <div class="action-priority">2</div>
+                        <div class="action-content">
+                            <div class="action-title">Internal team briefing on AP plan</div>
+                            <div class="action-meta">Owner: Aaron • Due: Jan 15 (noon)</div>
+                        </div>
+                    </li>
+                    <li class="action-item">
+                        <div class="action-priority">3</div>
+                        <div class="action-content">
+                            <div class="action-title">Send first vendor emails</div>
+                            <div class="action-meta">Owner: Aaron • Due: Jan 17 (5pm ET)</div>
+                        </div>
+                    </li>
+                    <li class="action-item">
+                        <div class="action-priority">4</div>
+                        <div class="action-content">
+                            <div class="action-title">Confirm Kick Further terms</div>
+                            <div class="action-meta">Owner: Nick • Due: Jan 17</div>
+                        </div>
+                    </li>
+                    <li class="action-item">
+                        <div class="action-priority">5</div>
+                        <div class="action-content">
+                            <div class="action-title">Schedule Josh Wand meeting</div>
+                            <div class="action-meta">Owner: Aaron • Due: This week or next</div>
+                        </div>
+                    </li>
+                </ul>
+            </div>
+        </section>
+
+        <!-- Open Questions -->
+        <section class="section">
+            <div class="section-header">
+                <div class="section-number">?</div>
+                <div>
+                    <h2 class="section-title">Open Questions</h2>
+                    <p class="section-subtitle">For NP Capital / Brent</p>
+                </div>
+            </div>
+
+            <div class="questions-section">
+                <div class="questions-title">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <circle cx="12" cy="12" r="10"></circle>
+                        <path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"></path>
+                        <line x1="12" y1="17" x2="12.01" y2="17"></line>
+                    </svg>
+                    Requires Input
+                </div>
+                <div class="question-item">
+                    <span class="question-number">1.</span>
+                    After Kick Further + AP delay, what is the exact working capital position week by week through Q2?
+                </div>
+                <div class="question-item">
+                    <span class="question-number">2.</span>
+                    What is the minimum cash needed to survive to a potential equity raise (worst case)?
+                </div>
+                <div class="question-item">
+                    <span class="question-number">3.</span>
+                    What production schedule is required, and when do material buys need to happen (60-day lead time)?
+                </div>
+                <div class="question-item">
+                    <span class="question-number">4.</span>
+                    In worst case (retail flat, D2C flat), when does cash run out?
+                </div>
+                <div class="question-item">
+                    <span class="question-number">5.</span>
+                    Is the $1.5M by May 1st estimate still accurate given updated AP terms?
+                </div>
+            </div>
+        </section>
+
+        <!-- Footer -->
+        <footer class="footer">
+            <div class="confidential-notice">BREZ Internal - Confidential</div>
+            <p>This document is a living strategy. Update as conditions change and questions are answered.</p>
+            <p style="margin-top: 16px;">Generated by BREZ OS • Last updated: January 14, 2026</p>
+        </footer>
+    </div>
+
+    <!-- Export Button -->
+    <a href="javascript:window.print()" class="export-btn">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+            <polyline points="7 10 12 15 17 10"></polyline>
+            <line x1="12" y1="15" x2="12" y2="3"></line>
+        </svg>
+        Export PDF
+    </a>
+</body>
+</html>

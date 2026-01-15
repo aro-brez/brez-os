@@ -131,10 +131,12 @@ const FALLBACK_METRICS: UnifiedMetrics = {
   ap: { total: 8200000, critical: 2100000, stopShipRisks: 2 },
   revenue: { today: 103000, mtd: 2480000, monthlyRun: 3100000, trend: "+4%" },
   dtc: { orders: 2800, aov: 72, cac: 58, conversionRate: 2.8, contributionMargin: 0.32 },
+  amazon: { revenue: 0, orders: 0, fbaRevenue: 0, fbmRevenue: 0, contributionMargin: 0 },
   subscriptions: { active: 14200, newThisWeek: 340, churnRate: 4.2 },
   sources: {
     shopify: { connected: false, lastUpdated: "" },
     quickbooks: { connected: false, lastUpdated: "" },
+    amazon: { connected: false, lastUpdated: "" },
   },
   lastUpdated: new Date().toISOString(),
 };

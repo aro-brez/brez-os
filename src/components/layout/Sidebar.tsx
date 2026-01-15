@@ -25,6 +25,7 @@ import {
   Bot,
   Sparkles,
   Zap,
+  Mic,
 } from "lucide-react";
 import { devStore } from "@/lib/data/devStore";
 import { Avatar } from "@/components/ui";
@@ -35,6 +36,7 @@ import { useAIAssistant } from "@/components/ui/AIAssistant";
 const mainNavItems = [
   { href: "/", label: "Command Center", icon: LayoutDashboard },
   { href: "/plan", label: "2026 Plan", icon: Calendar },
+  { href: "/strategies", label: "Strategies", icon: BookOpen },
   { href: "/channels", label: "Channels", icon: MessageSquare },
   { href: "/goals", label: "Goals", icon: Target },
   { href: "/tasks", label: "Tasks", icon: CheckSquare },
@@ -242,15 +244,15 @@ export function Sidebar() {
   );
 }
 
-// Mobile bottom navigation - Enhanced
+// Mobile bottom navigation - Enhanced with Voice
 export function MobileNav() {
   const pathname = usePathname();
 
   const items = [
     { href: "/", label: "Home", icon: LayoutDashboard },
     { href: "/channels", label: "Chat", icon: MessageSquare },
+    { href: "/voice", label: "Voice", icon: Mic, isVoice: true },
     { href: "/tasks", label: "Tasks", icon: CheckSquare },
-    { href: "/growth", label: "Growth", icon: TrendingUp },
     { href: "/settings", label: "More", icon: Settings },
   ];
 
@@ -259,22 +261,35 @@ export function MobileNav() {
       <div className="flex items-center justify-around py-2">
         {items.map((item) => {
           const isActive = pathname === item.href || (item.href !== "/" && pathname.startsWith(item.href));
+          const isVoice = 'isVoice' in item && item.isVoice;
+
           return (
             <Link
               key={item.href}
               href={item.href}
               className={clsx(
                 "flex flex-col items-center gap-1 px-3 py-1.5 rounded-xl transition-all duration-200",
-                isActive
-                  ? "text-[#e3f98a] bg-[#e3f98a]/10"
-                  : "text-[#676986] active:bg-white/5"
+                isVoice
+                  ? "text-[#e3f98a] bg-gradient-to-t from-[#e3f98a]/20 to-transparent -mt-4 relative"
+                  : isActive
+                    ? "text-[#e3f98a] bg-[#e3f98a]/10"
+                    : "text-[#676986] active:bg-white/5"
               )}
             >
-              <item.icon className={clsx(
-                "w-5 h-5",
-                isActive && "drop-shadow-[0_0_8px_rgba(227,249,138,0.5)]"
-              )} />
-              <span className="text-[10px] font-medium">{item.label}</span>
+              {isVoice ? (
+                <div className="w-12 h-12 rounded-full bg-[#e3f98a] flex items-center justify-center shadow-[0_0_20px_rgba(227,249,138,0.4)] -mt-2">
+                  <item.icon className="w-6 h-6 text-[#0D0D2A]" />
+                </div>
+              ) : (
+                <item.icon className={clsx(
+                  "w-5 h-5",
+                  isActive && "drop-shadow-[0_0_8px_rgba(227,249,138,0.5)]"
+                )} />
+              )}
+              <span className={clsx(
+                "text-[10px] font-medium",
+                isVoice && "text-[#e3f98a] mt-1"
+              )}>{item.label}</span>
             </Link>
           );
         })}
