@@ -6,14 +6,14 @@
 
 A Next.js 15 application that serves as BREZ's complete company operating system — combining AI-powered insights, team communication, task management, financial simulation, and the Growth Generator in one unified platform.
 
-**GitHub**: https://github.com/aro-brez/brez-growth-generator
+**GitHub**: https://github.com/aro-brez/brez-os
 
 ## Quick Start
 
 ```bash
 # Clone the repository
-git clone https://github.com/aro-brez/brez-growth-generator.git
-cd brez-growth-generator
+git clone https://github.com/aro-brez/brez-os.git
+cd brez-os
 
 # Install dependencies
 npm install
@@ -66,8 +66,8 @@ Open [http://localhost:3000](http://localhost:3000) - the app runs in **DEV MODE
 
 ```bash
 # 1. Clone the repo
-git clone https://github.com/aro-brez/brez-growth-generator.git
-cd brez-growth-generator
+git clone https://github.com/aro-brez/brez-os.git
+cd brez-os
 
 # 2. Install dependencies
 npm install
@@ -188,7 +188,7 @@ git commit -m "Initial commit: BRĒZ AI V1"
 
 ```bash
 # Create repo on GitHub first, then:
-git remote add origin https://github.com/aro-brez/brez-growth-generator.git
+git remote add origin https://github.com/aro-brez/brez-os.git
 git branch -M main
 git push -u origin main
 ```
@@ -336,7 +336,7 @@ Before going live with your team:
 ## Support
 
 - **Documentation**: Visit `/operator` in the app
-- **Issues**: [GitHub Issues](https://github.com/aro-brez/brez-growth-generator/issues)
+- **Issues**: [GitHub Issues](https://github.com/aro-brez/brez-os/issues)
 - **Team**: #brez-ai channel in Slack
 
 ---
