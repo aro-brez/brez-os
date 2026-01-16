@@ -26,6 +26,7 @@ import {
   Sparkles,
   Zap,
   Mic,
+  Newspaper,
 } from "lucide-react";
 import { devStore } from "@/lib/data/devStore";
 import { Avatar } from "@/components/ui";
@@ -35,6 +36,7 @@ import { useAIAssistant } from "@/components/ui/AIAssistant";
 
 const mainNavItems = [
   { href: "/", label: "Command Center", icon: LayoutDashboard },
+  { href: "/daily-brief", label: "Daily Brief", icon: Newspaper },
   { href: "/plan", label: "2026 Plan", icon: Calendar },
   { href: "/strategies", label: "Strategies", icon: BookOpen },
   { href: "/channels", label: "Channels", icon: MessageSquare },
