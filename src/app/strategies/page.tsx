@@ -139,6 +139,18 @@ const strategies: StrategyDocument[] = [
     tags: ["legal", "trademark", "brand", "ip"],
     progress: 100,
   },
+  {
+    slug: "trademark-decision-matrix",
+    title: "Trademark Decision Matrix",
+    description: "Executive summary: costs, timeline, and authorization for trademark strategy",
+    icon: Scale,
+    owner: "Andrea Golan",
+    status: "active",
+    updated: "January 16, 2026",
+    access: "elt",
+    tags: ["legal", "trademark", "decision"],
+    progress: 100,
+  },
 ];
 
 const accessLevels: Record<string, { label: string; color: string }> = {

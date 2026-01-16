@@ -1,0 +1,685 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BREZ Trademark Decision Matrix - January 2026</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+
+        :root {
+            --lime: #e3f98a;
+            --bg-dark: #0D0D2A;
+            --bg-card: #1A1A2E;
+            --bg-elevated: #2D2D44;
+            --purple: #8533fc;
+            --pink: #ff6b6b;
+            --cyan: #65cdd8;
+            --success: #6BCB77;
+            --warning: #ffce33;
+            --text: #FFFFFF;
+            --text-secondary: #a8a8a8;
+            --text-muted: #676986;
+            --border: rgba(255,255,255,0.1);
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            font-family: 'Inter', -apple-system, sans-serif;
+            background: var(--bg-dark);
+            color: var(--text);
+            line-height: 1.6;
+            padding: 40px;
+        }
+
+        .container { max-width: 900px; margin: 0 auto; }
+
+        .header {
+            text-align: center;
+            margin-bottom: 40px;
+            padding-bottom: 24px;
+            border-bottom: 2px solid var(--lime);
+        }
+
+        .header h1 {
+            font-size: 32px;
+            font-weight: 700;
+            margin-bottom: 8px;
+        }
+
+        .header .subtitle {
+            color: var(--text-secondary);
+            font-size: 14px;
+        }
+
+        .badge {
+            display: inline-block;
+            padding: 6px 16px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 600;
+            margin: 8px 4px;
+        }
+
+        .badge-warning { background: var(--warning); color: var(--bg-dark); }
+        .badge-success { background: var(--success); color: var(--bg-dark); }
+        .badge-danger { background: var(--pink); color: white; }
+
+        .section {
+            background: var(--bg-card);
+            border-radius: 16px;
+            padding: 28px;
+            margin-bottom: 24px;
+            border: 1px solid var(--border);
+        }
+
+        .section h2 {
+            font-size: 20px;
+            font-weight: 700;
+            color: var(--lime);
+            margin-bottom: 20px;
+            padding-bottom: 12px;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .section h3 {
+            font-size: 16px;
+            font-weight: 600;
+            margin: 20px 0 12px 0;
+        }
+
+        .decision-box {
+            background: var(--bg-elevated);
+            border-radius: 12px;
+            padding: 20px;
+            margin: 16px 0;
+        }
+
+        .decision-box.highlight {
+            border-left: 4px solid var(--lime);
+        }
+
+        .decision-box.action {
+            border-left: 4px solid var(--warning);
+        }
+
+        .decision-box.danger {
+            border-left: 4px solid var(--pink);
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 16px 0;
+            font-size: 14px;
+        }
+
+        th, td {
+            padding: 12px 16px;
+            text-align: left;
+            border-bottom: 1px solid var(--border);
+        }
+
+        th {
+            background: var(--bg-elevated);
+            color: var(--lime);
+            font-weight: 600;
+            font-size: 11px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        td { color: var(--text-secondary); }
+        td strong { color: var(--text); }
+
+        .cost-summary {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 16px;
+            margin: 20px 0;
+        }
+
+        .cost-card {
+            background: var(--bg-elevated);
+            padding: 20px;
+            border-radius: 12px;
+            text-align: center;
+        }
+
+        .cost-card .amount {
+            font-size: 28px;
+            font-weight: 700;
+            color: var(--lime);
+        }
+
+        .cost-card .label {
+            font-size: 11px;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-top: 4px;
+        }
+
+        .timeline {
+            background: var(--bg-elevated);
+            border-radius: 12px;
+            padding: 20px;
+        }
+
+        .timeline-item {
+            display: flex;
+            gap: 16px;
+            padding: 12px 0;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .timeline-item:last-child { border-bottom: none; }
+
+        .timeline-date {
+            min-width: 120px;
+            font-weight: 600;
+            color: var(--warning);
+        }
+
+        ul { margin: 12px 0 12px 20px; }
+        li { margin: 8px 0; color: var(--text-secondary); }
+        li strong { color: var(--text); }
+
+        .question-box {
+            background: linear-gradient(135deg, rgba(133,51,252,0.15) 0%, rgba(101,205,216,0.15) 100%);
+            border: 1px solid var(--purple);
+            border-radius: 12px;
+            padding: 20px;
+            margin: 16px 0;
+        }
+
+        .signature-line {
+            margin-top: 40px;
+            padding-top: 20px;
+            border-top: 1px solid var(--border);
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 40px;
+        }
+
+        .signature-block {
+            padding-top: 40px;
+            border-top: 1px solid var(--text-muted);
+        }
+
+        .signature-label {
+            font-size: 12px;
+            color: var(--text-muted);
+        }
+
+        @media print {
+            body { background: white; color: black; padding: 20px; }
+            .section { background: #f5f5f5; border: 1px solid #ddd; }
+            .decision-box, .cost-card, .timeline { background: #eee; }
+            th { background: #ddd; color: #333; }
+            td, li { color: #333; }
+            .header h1, .section h2 { color: #333; }
+            .cost-card .amount { color: #333; }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Header -->
+        <div class="header">
+            <h1>BREZ Trademark Decision Matrix</h1>
+            <div class="subtitle">Executive Summary for General Counsel | January 16, 2026</div>
+            <div>
+                <span class="badge badge-warning">$12,000 Outstanding</span>
+                <span class="badge badge-danger">March 1 Deadline</span>
+            </div>
+        </div>
+
+        <!-- Section 1: Executive Summary -->
+        <div class="section">
+            <h2>1. Executive Summary: Three Core Decisions</h2>
+
+            <div class="decision-box highlight">
+                <h3 style="margin-top: 0; color: var(--lime);">Decision A: BREZ Core Mark</h3>
+                <p><strong>Action:</strong> HOLD - Wait for Breeze vs. Breez dispute to resolve</p>
+                <p><strong>Timeline:</strong> Monitor quarterly (next check: April 2026)</p>
+                <p><strong>Strategy:</strong> Once resolved, argue BREZ functional beverages are distinct from smokables (Breeze Smoke) and mints/distribution (Breez). Alternative: Register as "BREZ" (B-r-e-z) without macron.</p>
+                <p><strong>Cost:</strong> $0 now (maintain existing application)</p>
+            </div>
+
+            <div class="decision-box action">
+                <h3 style="margin-top: 0; color: var(--warning);">Decision B: File Subbrand Trademarks</h3>
+                <p><strong>Action:</strong> File NEW applications using compound marks matching actual packaging</p>
+                <p><strong>Format:</strong> "[BRAND] [FLAVOR] FEEL GOOD TONIC"</p>
+                <p><strong>Examples:</strong></p>
+                <ul>
+                    <li>FLOW LEMON ELDERFLOWER FEEL GOOD TONIC</li>
+                    <li>MUSE [FLAVOR] FEEL GOOD TONIC</li>
+                    <li>PASSION [FLAVOR] FEEL GOOD TONIC</li>
+                    <li>AMPLIFY [FLAVOR] FEEL GOOD TONIC</li>
+                    <li>ELEVATE [FLAVOR] FEEL GOOD TONIC</li>
+                    <li>DREAM [FLAVOR] FEEL GOOD TONIC</li>
+                    <li>DRIFT [FLAVOR] FEEL GOOD TONIC</li>
+                </ul>
+                <p><strong>Why this works:</strong> Matches actual can labeling, creates distinct commercial impression, preserves common law rights to use standalone words (FLOW, MUSE, etc.)</p>
+            </div>
+
+            <div class="decision-box danger">
+                <h3 style="margin-top: 0; color: var(--pink);">Decision C: Abandon Low-Value Marks</h3>
+                <p><strong>Action:</strong> ABANDON by March 1, 2026</p>
+                <p><strong>Marks:</strong> BREZ Juice, BREZ WATER, BREZ WTR, MICRODOSED CANNABIS</p>
+                <p><strong>Reason:</strong> 15-20% success probability does not justify $8,500-$10,000 per mark</p>
+                <p><strong>Savings:</strong> ~$35,000+ avoided spend</p>
+            </div>
+        </div>
+
+        <!-- Section 2: Cost Breakdown -->
+        <div class="section">
+            <h2>2. Cost Breakdown & Payment Schedule</h2>
+
+            <div class="cost-summary">
+                <div class="cost-card">
+                    <div class="amount">$12,000</div>
+                    <div class="label">Outstanding Balance</div>
+                </div>
+                <div class="cost-card">
+                    <div class="amount">$2,800</div>
+                    <div class="label">Subbrand Filings (7 marks)</div>
+                </div>
+                <div class="cost-card">
+                    <div class="amount">$14,800</div>
+                    <div class="label">Total Investment</div>
+                </div>
+            </div>
+
+            <h3>Itemized Costs</h3>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Item</th>
+                        <th>Cost Per</th>
+                        <th>Quantity</th>
+                        <th>Total</th>
+                        <th>Notes</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><strong>Outstanding Balance</strong></td>
+                        <td>-</td>
+                        <td>-</td>
+                        <td><strong>$12,000</strong></td>
+                        <td>Must pay before new work</td>
+                    </tr>
+                    <tr>
+                        <td>Subbrand TM Filings</td>
+                        <td>$400</td>
+                        <td>7 marks</td>
+                        <td>$2,800</td>
+                        <td>FLOW, MUSE, PASSION, AMPLIFY, ELEVATE, DREAM, DRIFT</td>
+                    </tr>
+                    <tr>
+                        <td>Non-THC Evidence Submission</td>
+                        <td>$350</td>
+                        <td>6 marks</td>
+                        <td>$2,100</td>
+                        <td>Overcome CSA/FDCA refusals</td>
+                    </tr>
+                    <tr>
+                        <td>Narrow Goods Amendments</td>
+                        <td>$400</td>
+                        <td>5 marks</td>
+                        <td>$2,000</td>
+                        <td>Amend existing applications</td>
+                    </tr>
+                    <tr style="background: var(--bg-elevated);">
+                        <td><strong>TOTAL RECOMMENDED PATH</strong></td>
+                        <td></td>
+                        <td></td>
+                        <td><strong>$18,900</strong></td>
+                        <td>Includes outstanding balance</td>
+                    </tr>
+                </tbody>
+            </table>
+
+            <div class="decision-box highlight">
+                <h3 style="margin-top: 0;">Cost Comparison: Our Path vs. Fighting Each Refusal</h3>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Approach</th>
+                            <th>Total Cost</th>
+                            <th>Success Rate</th>
+                            <th>Expected Registrations</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td><strong>Recommended Path (Subbrands)</strong></td>
+                            <td><strong>$18,900</strong></td>
+                            <td><strong>~75%</strong></td>
+                            <td><strong>5-6 of 7</strong></td>
+                        </tr>
+                        <tr>
+                            <td>Fight each refusal individually</td>
+                            <td>$102,000</td>
+                            <td>~35%</td>
+                            <td>4 of 12</td>
+                        </tr>
+                    </tbody>
+                </table>
+                <p style="margin-top: 12px; color: var(--success);"><strong>Savings from recommended path: $83,100</strong></p>
+            </div>
+        </div>
+
+        <!-- Section 3: Timeline -->
+        <div class="section">
+            <h2>3. Timeline & Deadlines</h2>
+
+            <div class="timeline">
+                <div class="timeline-item">
+                    <div class="timeline-date">Jan 31, 2026</div>
+                    <div>
+                        <strong>Pay $12,000 outstanding balance</strong>
+                        <br><span style="color: var(--text-muted);">Required before counsel can begin new work</span>
+                    </div>
+                </div>
+                <div class="timeline-item">
+                    <div class="timeline-date">Feb 15, 2026</div>
+                    <div>
+                        <strong>Submit non-THC product specimens</strong>
+                        <br><span style="color: var(--text-muted);">Andrew to prepare packaging/website screenshots for FEEL GOOD TONICS, AMPLIFY, ELEVATE, DREAM, DRIFT</span>
+                    </div>
+                </div>
+                <div class="timeline-item">
+                    <div class="timeline-date">Feb 28, 2026</div>
+                    <div>
+                        <strong>File 7 subbrand trademark applications</strong>
+                        <br><span style="color: var(--text-muted);">[Brand] [Flavor] Feel Good Tonic format</span>
+                    </div>
+                </div>
+                <div class="timeline-item" style="background: rgba(255,107,107,0.1); margin: 0 -20px; padding: 12px 20px;">
+                    <div class="timeline-date" style="color: var(--pink);">Mar 1, 2026</div>
+                    <div>
+                        <strong style="color: var(--pink);">DEADLINE: BREZ Juice & BREZ WATER response</strong>
+                        <br><span style="color: var(--text-muted);">Decision: ABANDON (saves $17,000-$20,000)</span>
+                    </div>
+                </div>
+                <div class="timeline-item">
+                    <div class="timeline-date">Q2 2026</div>
+                    <div>
+                        <strong>Expected subbrand approvals</strong>
+                        <br><span style="color: var(--text-muted);">USPTO typical processing: 8-12 months, but compound marks often faster</span>
+                    </div>
+                </div>
+                <div class="timeline-item">
+                    <div class="timeline-date">Quarterly</div>
+                    <div>
+                        <strong>Monitor BREZ core mark</strong>
+                        <br><span style="color: var(--text-muted);">Check Breeze vs. Breez dispute status</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="decision-box action" style="margin-top: 20px;">
+                <h3 style="margin-top: 0; color: var(--warning);">Critical: Start Using Marks After Approval</h3>
+                <p>Once subbrand trademarks are approved, we MUST use them in commerce to maintain registration:</p>
+                <ul>
+                    <li>Update packaging to include TM symbol on approved marks</li>
+                    <li>Use on website, marketing materials, POS</li>
+                    <li>Track first use dates for USPTO records</li>
+                    <li>File Statement of Use if required</li>
+                </ul>
+            </div>
+        </div>
+
+        <!-- Section 4: What We Need From Counsel -->
+        <div class="section">
+            <h2>4. Questions for Trademark Counsel</h2>
+
+            <div class="question-box">
+                <h3 style="margin-top: 0; color: var(--purple);">Request: Cost Estimate & Second Opinion</h3>
+                <p>We need Myers Law Group to confirm:</p>
+                <ol style="margin-left: 20px;">
+                    <li><strong>Exact cost for 7 subbrand filings</strong> in "[Brand] [Flavor] Feel Good Tonic" format</li>
+                    <li><strong>Timeline to approval</strong> - expedited path available?</li>
+                    <li><strong>Success probability assessment</strong> - do they agree with ~75% estimate?</li>
+                    <li><strong>Common law rights confirmation</strong> - if we register "FLOW LEMON ELDERFLOWER FEEL GOOD TONIC," can we still use "FLOW" alone on packaging and marketing?</li>
+                    <li><strong>Second opinion</strong> - are there any marks we should fight that we're recommending abandon? Any we're missing?</li>
+                </ol>
+            </div>
+
+            <h3>Specific Questions by Mark</h3>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Mark</th>
+                        <th>Question for Counsel</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><strong>BREZ</strong></td>
+                        <td>Can we file as "BREZ" (without macron) to differentiate from "BREEZ" and "BREEZE"?</td>
+                    </tr>
+                    <tr>
+                        <td><strong>FLOW</strong></td>
+                        <td>Should we pursue consent agreement with Flow Water, or is compound mark sufficient?</td>
+                    </tr>
+                    <tr>
+                        <td><strong>MUSE</strong></td>
+                        <td>Given MUSE exists for wine and tea, can we argue crowded field for functional beverages?</td>
+                    </tr>
+                    <tr>
+                        <td><strong>A BETTER BEVERAGE</strong></td>
+                        <td>Is Supplemental Register viable? How long to acquired distinctiveness?</td>
+                    </tr>
+                    <tr>
+                        <td><strong>DRINKING REIMAGINED</strong></td>
+                        <td>Can you research current owner/status? Is acquisition worth pursuing?</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <!-- Section 5: Current Portfolio Status -->
+        <div class="section">
+            <h2>5. Current Portfolio Status Summary</h2>
+
+            <h3>REGISTERED (Must Maintain)</h3>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Mark</th>
+                        <th>Jurisdiction</th>
+                        <th>Status</th>
+                        <th>Action</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><strong>BREZ</strong></td>
+                        <td>European Union</td>
+                        <td><span class="badge badge-success">Registered</span></td>
+                        <td>Maintain</td>
+                    </tr>
+                    <tr>
+                        <td><strong>FLOW</strong></td>
+                        <td>European Union</td>
+                        <td><span class="badge badge-success">Registered</span></td>
+                        <td>Maintain</td>
+                    </tr>
+                    <tr>
+                        <td><strong>BREZ</strong></td>
+                        <td>United Kingdom</td>
+                        <td><span class="badge badge-warning">Pending</span></td>
+                        <td>Monitor</td>
+                    </tr>
+                </tbody>
+            </table>
+
+            <h3>US PENDING (Strategy Required)</h3>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Mark</th>
+                        <th>Issue</th>
+                        <th>Strategy</th>
+                        <th>Priority</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><strong>BREZ</strong></td>
+                        <td>Suspended (Breeze/Breez dispute)</td>
+                        <td>HOLD - Monitor quarterly</td>
+                        <td>Medium</td>
+                    </tr>
+                    <tr>
+                        <td><strong>FEEL GOOD TONICS</strong></td>
+                        <td>CSA/FDCA refusal</td>
+                        <td>Submit non-THC specimens</td>
+                        <td><strong>HIGH</strong></td>
+                    </tr>
+                    <tr>
+                        <td><strong>FLOW</strong></td>
+                        <td>Likelihood of confusion</td>
+                        <td>File subbrand compound mark</td>
+                        <td><strong>HIGH</strong></td>
+                    </tr>
+                    <tr>
+                        <td><strong>MUSE</strong></td>
+                        <td>Likelihood of confusion</td>
+                        <td>File subbrand compound mark</td>
+                        <td><strong>HIGH</strong></td>
+                    </tr>
+                    <tr>
+                        <td><strong>PASSION</strong></td>
+                        <td>Likelihood of confusion</td>
+                        <td>File subbrand compound mark</td>
+                        <td>Medium</td>
+                    </tr>
+                    <tr>
+                        <td><strong>AMPLIFY/ELEVATE/DREAM/DRIFT</strong></td>
+                        <td>Likelihood of confusion + FDCA</td>
+                        <td>File subbrand + non-THC evidence</td>
+                        <td>Medium</td>
+                    </tr>
+                </tbody>
+            </table>
+
+            <h3>ABANDON (By March 1, 2026)</h3>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Mark</th>
+                        <th>Reason to Abandon</th>
+                        <th>Cost Avoided</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>BREZ Juice</td>
+                        <td>Multiple blocking marks, 20% success rate</td>
+                        <td>$8,500-$10,000</td>
+                    </tr>
+                    <tr>
+                        <td>BREZ WATER</td>
+                        <td>Breeze/Breez + FDCA, 15% success rate</td>
+                        <td>$8,500-$10,000</td>
+                    </tr>
+                    <tr>
+                        <td>BREZ WTR</td>
+                        <td>Same issues as BREZ WATER</td>
+                        <td>$8,500</td>
+                    </tr>
+                    <tr>
+                        <td>MICRODOSED CANNABIS</td>
+                        <td>Merely descriptive + CSA</td>
+                        <td>$5,000</td>
+                    </tr>
+                    <tr style="background: var(--bg-elevated);">
+                        <td><strong>TOTAL SAVINGS</strong></td>
+                        <td></td>
+                        <td><strong>~$30,500-$33,500</strong></td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <!-- Section 6: Decision Authorization -->
+        <div class="section">
+            <h2>6. Decision Authorization</h2>
+
+            <div class="decision-box highlight">
+                <h3 style="margin-top: 0;">Summary of Authorized Actions</h3>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Action</th>
+                            <th>Cost</th>
+                            <th>Deadline</th>
+                            <th>Approved</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>Pay outstanding balance to Myers Law Group</td>
+                            <td>$12,000</td>
+                            <td>Jan 31, 2026</td>
+                            <td style="text-align: center;">____</td>
+                        </tr>
+                        <tr>
+                            <td>File 7 subbrand trademark applications</td>
+                            <td>~$2,800</td>
+                            <td>Feb 28, 2026</td>
+                            <td style="text-align: center;">____</td>
+                        </tr>
+                        <tr>
+                            <td>Submit non-THC evidence for 6 marks</td>
+                            <td>~$2,100</td>
+                            <td>Feb 15, 2026</td>
+                            <td style="text-align: center;">____</td>
+                        </tr>
+                        <tr>
+                            <td>Abandon BREZ Juice, WATER, WTR, MICRODOSED</td>
+                            <td>$0</td>
+                            <td>Mar 1, 2026</td>
+                            <td style="text-align: center;">____</td>
+                        </tr>
+                        <tr>
+                            <td>Request second opinion from counsel</td>
+                            <td>Included</td>
+                            <td>Feb 15, 2026</td>
+                            <td style="text-align: center;">____</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <div class="signature-line">
+                <div>
+                    <div class="signature-block"></div>
+                    <div class="signature-label">Andrea Golan, General Counsel</div>
+                    <div class="signature-label">Date: _______________</div>
+                </div>
+                <div>
+                    <div class="signature-block"></div>
+                    <div class="signature-label">Aaron Nosbisch, CEO</div>
+                    <div class="signature-label">Date: _______________</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Footer -->
+        <div style="text-align: center; margin-top: 40px; padding-top: 20px; border-top: 1px solid var(--border);">
+            <p style="color: var(--text-muted); font-size: 12px;">
+                BREZ Trademark Decision Matrix | Generated January 16, 2026
+                <br>Data Source: /src/lib/data/trademark-portfolio.ts
+                <br>Full Strategy Document: /strategies/trademark-portfolio-strategy
+            </p>
+        </div>
+    </div>
+</body>
+</html>
