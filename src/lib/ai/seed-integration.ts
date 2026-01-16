@@ -5,6 +5,42 @@
 
 import { SEEDLearningEngine } from '@/../.claude/algorithms/seed-learning-engine';
 
+interface HistoricalData {
+  lastUpdated?: string;
+  sources?: Record<string, { connected: boolean; lastSync?: string }>;
+}
+
+interface DecisionOption {
+  action: string;
+  impact?: number;
+  feasibility?: number;
+  discoveryPotential?: number;
+  expectedCAC?: number;
+  expectedRevenue?: number;
+  expectedLTV?: number;
+  expectedCM?: number;
+  amount?: string;
+  channels?: string;
+  theme?: string;
+  percentage?: string;
+  from?: string;
+  to?: string;
+}
+
+interface DecisionRule {
+  condition: string;
+  action: string;
+  successRate: number;
+  usageCount: number;
+}
+
+interface PrioritizationWeights {
+  impact: number;
+  feasibility: number;
+  discoveryPotential: number;
+  riskTolerance: number;
+}
+
 interface BusinessDecision {
   id: string;
   timestamp: Date;
@@ -23,12 +59,12 @@ interface BusinessDecision {
       bottleneck: string;
       budgetLimit?: number;
     };
-    historicalData: any;
+    historicalData: HistoricalData;
   };
-  options: any[];
-  chosenOption?: any;
+  options: DecisionOption[];
+  chosenOption?: DecisionOption;
   prediction: {
-    expectedOutcome: any;
+    expectedOutcome: DecisionOption;
     confidence: number;
     metrics: Record<string, number>;
   };
@@ -74,8 +110,8 @@ class SEEDService {
   async makeDecision(
     type: BusinessDecision['type'],
     context: BusinessDecision['context'],
-    options: any[]
-  ): Promise<{ decision: any; confidence: number; reasoning: string }> {
+    options: DecisionOption[]
+  ): Promise<{ decision: DecisionOption; confidence: number; reasoning: string }> {
     // Use SEED Learning Engine to score options
     const result = await this.engine.makeDecision(
       {
@@ -127,7 +163,8 @@ class SEEDService {
       return;
     }
 
-    const outcome: BusinessOutcome = {
+    // Track outcome for reference (future: persist to database)
+    const _outcome: BusinessOutcome = {
       decisionId,
       timestamp: new Date(),
       actualMetrics,
@@ -183,8 +220,8 @@ class SEEDService {
   async getLearningState(): Promise<{
     predictionAccuracy: number;
     decisionsTracked: number;
-    topRules: any[];
-    currentWeights: any;
+    topRules: DecisionRule[];
+    currentWeights: PrioritizationWeights;
     improvementVelocity: number;
   }> {
     const metrics = await this.engine.getMetrics();
@@ -201,7 +238,7 @@ class SEEDService {
     };
   }
 
-  private extractMetricsPrediction(decision: any): Record<string, number> {
+  private extractMetricsPrediction(decision: DecisionOption): Record<string, number> {
     // Extract predicted metric values from decision
     return {
       expectedCAC: decision.expectedCAC || 0,
@@ -225,7 +262,7 @@ class SEEDService {
   private generateOptions(
     type: BusinessDecision['type'],
     context: BusinessDecision['context']
-  ): any[] {
+  ): DecisionOption[] {
     // Generate realistic options based on decision type
     switch (type) {
       case 'cac_optimization':
@@ -260,7 +297,7 @@ class SEEDService {
     }
   }
 
-  private formatAction(decision: any): string {
+  private formatAction(decision: DecisionOption): string {
     if (decision.action === 'increase_spend') {
       return `Increase ad spend by ${decision.amount || '20%'} focusing on ${decision.channels || 'top-performing channels'}`;
     }

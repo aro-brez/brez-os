@@ -6,6 +6,28 @@
 import type { UnifiedMetrics, DynamicAction } from '@/lib/integrations/unified';
 
 // Re-export types from seed-integration for convenience
+export interface HistoricalData {
+  lastUpdated?: string;
+  sources?: Record<string, { connected: boolean; lastSync?: string }>;
+}
+
+export interface DecisionOption {
+  action: string;
+  description?: string;
+  impact?: number;
+  feasibility?: number;
+  discoveryPotential?: number;
+  expectedCAC?: number;
+  expectedRevenue?: number;
+  expectedMargin?: number;
+  savingsPotential?: number;
+  revenueImpact?: number;
+  volumeImpact?: number;
+  cashTiming?: string;
+  timeToMarket?: string;
+  risk?: string;
+}
+
 export interface BusinessContext {
   currentMetrics: {
     cac?: number;
@@ -20,7 +42,7 @@ export interface BusinessContext {
     bottleneck: string;
     budgetLimit?: number;
   };
-  historicalData: any;
+  historicalData: HistoricalData;
 }
 
 export type DecisionType = 'cac_optimization' | 'spend_allocation' | 'product_launch' | 'retail_expansion' | 'pricing';
@@ -192,7 +214,7 @@ export function inferDecisionType(metrics: UnifiedMetrics): DecisionType {
 export function generateOptionsForDecision(
   type: DecisionType,
   context: BusinessContext
-): any[] {
+): DecisionOption[] {
   switch (type) {
     case 'cac_optimization':
       return generateCACOptions(context);
@@ -217,7 +239,7 @@ export function generateOptionsForDecision(
 /**
  * Generate CAC optimization options
  */
-function generateCACOptions(context: BusinessContext): any[] {
+function generateCACOptions(context: BusinessContext): DecisionOption[] {
   const currentCAC = context.currentMetrics.cac || 60;
 
   return [
@@ -267,7 +289,7 @@ function generateCACOptions(context: BusinessContext): any[] {
 /**
  * Generate spend allocation options (cash-constrained)
  */
-function generateSpendOptions(context: BusinessContext): any[] {
+function generateSpendOptions(context: BusinessContext): DecisionOption[] {
   const budgetLimit = context.constraints.budgetLimit || 50000;
 
   return [
@@ -307,7 +329,7 @@ function generateSpendOptions(context: BusinessContext): any[] {
 /**
  * Generate retail expansion options
  */
-function generateRetailOptions(context: BusinessContext): any[] {
+function generateRetailOptions(_context: BusinessContext): DecisionOption[] {
   return [
     {
       action: 'expand_doors',
@@ -345,7 +367,7 @@ function generateRetailOptions(context: BusinessContext): any[] {
 /**
  * Generate product launch options
  */
-function generateProductOptions(context: BusinessContext): any[] {
+function generateProductOptions(_context: BusinessContext): DecisionOption[] {
   return [
     {
       action: 'launch_new_sku',
@@ -383,7 +405,7 @@ function generateProductOptions(context: BusinessContext): any[] {
 /**
  * Generate pricing options
  */
-function generatePricingOptions(context: BusinessContext): any[] {
+function generatePricingOptions(context: BusinessContext): DecisionOption[] {
   const currentAOV = context.currentMetrics.contributionMargin || 30;
 
   return [
@@ -425,7 +447,7 @@ function generatePricingOptions(context: BusinessContext): any[] {
  * Used when SEED provides the recommendation
  */
 export function seedDecisionToDynamicAction(
-  decision: any,
+  decision: DecisionOption,
   confidence: number,
   reasoning: string,
   type: DecisionType
@@ -444,20 +466,20 @@ export function seedDecisionToDynamicAction(
 /**
  * Format action title for display
  */
-function formatActionTitle(action: string, description: string): string {
+function formatActionTitle(action: string, description?: string): string {
   // Convert snake_case to Title Case
   const title = action
     .split('_')
     .map(word => word.charAt(0).toUpperCase() + word.slice(1))
     .join(' ');
 
-  return `${title}: ${description}`;
+  return description ? `${title}: ${description}` : title;
 }
 
 /**
  * Generate action steps based on decision and type
  */
-function generateStepsForAction(decision: any, type: DecisionType): string[] {
+function generateStepsForAction(decision: DecisionOption, _type: DecisionType): string[] {
   // Default steps based on action type
   const baseSteps: Record<string, string[]> = {
     increase_spend: [
@@ -509,7 +531,7 @@ function generateStepsForAction(decision: any, type: DecisionType): string[] {
 /**
  * Estimate impact description from decision metrics
  */
-function estimateImpactDescription(decision: any): string {
+function estimateImpactDescription(decision: DecisionOption): string {
   if (decision.expectedRevenue && decision.expectedRevenue > 1.2) {
     return `Potential revenue uplift: +${((decision.expectedRevenue - 1) * 100).toFixed(0)}%`;
   }
@@ -528,14 +550,14 @@ function estimateImpactDescription(decision: any): string {
 /**
  * Determine urgency based on confidence and decision characteristics
  */
-function determineUrgency(confidence: number, decision: any): 'critical' | 'high' | 'medium' | 'low' {
+function determineUrgency(confidence: number, decision: DecisionOption): 'critical' | 'high' | 'medium' | 'low' {
   // High confidence + high impact = high urgency
-  if (confidence > 0.8 && decision.impact > 0.8) {
+  if (confidence > 0.8 && (decision.impact ?? 0) > 0.8) {
     return 'high';
   }
 
   // Cash-saving actions are high urgency in constrained phases
-  if (decision.savingsPotential && decision.savingsPotential > 50000) {
+  if ((decision.savingsPotential ?? 0) > 50000) {
     return 'high';
   }
 
