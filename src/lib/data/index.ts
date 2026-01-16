@@ -100,6 +100,31 @@ export {
   validateAllData,
 } from './data-intake';
 
+// Trademark Portfolio - legal/brand IP data
+export {
+  REGISTERED_TRADEMARKS,
+  PENDING_TRADEMARKS,
+  ABANDONED_TRADEMARKS,
+  ACQUISITION_TARGETS,
+  RECOMMENDED_STRATEGIES,
+  COST_SUMMARY,
+  DEADLINES,
+  USE_LEGEND,
+  CONTACTS,
+  getTrademarksByStatus,
+  getTrademarksByJurisdiction,
+  getTotalCostToFight,
+  getHighPriorityMarks,
+} from './trademark-portfolio';
+export type {
+  TrademarkStatus,
+  RefusalReason,
+  Jurisdiction,
+  TrademarkRecord,
+  AcquisitionTarget,
+  TrademarkStrategy,
+} from './trademark-portfolio';
+
 // =============================================================================
 // CONVENIENCE FUNCTIONS FOR BRITTANI
 // =============================================================================

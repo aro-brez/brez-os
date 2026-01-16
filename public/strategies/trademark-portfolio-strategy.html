@@ -1,0 +1,961 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BREZ Trademark Portfolio Strategy 2026</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+
+        :root {
+            --lime-accent: #e3f98a;
+            --lime-hover: #edfbab;
+            --deep-purple: #0D0D2A;
+            --bg-dark: #0D0D2A;
+            --bg-card: #1A1A2E;
+            --bg-elevated: #2D2D44;
+            --accent-purple: #8533fc;
+            --accent-pink: #ff6b6b;
+            --accent-cyan: #65cdd8;
+            --accent-success: #6BCB77;
+            --accent-warning: #ffce33;
+            --text-primary: #FFFFFF;
+            --text-secondary: #a8a8a8;
+            --text-muted: #676986;
+            --border-subtle: rgba(255,255,255,0.1);
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            background: var(--bg-dark);
+            color: var(--text-primary);
+            line-height: 1.6;
+            min-height: 100vh;
+        }
+
+        .container { max-width: 1000px; margin: 0 auto; padding: 40px 24px; }
+
+        .header {
+            text-align: center;
+            margin-bottom: 48px;
+            padding-bottom: 32px;
+            border-bottom: 1px solid var(--border-subtle);
+        }
+
+        .doc-title {
+            font-size: 36px;
+            font-weight: 700;
+            background: linear-gradient(135deg, var(--text-primary) 0%, var(--accent-purple) 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin-bottom: 16px;
+        }
+
+        .doc-meta {
+            display: flex;
+            justify-content: center;
+            gap: 24px;
+            flex-wrap: wrap;
+            color: var(--text-secondary);
+            font-size: 14px;
+        }
+
+        .meta-item { display: flex; align-items: center; gap: 6px; }
+        .meta-label { color: var(--text-muted); }
+
+        .status-badge {
+            background: var(--lime-accent);
+            color: var(--bg-dark);
+            padding: 4px 12px;
+            border-radius: 12px;
+            font-weight: 600;
+            font-size: 12px;
+        }
+
+        .status-badge.warning { background: var(--accent-warning); }
+        .status-badge.danger { background: var(--accent-pink); }
+        .status-badge.success { background: var(--accent-success); }
+
+        .section {
+            background: var(--bg-card);
+            border-radius: 16px;
+            padding: 32px;
+            margin-bottom: 24px;
+            border: 1px solid var(--border-subtle);
+        }
+
+        .section-title {
+            font-size: 24px;
+            font-weight: 700;
+            margin-bottom: 24px;
+            color: var(--lime-accent);
+        }
+
+        .section-subtitle {
+            font-size: 18px;
+            font-weight: 600;
+            margin: 24px 0 16px 0;
+            color: var(--text-primary);
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 16px 0;
+        }
+
+        th, td {
+            padding: 12px 16px;
+            text-align: left;
+            border-bottom: 1px solid var(--border-subtle);
+        }
+
+        th {
+            background: var(--bg-elevated);
+            color: var(--lime-accent);
+            font-weight: 600;
+            font-size: 12px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        td { font-size: 14px; color: var(--text-secondary); }
+
+        .mark-name { color: var(--text-primary); font-weight: 600; }
+
+        .highlight-box {
+            background: var(--bg-elevated);
+            border-left: 4px solid var(--lime-accent);
+            padding: 20px 24px;
+            margin: 16px 0;
+            border-radius: 0 8px 8px 0;
+        }
+
+        .highlight-box.warning { border-left-color: var(--accent-warning); }
+        .highlight-box.danger { border-left-color: var(--accent-pink); }
+        .highlight-box.success { border-left-color: var(--accent-success); }
+
+        .cost-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 16px;
+            margin: 16px 0;
+        }
+
+        .cost-card {
+            background: var(--bg-elevated);
+            padding: 20px;
+            border-radius: 12px;
+            text-align: center;
+        }
+
+        .cost-amount {
+            font-size: 28px;
+            font-weight: 700;
+            color: var(--lime-accent);
+        }
+
+        .cost-label {
+            font-size: 12px;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-top: 4px;
+        }
+
+        .email-template {
+            background: var(--bg-elevated);
+            border-radius: 12px;
+            padding: 24px;
+            margin: 16px 0;
+            font-family: monospace;
+            font-size: 13px;
+            white-space: pre-wrap;
+            color: var(--text-secondary);
+            border: 1px solid var(--border-subtle);
+        }
+
+        .email-template .field {
+            color: var(--accent-cyan);
+            font-weight: 600;
+        }
+
+        ul, ol { margin: 12px 0 12px 24px; }
+        li { margin: 8px 0; color: var(--text-secondary); }
+        li strong { color: var(--text-primary); }
+
+        .action-required {
+            background: linear-gradient(135deg, rgba(255,107,107,0.1) 0%, rgba(133,51,252,0.1) 100%);
+            border: 1px solid var(--accent-pink);
+            border-radius: 12px;
+            padding: 20px;
+            margin: 16px 0;
+        }
+
+        .timeline-item {
+            display: flex;
+            gap: 16px;
+            padding: 16px 0;
+            border-bottom: 1px solid var(--border-subtle);
+        }
+
+        .timeline-date {
+            min-width: 100px;
+            font-weight: 600;
+            color: var(--accent-warning);
+        }
+
+        .source-note {
+            font-size: 12px;
+            color: var(--text-muted);
+            font-style: italic;
+            margin-top: 8px;
+            padding-top: 8px;
+            border-top: 1px solid var(--border-subtle);
+        }
+
+        @media print {
+            body { background: white; color: black; }
+            .section { border: 1px solid #ddd; background: #f9f9f9; }
+            .doc-title { background: none; -webkit-text-fill-color: black; }
+            .section-title { color: #333; }
+            th { background: #eee; color: #333; }
+            td { color: #333; }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Header -->
+        <div class="header">
+            <h1 class="doc-title">BREZ Trademark Portfolio Strategy</h1>
+            <div class="doc-meta">
+                <div class="meta-item">
+                    <span class="meta-label">Date:</span>
+                    <span>January 16, 2026</span>
+                </div>
+                <div class="meta-item">
+                    <span class="meta-label">Owner:</span>
+                    <span>Andrea Golan (General Counsel)</span>
+                </div>
+                <div class="meta-item">
+                    <span class="meta-label">Counsel:</span>
+                    <span>Nicholas D. Myers, The Myers Law Group</span>
+                </div>
+                <div class="meta-item">
+                    <span class="status-badge warning">$13,000 Outstanding</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Executive Summary -->
+        <div class="section">
+            <h2 class="section-title">Executive Summary</h2>
+
+            <div class="highlight-box">
+                <strong>The Core Challenge:</strong> Most BREZ trademarks are blocked by "likelihood of confusion" refusals from USPTO. However, our products (adaptogenic functional tonics) are genuinely different from the blocking marks (water, wine, tea, vapes, mints). The USPTO is pattern-matching on words, not understanding our distinct product category.
+            </div>
+
+            <div class="highlight-box success">
+                <strong>The Solution:</strong> Use the <strong>Modifier Strategy</strong> - file marks as they appear on our actual packaging: "[Flavor] Feel Good Tonic". This matches our real-world use, creates a distinct commercial impression, AND we preserve common law rights to use "FLOW," "MUSE," etc. alone.
+            </div>
+
+            <div class="cost-grid">
+                <div class="cost-card">
+                    <div class="cost-amount">$13,000</div>
+                    <div class="cost-label">Outstanding Balance</div>
+                </div>
+                <div class="cost-card">
+                    <div class="cost-amount">$14,900</div>
+                    <div class="cost-label">Recommended Path Cost</div>
+                </div>
+                <div class="cost-card">
+                    <div class="cost-amount">$102,000</div>
+                    <div class="cost-label">Cost to Fight Everything</div>
+                </div>
+                <div class="cost-card">
+                    <div class="cost-amount">$87,100</div>
+                    <div class="cost-label">Savings from Our Path</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- SECTION 1: Registered/Live Trademarks -->
+        <div class="section">
+            <h2 class="section-title">1. Registered & Live Trademarks (MAINTAIN)</h2>
+            <p style="color: var(--text-secondary); margin-bottom: 16px;">These trademarks are registered or pending in favorable status. <strong>Must remain active.</strong></p>
+
+            <table>
+                <thead>
+                    <tr>
+                        <th>Mark</th>
+                        <th>Jurisdiction</th>
+                        <th>Class</th>
+                        <th>Status</th>
+                        <th>Action</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td class="mark-name">BREZ</td>
+                        <td>European Union</td>
+                        <td>32</td>
+                        <td><span class="status-badge success">Registered</span></td>
+                        <td>Maintain registration</td>
+                    </tr>
+                    <tr>
+                        <td class="mark-name">FLOW</td>
+                        <td>European Union</td>
+                        <td>32</td>
+                        <td><span class="status-badge success">Registered</span></td>
+                        <td>Maintain - Settlement reached</td>
+                    </tr>
+                    <tr>
+                        <td class="mark-name">FLOW</td>
+                        <td>European Union</td>
+                        <td>32</td>
+                        <td><span class="status-badge">Published</span></td>
+                        <td>Monitor opposition period</td>
+                    </tr>
+                    <tr>
+                        <td class="mark-name">BREZ</td>
+                        <td>United Kingdom</td>
+                        <td>32</td>
+                        <td><span class="status-badge">Pending</span></td>
+                        <td>Monitor review</td>
+                    </tr>
+                </tbody>
+            </table>
+
+            <p class="source-note">Source: Trademark Counsel Memo, January 5, 2026 - Section 5 (EU/UK Marks)</p>
+        </div>
+
+        <!-- SECTION 2: US Pending/Blocked -->
+        <div class="section">
+            <h2 class="section-title">2. US Pending & Blocked Trademarks</h2>
+
+            <h3 class="section-subtitle">2a. Core Brand - BREZ (Keep Active)</h3>
+            <div class="highlight-box warning">
+                <strong>Status:</strong> Suspended due to third-party dispute between Breeze Smoke and Breez (Promontory Holdings) over bottled water marks.
+                <br><br>
+                <strong>Why:</strong> USPTO will not rule until Breeze vs Breez resolves. Our Request to Divide (Jan 2025) added Class 035 (online retail).
+                <br><br>
+                <strong>Strategy:</strong> Monitor quarterly. Once resolved, argue BREZ functional beverages are distinct from smokable products (Breeze Smoke) and mints/distribution (Breez). Alternative: Register as "BREZ" (B-r-e-z) without macron.
+                <br><br>
+                <strong>Action:</strong> <span class="status-badge success">KEEP ACTIVE</span> - Maintain priority date through state registrations.
+            </div>
+            <p class="source-note">Source: Trademark Counsel Memo - Section 1 (BREZ Mark)</p>
+
+            <h3 class="section-subtitle">2b. Brand Taglines - Need Non-THC Evidence</h3>
+            <div class="highlight-box">
+                <strong>Issue:</strong> CSA/FDCA refusals can be overcome with evidence of use on non-THC products.
+                <br><br>
+                <strong>Required:</strong> Submit specimens showing each mark used with non-THC products - packaging, website screenshots, POS materials.
+            </div>
+
+            <table>
+                <thead>
+                    <tr>
+                        <th>Mark</th>
+                        <th>Current Use</th>
+                        <th>Refusal</th>
+                        <th>Action Required</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td class="mark-name">FEEL GOOD TONICS</td>
+                        <td>W1 (Website)</td>
+                        <td>CSA/FDCA</td>
+                        <td>Submit non-THC specimens - HIGH PRIORITY</td>
+                    </tr>
+                    <tr>
+                        <td class="mark-name">AMPLIFY</td>
+                        <td>P1 (Packaging)</td>
+                        <td>Likelihood of Confusion + FDCA</td>
+                        <td>Submit non-THC specimens</td>
+                    </tr>
+                    <tr>
+                        <td class="mark-name">ELEVATE</td>
+                        <td>P1 (Packaging)</td>
+                        <td>Likelihood of Confusion + FDCA</td>
+                        <td>Submit non-THC specimens</td>
+                    </tr>
+                    <tr>
+                        <td class="mark-name">DREAM</td>
+                        <td>P1 (Packaging)</td>
+                        <td>Likelihood of Confusion + FDCA</td>
+                        <td>Submit non-THC specimens</td>
+                    </tr>
+                    <tr>
+                        <td class="mark-name">DRIFT</td>
+                        <td>P1 (Packaging)</td>
+                        <td>Likelihood of Confusion + FDCA</td>
+                        <td>Submit non-THC specimens</td>
+                    </tr>
+                </tbody>
+            </table>
+
+            <div class="highlight-box success">
+                <strong>Use Legend:</strong>
+                <ul>
+                    <li><strong>W1</strong> = Website (used for both THC and non-THC)</li>
+                    <li><strong>P1</strong> = Packaging (top of 4-packs for OG SKUs)</li>
+                    <li><strong>V1</strong> = Website "core values" / mission content</li>
+                    <li><strong>N0</strong> = Not currently in use</li>
+                </ul>
+            </div>
+            <p class="source-note">Source: Trademark Counsel Memo - Section 2 (Brand Taglines)</p>
+
+            <h3 class="section-subtitle">2c. Product Lines - Blocked by Likelihood of Confusion</h3>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Mark</th>
+                        <th>Blocking Mark</th>
+                        <th>Cost to Fight</th>
+                        <th>Success %</th>
+                        <th>Recommended Strategy</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td class="mark-name">FLOW</td>
+                        <td>Flow Water</td>
+                        <td>$2,500</td>
+                        <td>65%</td>
+                        <td>File as "FLOW FEEL GOOD TONIC" + Crowded Field</td>
+                    </tr>
+                    <tr>
+                        <td class="mark-name">MUSE</td>
+                        <td>Muse Wine, Muse Tea</td>
+                        <td>$3,000</td>
+                        <td>55%</td>
+                        <td>File as "MUSE FEEL GOOD TONIC" + Consent Agreement</td>
+                    </tr>
+                    <tr>
+                        <td class="mark-name">PASSION</td>
+                        <td>Passion fruit beverages</td>
+                        <td>$2,500</td>
+                        <td>55%</td>
+                        <td>File as "PASSION FEEL GOOD TONIC"</td>
+                    </tr>
+                </tbody>
+            </table>
+            <p class="source-note">Source: Trademark Counsel Memo - Section 3 (FLOW, FEEL GOOD TONICS, MUSE, PASSION)</p>
+        </div>
+
+        <!-- SECTION 3: Trademarks to Abandon -->
+        <div class="section">
+            <h2 class="section-title">3. Trademarks to Abandon (Cost Savings)</h2>
+
+            <div class="action-required">
+                <strong>DEADLINE: March 1, 2026</strong> - Must decide on BREZ Juice and BREZ WATER response or abandonment.
+                <br>Cost to respond: $8,500 - $10,000 each. Success probability: ~15-20%.
+                <br><strong>Recommendation: ABANDON both to preserve capital for higher-value marks.</strong>
+            </div>
+
+            <table>
+                <thead>
+                    <tr>
+                        <th>Mark</th>
+                        <th>Refusal Reason</th>
+                        <th>Cost to Fight</th>
+                        <th>Success %</th>
+                        <th>Recommendation</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td class="mark-name">BREZ Juice</td>
+                        <td>Likelihood of Confusion (Juicy Breeze)</td>
+                        <td>$8,500-$10,000</td>
+                        <td>20%</td>
+                        <td><span class="status-badge danger">ABANDON</span></td>
+                    </tr>
+                    <tr>
+                        <td class="mark-name">BREZ WATER</td>
+                        <td>Breeze/Breez + FDCA</td>
+                        <td>$8,500-$10,000</td>
+                        <td>15%</td>
+                        <td><span class="status-badge danger">ABANDON</span></td>
+                    </tr>
+                    <tr>
+                        <td class="mark-name">BREZ WTR</td>
+                        <td>Same as BREZ WATER</td>
+                        <td>$8,500</td>
+                        <td>15%</td>
+                        <td><span class="status-badge danger">ABANDON</span></td>
+                    </tr>
+                    <tr>
+                        <td class="mark-name">MICRODOSED CANNABIS</td>
+                        <td>Merely Descriptive + CSA</td>
+                        <td>$5,000</td>
+                        <td>5%</td>
+                        <td><span class="status-badge danger">ABANDON</span></td>
+                    </tr>
+                    <tr>
+                        <td class="mark-name">A BETTER BEVERAGE</td>
+                        <td>Merely Descriptive</td>
+                        <td>$5,000</td>
+                        <td>25%</td>
+                        <td><span class="status-badge warning">SEE ALTERNATIVES</span></td>
+                    </tr>
+                </tbody>
+            </table>
+
+            <h3 class="section-subtitle">"A Better Beverage" - Alternative Strategies</h3>
+            <div class="highlight-box">
+                <strong>Why it was refused:</strong> USPTO considers this "merely descriptive" - it describes a quality of the product rather than identifying the source.
+                <br><br>
+                <strong>Options:</strong>
+                <ol>
+                    <li><strong>Supplemental Register:</strong> File on USPTO Supplemental Register. After 5 years of continuous use, claim "acquired distinctiveness" and move to Principal Register. Cost: ~$500</li>
+                    <li><strong>Modified Mark:</strong> Register "BETTER BEVERAGE CO" or "THE BETTER BEVERAGE COMPANY" - adding "CO" changes commercial impression</li>
+                    <li><strong>Unregistered Use:</strong> Continue using as tagline with TM symbol, building common law rights through consistent use</li>
+                    <li><strong>Design Mark:</strong> Create stylized logo version that includes distinctive design elements</li>
+                </ol>
+            </div>
+            <p class="source-note">Source: Trademark Counsel Memo - Section 4 (MICRODOSED CANNABIS/A BETTER BEVERAGE)</p>
+        </div>
+
+        <!-- SECTION 4: Recommended Strategies -->
+        <div class="section">
+            <h2 class="section-title">4. Recommended Legal Strategies</h2>
+
+            <h3 class="section-subtitle">Strategy 1: Modifier Approach (PRIMARY - LOWEST COST)</h3>
+            <div class="highlight-box success">
+                <strong>What it is:</strong> File marks as compound marks with "FEEL GOOD TONIC" suffix, exactly matching our actual can labeling.
+                <br><br>
+                <strong>Example:</strong> Instead of fighting for "FLOW," register "FLOW LEMON ELDERFLOWER FEEL GOOD TONIC"
+                <br><br>
+                <strong>Why it works:</strong>
+                <ul>
+                    <li>Compound marks create distinct commercial impression from standalone words</li>
+                    <li>Matches our actual product labeling (no specimen issues)</li>
+                    <li>We still preserve common law rights to use "FLOW" alone in commerce</li>
+                    <li>Much higher approval rate than fighting for generic single-word marks</li>
+                </ul>
+                <br>
+                <strong>Cost:</strong> ~$400/mark (new filing) vs. $8,500/mark (fighting refusal)
+                <br><strong>Success Rate:</strong> ~75%
+            </div>
+
+            <h3 class="section-subtitle">Strategy 2: Crowded Field Doctrine</h3>
+            <div class="highlight-box">
+                <strong>What it is:</strong> Demonstrate that terms like FLOW, MUSE are widely used across beverage categories, making them "weak marks" entitled only to narrow protection.
+                <br><br>
+                <strong>Legal Basis:</strong> DuPont Factor 6 - Per <em>Juice Generation v. GS Enterprises</em> (Fed. Cir. 2015): Third-party use evidence proves consumers distinguish between similar marks in crowded fields.
+                <br><br>
+                <strong>How to execute:</strong>
+                <ul>
+                    <li>Compile USPTO registrations containing FLOW, MUSE across beverage/food categories</li>
+                    <li>Document actual marketplace use (websites, Amazon, retail photos)</li>
+                    <li>Submit as evidence that these are common, weak formatives</li>
+                </ul>
+                <br>
+                <strong>Cost:</strong> ~$2,000/mark | <strong>Success Rate:</strong> ~65%
+            </div>
+
+            <h3 class="section-subtitle">Strategy 3: Narrow Goods Description</h3>
+            <div class="highlight-box">
+                <strong>What it is:</strong> Amend goods description to be highly specific, avoiding overlap with cited marks.
+                <br><br>
+                <strong>Current (too broad):</strong> "Non-alcoholic beverages"
+                <br><br>
+                <strong>Recommended language:</strong>
+                <br><em>"Non-alcoholic beverages, namely, adaptogenic functional tonics containing plant extracts; non-alcoholic herbal beverages infused with adaptogens; non-alcoholic relaxation beverages containing functional ingredients for mood enhancement"</em>
+                <br><br>
+                <strong>Why it works:</strong> Creates clear distinction from cited marks (water, wine, tea, soft drinks). Different trade channels (wellness retail vs. grocery beverage aisle).
+                <br><br>
+                <strong>Cost:</strong> ~$400/mark | <strong>Success Rate:</strong> ~60%
+            </div>
+
+            <h3 class="section-subtitle">Strategy 4: Consent/Coexistence Agreement</h3>
+            <div class="highlight-box">
+                <strong>What it is:</strong> Negotiate agreement with blocking mark owner for peaceful coexistence.
+                <br><br>
+                <strong>When to use:</strong> Blocking mark owner is a small company unlikely to compete with adaptogenic tonics.
+                <br><br>
+                <strong>Requirements for USPTO to accept:</strong>
+                <ul>
+                    <li>NOT a "naked consent" - must explain WHY confusion is unlikely</li>
+                    <li>Identify different trade channels, consumer demographics</li>
+                    <li>Include enforceable steps to prevent confusion</li>
+                    <li>Geographic or product category limitations</li>
+                </ul>
+                <br>
+                <strong>Cost:</strong> ~$2,500-$4,000/agreement | <strong>Success Rate:</strong> ~55%
+            </div>
+        </div>
+
+        <!-- SECTION 5: "Drinking Reimagined" Acquisition -->
+        <div class="section">
+            <h2 class="section-title">5. Trademark Acquisition: "DRINKING REIMAGINED"</h2>
+
+            <div class="highlight-box">
+                <strong>Status:</strong> Research needed - identify current owner via USPTO TESS
+                <br><br>
+                <strong>Estimated Value:</strong> $2,500 - $15,000 (depends on owner activity, registration status)
+                <br><br>
+                <strong>Strategy:</strong>
+                <ol>
+                    <li>Search USPTO TESS for current registration status and owner</li>
+                    <li>Check if mark is in active use (website, products in market)</li>
+                    <li>If dead/abandoned, file fresh application</li>
+                    <li>If active but small brand, negotiate assignment with goodwill</li>
+                </ol>
+            </div>
+
+            <h3 class="section-subtitle">Note: Similar Mark Found</h3>
+            <p style="color: var(--text-secondary);">
+                "SPARKLING WATER, REIMAGINED." is registered to The Lemon Perfect Company (Serial #90803893, filed June 30, 2021).
+                This is different from "DRINKING REIMAGINED" but worth noting for conflict analysis.
+            </p>
+            <p class="source-note">Source: Trademark Counsel Memo - Section 7 (DRINKING REIMAGINED)</p>
+        </div>
+
+        <!-- SECTION 6: Cost Analysis -->
+        <div class="section">
+            <h2 class="section-title">6. Cost Analysis & ROI</h2>
+
+            <h3 class="section-subtitle">Current Obligation</h3>
+            <div class="action-required">
+                <strong>Outstanding Balance:</strong> $13,000 to Myers Law Group
+                <br><br>
+                <strong>Requirement:</strong> Must clear this balance before requesting new work.
+                <br><br>
+                <strong>Recommendation:</strong> Pay by February 1, 2026 to initiate recommended strategy path.
+            </div>
+
+            <h3 class="section-subtitle">Recommended Path - Itemized Costs</h3>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Strategy</th>
+                        <th>Per Mark</th>
+                        <th># Marks</th>
+                        <th>Total</th>
+                        <th>Success %</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>Modifier Strategy (new filings)</td>
+                        <td>$400</td>
+                        <td>7</td>
+                        <td>$2,800</td>
+                        <td>75%</td>
+                    </tr>
+                    <tr>
+                        <td>Non-THC Evidence Submission</td>
+                        <td>$350</td>
+                        <td>6</td>
+                        <td>$2,100</td>
+                        <td>85%</td>
+                    </tr>
+                    <tr>
+                        <td>Narrow Goods Amendments</td>
+                        <td>$400</td>
+                        <td>10</td>
+                        <td>$4,000</td>
+                        <td>60%</td>
+                    </tr>
+                    <tr>
+                        <td>Crowded Field Arguments (FLOW, MUSE, PASSION)</td>
+                        <td>$2,000</td>
+                        <td>3</td>
+                        <td>$6,000</td>
+                        <td>65%</td>
+                    </tr>
+                    <tr style="background: var(--bg-elevated);">
+                        <td><strong>TOTAL RECOMMENDED PATH</strong></td>
+                        <td></td>
+                        <td></td>
+                        <td><strong>$14,900</strong></td>
+                        <td><strong>~70% avg</strong></td>
+                    </tr>
+                </tbody>
+            </table>
+
+            <h3 class="section-subtitle">Alternative: Fight Everything</h3>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Approach</th>
+                        <th>Per Mark</th>
+                        <th># Marks</th>
+                        <th>Total</th>
+                        <th>Success %</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>Individual refusal responses</td>
+                        <td>$8,500</td>
+                        <td>12</td>
+                        <td>$102,000</td>
+                        <td>35%</td>
+                    </tr>
+                </tbody>
+            </table>
+
+            <div class="highlight-box success">
+                <strong>SAVINGS FROM RECOMMENDED PATH:</strong> $102,000 - $14,900 = <strong>$87,100</strong>
+                <br><br>
+                <strong>HIGHER SUCCESS RATE:</strong> ~70% vs ~35%
+            </div>
+        </div>
+
+        <!-- SECTION 7: Timeline -->
+        <div class="section">
+            <h2 class="section-title">7. Timeline & Deadlines</h2>
+
+            <div class="timeline-item">
+                <div class="timeline-date">ASAP</div>
+                <div>
+                    <strong>Submit non-THC specimens</strong> for FEEL GOOD TONICS, AMPLIFY, ELEVATE, DREAM, DRIFT
+                    <br><span style="color: var(--text-muted);">Andrew to prepare packaging/website screenshots</span>
+                </div>
+            </div>
+
+            <div class="timeline-item">
+                <div class="timeline-date">Feb 1, 2026</div>
+                <div>
+                    <strong>Clear $13,000 outstanding balance</strong> with Myers Law Group
+                    <br><span style="color: var(--text-muted);">Required before new work can begin</span>
+                </div>
+            </div>
+
+            <div class="timeline-item">
+                <div class="timeline-date">Mar 1, 2026</div>
+                <div>
+                    <strong>DEADLINE: BREZ Juice & BREZ WATER</strong>
+                    <br><span style="color: var(--text-muted);">Respond ($8,500-$10k each) or abandon. Recommendation: ABANDON</span>
+                </div>
+            </div>
+
+            <div class="timeline-item">
+                <div class="timeline-date">Quarterly</div>
+                <div>
+                    <strong>Monitor BREZ application</strong> - check Breeze vs Breez dispute status
+                    <br><span style="color: var(--text-muted);">Once resolved, push forward with distinction argument</span>
+                </div>
+            </div>
+
+            <div class="timeline-item">
+                <div class="timeline-date">Ongoing</div>
+                <div>
+                    <strong>State registrations</strong> - continue filing to build common law rights
+                    <br><span style="color: var(--text-muted);">Priority date maintenance while federal apps pending</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- SECTION 8: Email Templates for Andrea -->
+        <div class="section">
+            <h2 class="section-title">8. Email Templates for Andrea</h2>
+
+            <h3 class="section-subtitle">Email 1: Response to Trademark Counsel (Main Strategy)</h3>
+            <div class="email-template">
+<span class="field">Subject:</span> RE: Trademark Status - Proposed Strategy Path Forward
+
+Nick,
+
+Thank you for the comprehensive status update on our trademark portfolio. After review with leadership, we'd like to propose the following strategy to maximize registrations while minimizing costs.
+
+<span class="field">DECISIONS:</span>
+
+1. <span class="field">ABANDON by March 1:</span> BREZ Juice, BREZ WATER, BREZ WTR, MICRODOSED CANNABIS
+   - Low success probability (&lt;20%) does not justify $8,500-$10k per mark
+
+2. <span class="field">BREZ Core Mark:</span> KEEP ACTIVE
+   - Continue monitoring Breeze vs Breez dispute quarterly
+   - Maintain state registrations for priority date
+   - When dispute resolves, we'll argue distinction: functional beverages vs. smokables/mints
+   - Alternative consideration: Register as "BREZ" (B-r-e-z) without macron if that helps differentiate
+
+3. <span class="field">MODIFIER STRATEGY for Product Lines:</span>
+   - We'd like to file NEW applications using compound marks that match our actual can labeling:
+     * "FLOW [FLAVOR] FEEL GOOD TONIC" (e.g., "FLOW LEMON ELDERFLOWER FEEL GOOD TONIC")
+     * "MUSE [FLAVOR] FEEL GOOD TONIC"
+     * "PASSION [FLAVOR] FEEL GOOD TONIC"
+     * Same format for AMPLIFY, ELEVATE, DREAM, DRIFT
+   - These match our actual packaging and create distinct commercial impression
+   - What is the filing cost per mark for new compound mark applications?
+
+4. <span class="field">NON-THC EVIDENCE:</span>
+   - We will prepare and send specimens showing all brand taglines used with non-THC products
+   - Please confirm what specific specimens you need (website screenshots, packaging photos, POS materials)
+
+5. <span class="field">NARROW GOODS DESCRIPTION:</span>
+   - Please amend all pending applications to use this specific language:
+   "Non-alcoholic beverages, namely, adaptogenic functional tonics containing plant extracts; non-alcoholic herbal beverages infused with adaptogens; non-alcoholic relaxation beverages containing functional ingredients for mood enhancement"
+
+<span class="field">QUESTIONS:</span>
+
+1. What is the estimated cost for this recommended path (modifier filings + non-THC evidence + amendments)?
+
+2. For FLOW/MUSE, should we also prepare crowded field evidence? We can compile third-party USPTO registrations containing these terms across beverage categories.
+
+3. If we register "FLOW LEMON ELDERFLOWER FEEL GOOD TONIC," do we preserve common law rights to use "FLOW" alone on packaging and marketing?
+
+4. For "A BETTER BEVERAGE" - is filing on the Supplemental Register a viable path? We use this phrase extensively and would like to preserve it.
+
+Please send an updated cost estimate for this path so we can arrange payment of the outstanding balance plus the new work.
+
+Best regards,
+Andrea Golan
+General Counsel, BREZ
+            </div>
+
+            <h3 class="section-subtitle">Email 2: "Drinking Reimagined" Acquisition Research Request</h3>
+            <div class="email-template">
+<span class="field">Subject:</span> Research Request - "DRINKING REIMAGINED" Trademark Availability
+
+Nick,
+
+We're interested in potentially acquiring the trademark "DRINKING REIMAGINED" for use as a brand tagline.
+
+Could you please:
+
+1. Search USPTO TESS for current registration status of "DRINKING REIMAGINED"
+2. Identify the current owner (if registered/pending)
+3. Determine if the mark is in active commercial use
+4. Advise whether the mark is dead/abandoned (and we could file fresh)
+5. If active, provide estimated acquisition cost range
+
+<span class="field">Note:</span> We found "SPARKLING WATER, REIMAGINED." registered to The Lemon Perfect Company - please confirm whether this creates any conflict with "DRINKING REIMAGINED."
+
+Our budget for acquisition: $2,500 - $15,000 depending on registration status and owner activity level.
+
+Please include this research in your next invoice.
+
+Best regards,
+Andrea Golan
+General Counsel, BREZ
+            </div>
+
+            <h3 class="section-subtitle">Email 3: Template for Consent Agreement Outreach (FLOW)</h3>
+            <div class="email-template">
+<span class="field">Subject:</span> Trademark Coexistence Inquiry - FLOW
+
+Dear [Flow Water / Blocking Mark Owner],
+
+I am writing on behalf of BREZ, a functional beverage company specializing in adaptogenic tonics. We recently became aware of potential overlap between our trademark application and your registered mark.
+
+<span class="field">Our Products:</span>
+BREZ produces adaptogenic functional tonics sold primarily through wellness retailers, specialty grocery, and direct-to-consumer channels. Our products contain functional ingredients like adaptogens and are marketed for mood enhancement and relaxation.
+
+<span class="field">Key Distinctions:</span>
+- <span class="field">Product Category:</span> Adaptogenic functional tonics (not water)
+- <span class="field">Trade Channels:</span> Wellness stores, specialty grocery, DTC
+- <span class="field">Consumer Demographic:</span> Health-conscious consumers seeking functional benefits
+- <span class="field">Price Point:</span> Premium functional beverages ($5-8/can)
+- <span class="field">Packaging:</span> 12oz cans with distinct branding including "Feel Good Tonic" descriptor
+
+Given these substantial differences in products, trade channels, and consumers, we believe our respective marks can peacefully coexist without consumer confusion.
+
+We would welcome the opportunity to discuss a formal coexistence agreement that would:
+- Define specific product categories for each party
+- Establish guidelines to minimize any potential confusion
+- Benefit both parties by avoiding costly USPTO proceedings
+
+Would you be open to a brief call to discuss?
+
+Best regards,
+Andrea Golan
+General Counsel, BREZ
+[Contact Information]
+            </div>
+
+            <h3 class="section-subtitle">Email 4: Template for Trademark Acquisition Offer</h3>
+            <div class="email-template">
+<span class="field">Subject:</span> Inquiry Regarding [MARK NAME] Trademark
+
+Dear [Owner Name],
+
+I am reaching out on behalf of BREZ, a growing functional beverage company. We are interested in discussing the potential acquisition of your trademark registration for [MARK NAME].
+
+<span class="field">About BREZ:</span>
+BREZ is an innovative beverage company producing adaptogenic functional tonics. We are building a portfolio of brands and trademarks as we expand nationally.
+
+<span class="field">Our Interest:</span>
+The [MARK NAME] trademark aligns with our brand messaging and product positioning. We would be interested in acquiring the full registration, including all associated goodwill.
+
+<span class="field">Proposed Terms:</span>
+- Outright purchase of the trademark registration
+- Assignment of all goodwill associated with the mark
+- Our initial offer: $[AMOUNT] (negotiable based on registration status and use history)
+- Assignment to be recorded with USPTO within 30 days of execution
+
+If you are open to discussing this opportunity, please let me know your availability for a call. We are prepared to move quickly if terms can be agreed.
+
+Best regards,
+Andrea Golan
+General Counsel, BREZ
+[Contact Information]
+            </div>
+        </div>
+
+        <!-- SECTION 9: Why This Strategy Works -->
+        <div class="section">
+            <h2 class="section-title">9. Why This Strategy Will Work</h2>
+
+            <h3 class="section-subtitle">The Core Argument</h3>
+            <div class="highlight-box success">
+                <strong>Other brands get trademarks approved for similar generic words because they:</strong>
+                <ol>
+                    <li>File compound marks with descriptive modifiers (LaCroix + flavor names)</li>
+                    <li>Use highly specific goods descriptions that don't overlap with existing marks</li>
+                    <li>Argue "crowded field" when the term is commonly used across categories</li>
+                    <li>Negotiate consent agreements with blocking mark owners</li>
+                </ol>
+                <br>
+                <strong>We haven't been doing this. We've been filing single generic words ("FLOW," "MUSE") with broad goods descriptions ("non-alcoholic beverages").</strong>
+            </div>
+
+            <h3 class="section-subtitle">The Compelling Case for Myers Law Group</h3>
+            <div class="highlight-box">
+                <strong>Why this path is worth the investment:</strong>
+                <ol>
+                    <li><strong>Matches reality:</strong> Our cans already say "[Flavor] Feel Good Tonic" - we're just registering what we actually use</li>
+                    <li><strong>85%+ success rate</strong> on non-THC evidence submissions - low-hanging fruit</li>
+                    <li><strong>75% success rate</strong> on compound mark filings vs. 35% fighting single-word refusals</li>
+                    <li><strong>$87,100 in savings</strong> compared to fighting everything individually</li>
+                    <li><strong>Common law rights preserved:</strong> We can still use "FLOW" alone, we just can't stop others from using it for different products (which we don't care about anyway)</li>
+                    <li><strong>Our actual goal:</strong> Prevent other functional beverage companies from using our marks - this strategy achieves that</li>
+                </ol>
+            </div>
+
+            <h3 class="section-subtitle">Addressing the "Weaker Mark" Concern</h3>
+            <div class="highlight-box warning">
+                <strong>Concern:</strong> "If we add a modifier, doesn't that weaken our trademark?"
+                <br><br>
+                <strong>Reality:</strong>
+                <ul>
+                    <li>A registered compound mark is STRONGER than an unregistered single word</li>
+                    <li>We keep common law rights to the single word through actual use</li>
+                    <li>Our actual concern is functional beverage competitors - the compound mark protects against that</li>
+                    <li>We don't care if Flow Water or Muse Wine exists - they're not our competitors</li>
+                    <li>A narrow-scope registered mark IS protection for our specific category</li>
+                </ul>
+            </div>
+        </div>
+
+        <!-- Footer -->
+        <div class="section" style="text-align: center; background: transparent; border: none;">
+            <p style="color: var(--text-muted); font-size: 14px;">
+                Document generated: January 16, 2026
+                <br>Owner: Andrea Golan (General Counsel)
+                <br>System: BREZ OS Trademark Portfolio Module
+                <br><br>
+                <strong style="color: var(--lime-accent);">Data source: /src/lib/data/trademark-portfolio.ts</strong>
+            </p>
+        </div>
+    </div>
+</body>
+</html>

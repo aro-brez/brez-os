@@ -19,6 +19,7 @@ import {
   User,
   CheckCircle,
   Clock,
+  Scale,
 } from "lucide-react";
 import { Card, Badge } from "@/components/ui";
 import { devStore } from "@/lib/data/devStore";
@@ -125,6 +126,18 @@ const strategies: StrategyDocument[] = [
     updated: "Coming soon",
     access: "elt",
     tags: ["regulatory", "compliance", "legal"],
+  },
+  {
+    slug: "trademark-portfolio-strategy",
+    title: "Trademark Portfolio Strategy",
+    description: "Complete trademark portfolio status, registration strategy, and counsel communication templates",
+    icon: Scale,
+    owner: "Andrea Golan",
+    status: "active",
+    updated: "January 16, 2026",
+    access: "elt",
+    tags: ["legal", "trademark", "brand", "ip"],
+    progress: 100,
   },
 ];
 
