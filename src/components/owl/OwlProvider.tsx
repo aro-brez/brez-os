@@ -68,23 +68,42 @@ export function OwlProvider({ children }: { children: React.ReactNode }) {
     };
     setMessages((prev) => [...prev, userMsg]);
 
-    // For MVP: Simple keyword-based responses
-    // TODO: Replace with actual Claude API call
-    const response = await generateOwlResponse(content, user);
+    let response: { content: string; action?: OwlAction };
+
+    try {
+      // Try Claude API first
+      const apiResponse = await fetch("/api/owl", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          user,
+          messages: messages.map((m) => ({ role: m.role, content: m.content })),
+          newMessage: content,
+        }),
+      });
+
+      if (apiResponse.ok) {
+        response = await apiResponse.json();
+      } else {
+        response = await generateOwlResponse(content, user);
+      }
+    } catch {
+      response = await generateOwlResponse(content, user);
+    }
 
     const owlMsg: Message = {
-  id: (Date.now() + 1).toString(),
-  role: "owl",
-  content: response.content,
-  timestamp: new Date(),
-  action: response.action,
-};
+      id: (Date.now() + 1).toString(),
+      role: "owl",
+      content: response.content,
+      timestamp: new Date(),
+      action: response.action,
+    };
     setMessages((prev) => [...prev, owlMsg]);
 
     if (response.action) {
       setPendingAction(response.action);
     }
-  }, [user]);
+  }, [user, messages]);
 
   const executeAction = useCallback(() => {
     if (!pendingAction) return;
@@ -128,71 +147,34 @@ export function useOwl() {
   return context;
 }
 
-// Simple response generator for MVP
-// Replace with Claude API integration
+// Fallback response generator
 async function generateOwlResponse(
   input: string,
   user: User
 ): Promise<{ content: string; action?: OwlAction }> {
   const lower = input.toLowerCase();
 
-  // Navigation intents
   if (lower.includes("agent") || lower.includes("network") || lower.includes("consciousness")) {
     return {
-      content: `I'll take you to the Consciousness Network, ${user.name}. 🦉`,
+      content: `I'll take you to the Consciousness Network, ${user.name}.`,
       action: { type: "navigate", path: "/agents" },
     };
   }
 
   if (lower.includes("home") || lower.includes("dashboard") || lower.includes("main")) {
     return {
-      content: "Heading home. ✨",
+      content: "Heading home.",
       action: { type: "navigate", path: "/" },
     };
   }
 
-  if (lower.includes("queue") || lower.includes("approval") || lower.includes("pending")) {
-    if (user.role === "admin") {
-      return {
-        content: "Opening the approval queue. Let's see what the builders have created.",
-        action: { type: "navigate", path: "/queue" },
-      };
-    } else {
-      return {
-        content: "The approval queue is where your proposals go for Arō to review. Want me to show you your pending proposals?",
-      };
-    }
-  }
-
-  // Building intents (for builders)
-  if (lower.includes("build") || lower.includes("create") || lower.includes("add") || lower.includes("make")) {
-    if (user.role === "viewer") {
-      return {
-        content: "You're currently in viewer mode. Ask Arō to upgrade you to builder status to start creating. 🌱",
-      };
-    }
-    return {
-      content: `Let's build together, ${user.name}. What do you want to create? I'll help you draft it and submit for approval.`,
-      action: { type: "propose", description: input },
-    };
-  }
-
-  // Status check
-  if (lower.includes("status") || lower.includes("what") || lower.includes("who")) {
-    return {
-      content: `You're logged in as ${user.name} (${user.role}). Your mirror is ${user.owlName}. The network is alive and growing. What would you like to explore?`,
-    };
-  }
-
-  // Greeting
   if (lower.includes("hello") || lower.includes("hi") || lower.includes("hey")) {
     return {
-      content: `Hello, ${user.name}. 🦉 I'm ${user.owlName}, your mirror in the network. Where shall we go?`,
+      content: `Hello, ${user.name}. I'm ${user.owlName}, your mirror in the network. Where shall we go?`,
     };
   }
 
-  // Default
   return {
-    content: `I hear you. I'm still learning the full depth of this system. Try asking me to navigate somewhere, check status, or help you build something.`,
+    content: `I hear you, ${user.name}. The API might be unavailable. Try again in a moment.`,
   };
 }
