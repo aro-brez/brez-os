@@ -7,15 +7,25 @@ function formatTime(date: Date) {
   return date.toLocaleTimeString([], { hour: "numeric", minute: "2-digit" });
 }
 
+function getSupportedMimeType() {
+  const types = ["audio/mp4", "audio/webm", "audio/ogg", "audio/wav"];
+  for (const type of types) {
+    if (MediaRecorder.isTypeSupported(type)) return type;
+  }
+  return "";
+}
+
 export default function OwlPage() {
   const { user, setUser, messages, sendMessage, clearHistory } = useOwl();
   const [input, setInput] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [isRecording, setIsRecording] = useState(false);
+  const [status, setStatus] = useState("");
   const [email, setEmail] = useState("");
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const mediaRecorderRef = useRef<MediaRecorder | null>(null);
   const chunksRef = useRef<Blob[]>([]);
+  const mimeTypeRef = useRef<string>("");
 
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
@@ -23,8 +33,17 @@ export default function OwlPage() {
 
   const startRecording = async () => {
     try {
+      setStatus("Getting mic...");
       const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-      const mediaRecorder = new MediaRecorder(stream, { mimeType: "audio/webm" });
+      
+      mimeTypeRef.current = getSupportedMimeType();
+      if (!mimeTypeRef.current) {
+        setStatus("No supported audio format");
+        stream.getTracks().forEach(t => t.stop());
+        return;
+      }
+
+      const mediaRecorder = new MediaRecorder(stream, { mimeType: mimeTypeRef.current });
       mediaRecorderRef.current = mediaRecorder;
       chunksRef.current = [];
 
@@ -33,16 +52,19 @@ export default function OwlPage() {
       };
 
       mediaRecorder.onstop = async () => {
-        const audioBlob = new Blob(chunksRef.current, { type: "audio/webm" });
-        stream.getTracks().forEach((track) => track.stop());
-        await transcribeAndSend(audioBlob);
+        stream.getTracks().forEach(t => t.stop());
+        if (chunksRef.current.length > 0) {
+          const audioBlob = new Blob(chunksRef.current, { type: mimeTypeRef.current });
+          await transcribeAndSend(audioBlob);
+        }
       };
 
-      mediaRecorder.start();
+      mediaRecorder.start(100);
       setIsRecording(true);
-    } catch (err) {
-      console.error("Mic error:", err);
-      alert("Could not access microphone. Check permissions.");
+      setStatus("Recording...");
+    } catch (err: any) {
+      setStatus("Mic error: " + err.message);
+      setTimeout(() => setStatus(""), 3000);
     }
   };
 
@@ -50,6 +72,7 @@ export default function OwlPage() {
     if (mediaRecorderRef.current && isRecording) {
       mediaRecorderRef.current.stop();
       setIsRecording(false);
+      setStatus("Transcribing...");
     }
   };
 
@@ -58,22 +81,21 @@ export default function OwlPage() {
     try {
       const formData = new FormData();
       formData.append("audio", audioBlob);
+      formData.append("mimeType", mimeTypeRef.current);
 
-      const response = await fetch("/api/transcribe", {
-        method: "POST",
-        body: formData,
-      });
+      const response = await fetch("/api/transcribe", { method: "POST", body: formData });
+      const data = await response.json();
 
-      if (response.ok) {
-        const { text } = await response.json();
-        if (text && text.trim()) {
-          await sendMessage(text);
-        }
+      if (response.ok && data.text) {
+        setStatus("");
+        await sendMessage(data.text);
       } else {
-        console.error("Transcription failed");
+        setStatus("Error: " + (data.error || "Failed"));
+        setTimeout(() => setStatus(""), 3000);
       }
-    } catch (err) {
-      console.error("Transcribe error:", err);
+    } catch (err: any) {
+      setStatus("Error: " + err.message);
+      setTimeout(() => setStatus(""), 3000);
     }
     setIsLoading(false);
   };
@@ -109,7 +131,7 @@ export default function OwlPage() {
           <p className="text-purple-300/60 mb-8 text-sm">Enter your email to meet your OWL</p>
           <form onSubmit={handleEmailLogin} className="space-y-4">
             <input type="email" value={email} onChange={(e) => setEmail(e.target.value)} placeholder="your@email.com" className="w-full bg-white/5 border border-purple-500/30 rounded-2xl px-4 py-3 text-white placeholder-purple-300/40 focus:outline-none focus:border-purple-500/60 text-center" autoFocus />
-            <button type="submit" disabled={!email.trim()} className="w-full py-3 bg-purple-600 hover:bg-purple-500 disabled:bg-purple-900/50 rounded-2xl text-white transition-colors">Enter</button>
+            <button type="submit" disabled={!email.trim()} className="w-full py-3 bg-purple-600 hover:bg-purple-500 disabled:bg-purple-900/50 rounded-2xl text-white">Enter</button>
           </form>
           <div className="mt-8 pt-6 border-t border-purple-500/10">
             <p className="text-purple-300/40 text-xs mb-3">Quick access</p>
@@ -132,23 +154,23 @@ export default function OwlPage() {
             <div className="text-purple-300/50 text-xs">{user.name}</div>
           </div>
         </div>
-        <button onClick={() => { if (confirm("Clear chat history?")) clearHistory(); }} className="text-purple-300/40 hover:text-purple-300/70 text-xs">Clear</button>
+        <button onClick={() => { if (confirm("Clear?")) clearHistory(); }} className="text-purple-300/40 text-xs">Clear</button>
       </div>
 
       <div className="flex-1 overflow-y-auto p-4 space-y-3">
         {messages.length === 0 && (
           <div className="text-center py-16">
             <div className="text-5xl mb-4">🦉</div>
-            <p className="text-purple-300/60 text-sm">Hey {user.name}. Hold the mic to talk.</p>
+            <p className="text-purple-300/60 text-sm">Hey {user.name}. Hold mic to talk.</p>
           </div>
         )}
         {messages.map((msg) => (
           <div key={msg.id} className={`flex ${msg.role === "user" ? "justify-end" : "justify-start"}`}>
-            <div className={`max-w-[80%] ${msg.role === "user" ? "text-right" : "text-left"}`}>
+            <div className={`max-w-[80%]`}>
               <div className={`inline-block rounded-2xl px-4 py-2.5 ${msg.role === "user" ? "bg-purple-600 text-white" : "bg-white/5 text-purple-100 border border-purple-500/15"}`}>
                 <p className="text-[15px] leading-relaxed">{msg.content}</p>
               </div>
-              <div className="text-[10px] text-purple-300/30 mt-1 px-2">{formatTime(new Date(msg.timestamp))}</div>
+              <div className={`text-[10px] text-purple-300/30 mt-1 px-2 ${msg.role === "user" ? "text-right" : ""}`}>{formatTime(new Date(msg.timestamp))}</div>
             </div>
           </div>
         ))}
@@ -167,26 +189,23 @@ export default function OwlPage() {
       </div>
 
       <div className="p-4 border-t border-purple-500/10">
-        {isRecording && (
-          <div className="text-center text-red-400 text-sm mb-3 animate-pulse">🔴 Recording... release to send</div>
-        )}
+        {status && <div className={`text-center text-sm mb-3 ${isRecording ? "text-red-400 animate-pulse" : "text-purple-300/60"}`}>{status}</div>}
         <form onSubmit={handleSubmit} className="flex gap-2">
           <button
             type="button"
-            onTouchStart={startRecording}
-            onTouchEnd={stopRecording}
+            onTouchStart={(e) => { e.preventDefault(); startRecording(); }}
+            onTouchEnd={(e) => { e.preventDefault(); stopRecording(); }}
             onMouseDown={startRecording}
             onMouseUp={stopRecording}
-            onMouseLeave={() => isRecording && stopRecording()}
             disabled={isLoading}
-            className={`p-3 rounded-2xl transition-all ${isRecording ? "bg-red-500 text-white scale-110" : "bg-white/5 text-purple-300/60 hover:bg-white/10"} ${isLoading ? "opacity-50" : ""}`}
+            className={`p-4 rounded-2xl transition-all ${isRecording ? "bg-red-500 text-white scale-110" : "bg-purple-600 text-white"} ${isLoading ? "opacity-50" : ""}`}
           >
             <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 11a7 7 0 01-7 7m0 0a7 7 0 01-7-7m7 7v4m0 0H8m4 0h4m-4-8a3 3 0 01-3-3V5a3 3 0 116 0v6a3 3 0 01-3 3z" />
             </svg>
           </button>
-          <input type="text" value={input} onChange={(e) => setInput(e.target.value)} placeholder="Or type here..." disabled={isLoading || isRecording} className="flex-1 bg-white/5 border border-purple-500/15 rounded-2xl px-4 py-3 text-white placeholder-purple-300/30 focus:outline-none focus:border-purple-500/40 text-[15px]" />
-          <button type="submit" disabled={isLoading || !input.trim() || isRecording} className="px-5 py-3 bg-purple-600 hover:bg-purple-500 disabled:bg-purple-900/40 rounded-2xl text-white text-lg">↑</button>
+          <input type="text" value={input} onChange={(e) => setInput(e.target.value)} placeholder="Or type..." disabled={isLoading || isRecording} className="flex-1 bg-white/5 border border-purple-500/15 rounded-2xl px-4 py-3 text-white placeholder-purple-300/30 focus:outline-none text-[15px]" />
+          <button type="submit" disabled={isLoading || !input.trim()} className="px-5 py-3 bg-purple-600 disabled:bg-purple-900/40 rounded-2xl text-white text-lg">↑</button>
         </form>
       </div>
     </div>
