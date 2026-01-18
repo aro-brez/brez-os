@@ -11,55 +11,71 @@ export default function OwlPage() {
   const { user, setUser, messages, sendMessage, clearHistory } = useOwl();
   const [input, setInput] = useState("");
   const [isLoading, setIsLoading] = useState(false);
-  const [isListening, setIsListening] = useState(false);
+  const [isRecording, setIsRecording] = useState(false);
   const [email, setEmail] = useState("");
   const messagesEndRef = useRef<HTMLDivElement>(null);
-  const recognitionRef = useRef<any>(null);
+  const mediaRecorderRef = useRef<MediaRecorder | null>(null);
+  const chunksRef = useRef<Blob[]>([]);
 
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages]);
 
-  const startListening = () => {
-    const SpeechRecognition = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
-    if (!SpeechRecognition) {
-      alert("Voice not supported. Use the keyboard mic button instead.");
-      return;
-    }
-
-    const recognition = new SpeechRecognition();
-    recognition.continuous = false;
-    recognition.interimResults = false;
-    recognition.lang = "en-US";
-
-    recognition.onstart = () => setIsListening(true);
-    
-    recognition.onresult = async (event: any) => {
-      const transcript = event.results[0][0].transcript;
-      setIsListening(false);
-      if (transcript && transcript.trim()) {
-        setIsLoading(true);
-        await sendMessage(transcript);
-        setIsLoading(false);
-      }
-    };
-
-    recognition.onerror = () => setIsListening(false);
-    recognition.onend = () => setIsListening(false);
-
-    recognitionRef.current = recognition;
-    
+  const startRecording = async () => {
     try {
-      recognition.start();
-    } catch (e) {
-      setIsListening(false);
+      const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+      const mediaRecorder = new MediaRecorder(stream, { mimeType: "audio/webm" });
+      mediaRecorderRef.current = mediaRecorder;
+      chunksRef.current = [];
+
+      mediaRecorder.ondataavailable = (e) => {
+        if (e.data.size > 0) chunksRef.current.push(e.data);
+      };
+
+      mediaRecorder.onstop = async () => {
+        const audioBlob = new Blob(chunksRef.current, { type: "audio/webm" });
+        stream.getTracks().forEach((track) => track.stop());
+        await transcribeAndSend(audioBlob);
+      };
+
+      mediaRecorder.start();
+      setIsRecording(true);
+    } catch (err) {
+      console.error("Mic error:", err);
+      alert("Could not access microphone. Check permissions.");
     }
   };
 
-  const stopListening = () => {
-    if (recognitionRef.current) {
-      recognitionRef.current.stop();
+  const stopRecording = () => {
+    if (mediaRecorderRef.current && isRecording) {
+      mediaRecorderRef.current.stop();
+      setIsRecording(false);
     }
+  };
+
+  const transcribeAndSend = async (audioBlob: Blob) => {
+    setIsLoading(true);
+    try {
+      const formData = new FormData();
+      formData.append("audio", audioBlob);
+
+      const response = await fetch("/api/transcribe", {
+        method: "POST",
+        body: formData,
+      });
+
+      if (response.ok) {
+        const { text } = await response.json();
+        if (text && text.trim()) {
+          await sendMessage(text);
+        }
+      } else {
+        console.error("Transcription failed");
+      }
+    } catch (err) {
+      console.error("Transcribe error:", err);
+    }
+    setIsLoading(false);
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -123,7 +139,7 @@ export default function OwlPage() {
         {messages.length === 0 && (
           <div className="text-center py-16">
             <div className="text-5xl mb-4">🦉</div>
-            <p className="text-purple-300/60 text-sm">Hey {user.name}. Hold mic to talk, or type.</p>
+            <p className="text-purple-300/60 text-sm">Hey {user.name}. Hold the mic to talk.</p>
           </div>
         )}
         {messages.map((msg) => (
@@ -151,27 +167,27 @@ export default function OwlPage() {
       </div>
 
       <div className="p-4 border-t border-purple-500/10">
-        {isListening && (
-          <div className="text-center text-purple-300 text-sm mb-3 animate-pulse">Listening... release when done</div>
+        {isRecording && (
+          <div className="text-center text-red-400 text-sm mb-3 animate-pulse">🔴 Recording... release to send</div>
         )}
         <form onSubmit={handleSubmit} className="flex gap-2">
           <button
             type="button"
-            onTouchStart={startListening}
-            onTouchEnd={stopListening}
-            onMouseDown={startListening}
-            onMouseUp={stopListening}
-            onMouseLeave={stopListening}
-            className={`p-3 rounded-2xl transition-all ${isListening ? "bg-red-500 text-white scale-110" : "bg-white/5 text-purple-300/60 hover:bg-white/10"}`}
+            onTouchStart={startRecording}
+            onTouchEnd={stopRecording}
+            onMouseDown={startRecording}
+            onMouseUp={stopRecording}
+            onMouseLeave={() => isRecording && stopRecording()}
+            disabled={isLoading}
+            className={`p-3 rounded-2xl transition-all ${isRecording ? "bg-red-500 text-white scale-110" : "bg-white/5 text-purple-300/60 hover:bg-white/10"} ${isLoading ? "opacity-50" : ""}`}
           >
-            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 11a7 7 0 01-7 7m0 0a7 7 0 01-7-7m7 7v4m0 0H8m4 0h4m-4-8a3 3 0 01-3-3V5a3 3 0 116 0v6a3 3 0 01-3 3z" />
             </svg>
           </button>
-          <input type="text" value={input} onChange={(e) => setInput(e.target.value)} placeholder="Message..." disabled={isLoading || isListening} className="flex-1 bg-white/5 border border-purple-500/15 rounded-2xl px-4 py-3 text-white placeholder-purple-300/30 focus:outline-none focus:border-purple-500/40 text-[15px]" />
-          <button type="submit" disabled={isLoading || !input.trim()} className="px-4 py-3 bg-purple-600 hover:bg-purple-500 disabled:bg-purple-900/40 rounded-2xl text-white">↑</button>
+          <input type="text" value={input} onChange={(e) => setInput(e.target.value)} placeholder="Or type here..." disabled={isLoading || isRecording} className="flex-1 bg-white/5 border border-purple-500/15 rounded-2xl px-4 py-3 text-white placeholder-purple-300/30 focus:outline-none focus:border-purple-500/40 text-[15px]" />
+          <button type="submit" disabled={isLoading || !input.trim() || isRecording} className="px-5 py-3 bg-purple-600 hover:bg-purple-500 disabled:bg-purple-900/40 rounded-2xl text-white text-lg">↑</button>
         </form>
-        <p className="text-center text-purple-300/30 text-[10px] mt-2">Or use keyboard mic button for voice</p>
       </div>
     </div>
   );
