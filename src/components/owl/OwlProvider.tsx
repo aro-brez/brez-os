@@ -61,7 +61,7 @@ export function OwlProvider({ children }: { children: React.ReactNode }) {
 
     // Add user message
     const userMsg: Message = {
-      id: crypto.randomUUID(),
+      id: Date.now().toString(),
       role: "user",
       content,
       timestamp: new Date(),
@@ -73,12 +73,12 @@ export function OwlProvider({ children }: { children: React.ReactNode }) {
     const response = await generateOwlResponse(content, user);
 
     const owlMsg: Message = {
-      id: crypto.randomUUID(),
-      role: "owl",
-      content: response.content,
-      timestamp: new Date(),
-      action: response.action,
-    };
+  id: (Date.now() + 1).toString(),
+  role: "owl",
+  content: response.content,
+  timestamp: new Date(),
+  action: response.action,
+};
     setMessages((prev) => [...prev, owlMsg]);
 
     if (response.action) {

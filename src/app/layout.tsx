@@ -3,6 +3,8 @@ import "./globals.css";
 import { AuthProvider } from "@/components/providers/AuthProvider";
 import { AppShell } from "@/components/layout/AppShell";
 import { ServiceWorkerRegistration } from "@/components/pwa/ServiceWorkerRegistration";
+import { OwlProvider } from "@/components/owl/OwlProvider";
+import { OwlPopup } from "@/components/owl/OwlPopup";
 
 export const metadata: Metadata = {
   title: "BRĒZ AI",
@@ -33,7 +35,10 @@ export default function RootLayout({
       <body className="antialiased">
         <ServiceWorkerRegistration />
         <AuthProvider>
-          <AppShell>{children}</AppShell>
+          <OwlProvider>
+            <AppShell>{children}</AppShell>
+            <OwlPopup />
+          </OwlProvider>
         </AuthProvider>
       </body>
     </html>
