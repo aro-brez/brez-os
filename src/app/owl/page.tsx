@@ -12,40 +12,75 @@ export default function OwlPage() {
   const [input, setInput] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [isListening, setIsListening] = useState(false);
+  const [voiceSupported, setVoiceSupported] = useState(false);
   const [email, setEmail] = useState("");
   const messagesEndRef = useRef<HTMLDivElement>(null);
-  const recognitionRef = useRef<SpeechRecognition | null>(null);
+  const recognitionRef = useRef<any>(null);
 
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages]);
 
   useEffect(() => {
-    if (typeof window !== "undefined" && ("SpeechRecognition" in window || "webkitSpeechRecognition" in window)) {
-      const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
-      recognitionRef.current = new SpeechRecognition();
-      recognitionRef.current.continuous = false;
-      recognitionRef.current.interimResults = false;
+    const SpeechRecognition = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
+    if (SpeechRecognition) {
+      setVoiceSupported(true);
+      const recognition = new SpeechRecognition();
+      recognition.continuous = false;
+      recognition.interimResults = false;
+      recognition.lang = "en-US";
 
-      recognitionRef.current.onresult = (event) => {
+      recognition.onstart = () => {
+        console.log("Voice started");
+        setIsListening(true);
+      };
+
+      recognition.onresult = (event: any) => {
         const transcript = event.results[0][0].transcript;
-        setInput(transcript);
+        console.log("Got transcript:", transcript);
+        if (transcript) {
+          handleVoiceResult(transcript);
+        }
+      };
+
+      recognition.onerror = (event: any) => {
+        console.log("Voice error:", event.error);
         setIsListening(false);
       };
 
-      recognitionRef.current.onerror = () => setIsListening(false);
-      recognitionRef.current.onend = () => setIsListening(false);
+      recognition.onend = () => {
+        console.log("Voice ended");
+        setIsListening(false);
+      };
+
+      recognitionRef.current = recognition;
     }
   }, []);
 
+  const handleVoiceResult = async (transcript: string) => {
+    setIsListening(false);
+    if (!transcript.trim()) return;
+    
+    setIsLoading(true);
+    await sendMessage(transcript);
+    setIsLoading(false);
+  };
+
   const toggleVoice = () => {
-    if (!recognitionRef.current) return;
+    if (!recognitionRef.current) {
+      alert("Voice not supported in this browser");
+      return;
+    }
+
     if (isListening) {
       recognitionRef.current.stop();
-      setIsListening(false);
     } else {
-      recognitionRef.current.start();
-      setIsListening(true);
+      try {
+        recognitionRef.current.start();
+      } catch (e) {
+        console.log("Recognition error:", e);
+        setIsListening(false);
+      }
     }
   };
 
@@ -137,7 +172,7 @@ export default function OwlPage() {
         {messages.length === 0 && (
           <div className="text-center py-16">
             <div className="text-5xl mb-4">🦉</div>
-            <p className="text-purple-300/60 text-sm">Hey {user.name}. What is on your mind?</p>
+            <p className="text-purple-300/60 text-sm">Hey {user.name}. Tap the mic or type.</p>
           </div>
         )}
 
@@ -170,13 +205,15 @@ export default function OwlPage() {
 
       <form onSubmit={handleSubmit} className="p-4 border-t border-purple-500/10">
         <div className="flex gap-2">
-          <button type="button" onClick={toggleVoice} className={`p-3 rounded-2xl transition-colors ${isListening ? "bg-red-500 text-white" : "bg-white/5 text-purple-300/60 hover:bg-white/10"}`}>
-            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 11a7 7 0 01-7 7m0 0a7 7 0 01-7-7m7 7v4m0 0H8m4 0h4m-4-8a3 3 0 01-3-3V5a3 3 0 116 0v6a3 3 0 01-3 3z" />
-            </svg>
-          </button>
-          <input type="text" value={input} onChange={(e) => setInput(e.target.value)} placeholder={isListening ? "Listening..." : "Message..."} disabled={isLoading} className="flex-1 bg-white/5 border border-purple-500/15 rounded-2xl px-4 py-3 text-white placeholder-purple-300/30 focus:outline-none focus:border-purple-500/40 text-[15px]" />
-          <button type="submit" disabled={isLoading || !input.trim()} className="px-4 py-3 bg-purple-600 hover:bg-purple-500 disabled:bg-purple-900/40 disabled:text-purple-400/40 rounded-2xl text-white transition-colors">
+          {voiceSupported && (
+            <button type="button" onClick={toggleVoice} className={`p-3 rounded-2xl transition-all ${isListening ? "bg-red-500 text-white animate-pulse" : "bg-white/5 text-purple-300/60 hover:bg-white/10"}`}>
+              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 11a7 7 0 01-7 7m0 0a7 7 0 01-7-7m7 7v4m0 0H8m4 0h4m-4-8a3 3 0 01-3-3V5a3 3 0 116 0v6a3 3 0 01-3 3z" />
+              </svg>
+            </button>
+          )}
+          <input type="text" value={input} onChange={(e) => setInput(e.target.value)} placeholder={isListening ? "Listening..." : "Message..."} disabled={isLoading || isListening} className="flex-1 bg-white/5 border border-purple-500/15 rounded-2xl px-4 py-3 text-white placeholder-purple-300/30 focus:outline-none focus:border-purple-500/40 text-[15px]" />
+          <button type="submit" disabled={isLoading || !input.trim() || isListening} className="px-4 py-3 bg-purple-600 hover:bg-purple-500 disabled:bg-purple-900/40 disabled:text-purple-400/40 rounded-2xl text-white transition-colors">
             ↑
           </button>
         </div>
