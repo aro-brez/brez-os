@@ -19,7 +19,24 @@ export interface Lever {
   description: string;
 }
 
+export interface Recommendation {
+  investAmount: number;
+  investWhere: string;
+  expectedCustomers: number;
+  expectedSubscribers: number;
+  subscriberLTV: number;
+  totalLTVProfit: number;
+  retailLiftWeekly: number;
+  retailLiftLagWeeks: number;
+  paybackMonths: number;
+  firstOrderAOV: number;
+  subAOV: number;
+}
+
 export interface MomentumData {
+  // THE RECOMMENDATION - Answer the core question
+  recommendation: Recommendation;
+
   // Trajectory
   trajectory: 'gaining' | 'losing' | 'stable';
   trajectoryPercent: number;
@@ -197,7 +214,31 @@ export function useMomentumData(): MomentumData {
       contributionMargin: UNIT_ECONOMICS.margins.dtc.contributionMarginActual,
     };
 
+    // THE RECOMMENDATION - Answer: Where to invest, how much, what you get
+    const investAmount = weeklySpendCeiling;
+    const expectedCustomers = Math.round(investAmount / cac);
+    const subConversionRate = UNIT_ECONOMICS.subscription.conversionRate;
+    const expectedSubscribers = Math.round(expectedCustomers * subConversionRate);
+    const subscriberLTV = Math.round(cac * UNIT_ECONOMICS.ltvMultiples.month12); // ~$603
+    const totalLTVProfit = expectedSubscribers * subscriberLTV;
+    const retailLiftWeekly = Math.round(investAmount * VALIDATED_METRICS.alpha);
+
+    const recommendation: Recommendation = {
+      investAmount,
+      investWhere: 'DTC Ads',
+      expectedCustomers,
+      expectedSubscribers,
+      subscriberLTV,
+      totalLTVProfit,
+      retailLiftWeekly,
+      retailLiftLagWeeks: 6,
+      paybackMonths: Math.round(paybackMonths * 10) / 10,
+      firstOrderAOV: Math.round(DTC_YTD_2025.ytd.firstTimeAOV),
+      subAOV: Math.round(DTC_YTD_2025.ytd.subAOV),
+    };
+
     return {
+      recommendation,
       trajectory,
       trajectoryPercent: Math.round(trajectoryPercent * 10) / 10,
       trajectoryReason,

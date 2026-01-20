@@ -1,59 +1,91 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import { TrendingUp, TrendingDown, Minus, DollarSign, Target, Users, ShoppingCart, ArrowRight, AlertCircle, CheckCircle, Zap } from "lucide-react";
+import { TrendingUp, TrendingDown, Minus, Target, Users, ShoppingCart, ArrowRight, ArrowDown, Zap, RefreshCw } from "lucide-react";
 import { useMomentumData, Lever } from "@/lib/hooks/useMomentumData";
 import { OwlPopup } from "@/components/owl/OwlPopup";
 
 export default function MomentumCommandCenter() {
   const router = useRouter();
   const data = useMomentumData();
+  const rec = data.recommendation;
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-[#0D0D2A] via-[#1a1a3e] to-[#0D0D2A] p-4 pb-32">
       {/* Header */}
-      <div className="flex items-center justify-between mb-6">
+      <div className="flex items-center justify-between mb-4">
         <div>
-          <h1 className="text-white text-xl font-semibold">BREZ Command Center</h1>
+          <h1 className="text-white text-lg font-semibold">BREZ Command Center</h1>
           <p className="text-purple-300/50 text-xs">Data as of {data.lastUpdated}</p>
         </div>
+        <div className={`px-3 py-1 rounded-full text-xs font-medium ${
+          data.trajectory === 'gaining' ? 'bg-green-500/20 text-green-400' :
+          data.trajectory === 'losing' ? 'bg-red-500/20 text-red-400' : 'bg-yellow-500/20 text-yellow-400'
+        }`}>
+          {data.trajectory === 'gaining' ? '↑ GAINING' : data.trajectory === 'losing' ? '↓ LOSING' : '→ STEADY'}
+        </div>
       </div>
 
-      {/* 1. MOMENTUM TRAJECTORY - Hero */}
-      <div className={`rounded-2xl p-6 mb-4 border ${
-        data.trajectory === 'gaining'
-          ? 'bg-green-500/10 border-green-500/30'
-          : data.trajectory === 'losing'
-          ? 'bg-red-500/10 border-red-500/30'
-          : 'bg-yellow-500/10 border-yellow-500/30'
-      }`}>
-        <div className="flex items-center justify-between">
-          <div className="flex items-center gap-3">
-            {data.trajectory === 'gaining' && <TrendingUp className="w-8 h-8 text-green-400" />}
-            {data.trajectory === 'losing' && <TrendingDown className="w-8 h-8 text-red-400" />}
-            {data.trajectory === 'stable' && <Minus className="w-8 h-8 text-yellow-400" />}
+      {/* THE RECOMMENDATION - Hero */}
+      <div className="bg-gradient-to-br from-purple-900/40 to-indigo-900/40 border border-purple-500/30 rounded-2xl p-5 mb-4">
+        <div className="text-purple-300/60 text-xs mb-2">THIS WEEK&apos;S RECOMMENDATION</div>
+
+        <div className="flex items-baseline gap-2 mb-4">
+          <span className="text-3xl font-bold text-white">Invest ${(rec.investAmount / 1000).toFixed(0)}K</span>
+          <span className="text-purple-300">in {rec.investWhere}</span>
+        </div>
+
+        {/* The Flywheel */}
+        <div className="bg-black/20 rounded-xl p-4 mb-4">
+          <div className="grid grid-cols-4 gap-2 text-center">
             <div>
-              <div className={`text-2xl font-bold ${
-                data.trajectory === 'gaining' ? 'text-green-400' :
-                data.trajectory === 'losing' ? 'text-red-400' : 'text-yellow-400'
-              }`}>
-                {data.trajectory === 'gaining' ? 'GAINING MOMENTUM' :
-                 data.trajectory === 'losing' ? 'LOSING MOMENTUM' : 'HOLDING STEADY'}
-              </div>
-              <div className="text-purple-300/70 text-sm">{data.trajectoryReason}</div>
+              <div className="text-2xl font-mono text-cyan-400">{rec.expectedCustomers}</div>
+              <div className="text-purple-300/50 text-xs">customers</div>
+            </div>
+            <div>
+              <div className="text-2xl font-mono text-green-400">{rec.expectedSubscribers}</div>
+              <div className="text-purple-300/50 text-xs">subscribers</div>
+              <div className="text-purple-300/40 text-xs">({(rec.expectedSubscribers / rec.expectedCustomers * 100).toFixed(0)}%)</div>
+            </div>
+            <div>
+              <div className="text-2xl font-mono text-amber-400">${(rec.totalLTVProfit / 1000).toFixed(0)}K</div>
+              <div className="text-purple-300/50 text-xs">LTV profit</div>
+              <div className="text-purple-300/40 text-xs">(12mo)</div>
+            </div>
+            <div>
+              <div className="text-2xl font-mono text-purple-400">+${(rec.retailLiftWeekly / 1000).toFixed(1)}K</div>
+              <div className="text-purple-300/50 text-xs">retail/wk</div>
+              <div className="text-purple-300/40 text-xs">({rec.retailLiftLagWeeks}wk lag)</div>
             </div>
           </div>
-          <div className={`text-xl font-mono ${data.trajectoryPercent >= 0 ? 'text-green-400' : 'text-red-400'}`}>
-            {data.trajectoryPercent >= 0 ? '+' : ''}{data.trajectoryPercent}%
+        </div>
+
+        {/* Key Numbers */}
+        <div className="grid grid-cols-4 gap-3 text-center">
+          <div>
+            <div className="text-white font-mono">${rec.firstOrderAOV}</div>
+            <div className="text-purple-300/40 text-xs">1st AOV</div>
+          </div>
+          <div>
+            <div className="text-white font-mono">${rec.subAOV}</div>
+            <div className="text-purple-300/40 text-xs">Sub AOV</div>
+          </div>
+          <div>
+            <div className="text-white font-mono">{rec.paybackMonths}mo</div>
+            <div className="text-purple-300/40 text-xs">Payback</div>
+          </div>
+          <div>
+            <div className="text-white font-mono">${rec.subscriberLTV}</div>
+            <div className="text-purple-300/40 text-xs">Sub LTV</div>
           </div>
         </div>
       </div>
 
-      {/* 2. CAN WE INVEST MORE? */}
+      {/* WORKING CAPITAL STATUS */}
       <div className="bg-white/5 border border-purple-500/20 rounded-2xl p-4 mb-4">
         <div className="flex items-center justify-between">
           <div>
-            <div className="text-purple-300/60 text-xs mb-1">CAN WE INVEST MORE?</div>
+            <div className="text-purple-300/60 text-xs mb-1">CAN WE INVEST?</div>
             <div className={`text-lg font-bold ${
               data.canInvestMore === 'yes' ? 'text-green-400' :
               data.canInvestMore === 'caution' ? 'text-yellow-400' : 'text-red-400'
@@ -67,8 +99,12 @@ export default function MomentumCommandCenter() {
             <div className="text-white font-mono">${(data.cashHeadroom / 1000).toFixed(0)}K</div>
           </div>
           <div className="text-right">
-            <div className="text-purple-300/60 text-xs">Max Weekly Spend</div>
-            <div className="text-white font-mono">${(data.weeklySpendCeiling / 1000).toFixed(0)}K</div>
+            <div className="text-purple-300/60 text-xs">Cash</div>
+            <div className="text-white font-mono">${(data.cash.current / 1000).toFixed(0)}K</div>
+          </div>
+          <div className="text-right">
+            <div className="text-purple-300/60 text-xs">Runway</div>
+            <div className="text-white font-mono">{data.cash.runwayWeeks}wk</div>
           </div>
         </div>
       </div>
@@ -83,85 +119,30 @@ export default function MomentumCommandCenter() {
         </div>
       </div>
 
-      {/* 4. THE CHAIN: DTC → Demand → Retail */}
+      {/* THE FLYWHEEL - Visual */}
       <div className="bg-white/5 border border-purple-500/20 rounded-2xl p-4 mb-4">
-        <div className="text-purple-300/60 text-xs mb-3">THE CHAIN: DTC SPEND → DEMAND → RETAIL VELOCITY</div>
-        <div className="flex items-center justify-between">
-          <div className="text-center">
-            <div className="text-white font-mono text-lg">${(data.chain.dtcWeeklySpend / 1000).toFixed(0)}K</div>
-            <div className="text-purple-300/50 text-xs">DTC/wk</div>
-          </div>
-          <div className="flex flex-col items-center">
-            <ArrowRight className="w-6 h-6 text-purple-400" />
-            <div className="text-purple-400 text-xs">{data.chain.demandLagWeeks}wk lag</div>
-          </div>
-          <div className="text-center">
-            <div className="text-white font-mono text-lg">Demand</div>
-            <div className="text-purple-300/50 text-xs">builds</div>
-          </div>
-          <div className="flex flex-col items-center">
-            <ArrowRight className="w-6 h-6 text-purple-400" />
-            <div className="text-purple-400 text-xs">{data.chain.retailLagWeeks}wk lag</div>
-          </div>
-          <div className="text-center">
-            <div className="text-white font-mono text-lg">${(data.chain.retailWeeklyVelocity / 1000).toFixed(0)}K</div>
-            <div className="text-purple-300/50 text-xs">Retail/wk</div>
-          </div>
+        <div className="text-purple-300/60 text-xs mb-3">THE FLYWHEEL</div>
+        <div className="flex items-center justify-center gap-2 text-sm">
+          <div className="bg-cyan-500/20 text-cyan-400 px-3 py-1 rounded-lg">DTC Spend</div>
+          <ArrowRight className="w-4 h-4 text-purple-400" />
+          <div className="bg-green-500/20 text-green-400 px-3 py-1 rounded-lg">Customers</div>
+          <ArrowRight className="w-4 h-4 text-purple-400" />
+          <div className="bg-amber-500/20 text-amber-400 px-3 py-1 rounded-lg">Subs + LTV</div>
         </div>
-        <div className="mt-3 text-center text-purple-300/40 text-xs">
-          Alpha: {(data.chain.alpha * 100).toFixed(1)}% retail revenue per $1 ad spend
+        <div className="flex items-center justify-center mt-2">
+          <RefreshCw className="w-4 h-4 text-purple-400 mr-2" />
+          <span className="text-purple-300/50 text-xs">+ Retail Velocity (6wk lag) → Reinvest</span>
         </div>
       </div>
 
-      {/* 5. CASH GUARDRAILS */}
-      <div className="bg-white/5 border border-purple-500/20 rounded-2xl p-4 mb-4">
-        <div className="text-purple-300/60 text-xs mb-3">CASH GUARDRAILS</div>
-        <div className="grid grid-cols-3 gap-4 mb-3">
-          <div>
-            <div className="text-purple-300/50 text-xs">Cash</div>
-            <div className="text-white font-mono">${(data.cash.current / 1000).toFixed(0)}K</div>
-          </div>
-          <div>
-            <div className="text-purple-300/50 text-xs">Floor</div>
-            <div className="text-white font-mono">${(data.cash.floor / 1000).toFixed(0)}K</div>
-          </div>
-          <div>
-            <div className="text-purple-300/50 text-xs">Runway</div>
-            <div className="text-white font-mono">{data.cash.runwayWeeks}wk</div>
-          </div>
-        </div>
-        <div className="grid grid-cols-2 gap-4">
-          <div>
-            <div className="text-purple-300/50 text-xs">AP Total</div>
-            <div className="text-amber-400 font-mono">${(data.cash.apTotal / 1000000).toFixed(1)}M</div>
-          </div>
-          <div>
-            <div className="text-purple-300/50 text-xs">Loan Available</div>
-            <div className="text-green-400 font-mono">${(data.cash.loanAvailable / 1000000).toFixed(1)}M</div>
-          </div>
-        </div>
-      </div>
-
-      {/* 6. UNIT ECONOMICS / LTV */}
-      <div className="bg-white/5 border border-purple-500/20 rounded-2xl p-4 mb-6">
-        <div className="text-purple-300/60 text-xs mb-3">UNIT ECONOMICS</div>
-        <div className="grid grid-cols-4 gap-2">
-          <div className="text-center">
-            <div className="text-white font-mono text-lg">${data.economics.cac.toFixed(0)}</div>
-            <div className="text-purple-300/50 text-xs">CAC</div>
-          </div>
-          <div className="text-center">
-            <div className="text-white font-mono text-lg">{data.economics.paybackMonths}mo</div>
-            <div className="text-purple-300/50 text-xs">Payback</div>
-          </div>
-          <div className="text-center">
-            <div className="text-white font-mono text-lg">{data.economics.ltvCacRatio}x</div>
-            <div className="text-purple-300/50 text-xs">LTV:CAC</div>
-          </div>
-          <div className="text-center">
-            <div className="text-white font-mono text-lg">{(data.economics.contributionMargin * 100).toFixed(0)}%</div>
-            <div className="text-purple-300/50 text-xs">CM</div>
-          </div>
+      {/* AP/LOAN STATUS - Compact */}
+      <div className="bg-white/5 border border-purple-500/20 rounded-xl p-3 mb-4">
+        <div className="flex items-center justify-between text-sm">
+          <div className="text-purple-300/50">AP: <span className="text-amber-400 font-mono">${(data.cash.apTotal / 1000000).toFixed(1)}M</span></div>
+          <div className="text-purple-300/30">|</div>
+          <div className="text-purple-300/50">Loan Avail: <span className="text-green-400 font-mono">${(data.cash.loanAvailable / 1000000).toFixed(1)}M</span></div>
+          <div className="text-purple-300/30">|</div>
+          <div className="text-purple-300/50">LTV:CAC: <span className="text-white font-mono">{data.economics.ltvCacRatio}x</span></div>
         </div>
       </div>
 
