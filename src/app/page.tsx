@@ -1,17 +1,42 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { TrendingUp, TrendingDown, AlertTriangle, CheckCircle, RefreshCw } from "lucide-react";
+import { TrendingUp, TrendingDown, AlertTriangle, CheckCircle, RefreshCw, X, ChevronRight, ChevronLeft } from "lucide-react";
 import { useMomentumData, saveOverrides, DataOverrides } from "@/lib/hooks/useMomentumData";
 import { OwlPopup } from "@/components/owl/OwlPopup";
+
+// Format number as millions (e.g., 1629000 → "$1.63M")
+function formatM(value: number): string {
+  return `$${(value / 1000000).toFixed(2)}M`;
+}
+
+// Format smaller numbers as K
+function formatK(value: number): string {
+  return `$${(value / 1000).toFixed(0)}K`;
+}
 
 export default function CommandCenter() {
   const data = useMomentumData();
   const rec = data.recommendation;
   const [showUpdate, setShowUpdate] = useState(false);
   const [mounted, setMounted] = useState(false);
+  const [showOnboarding, setShowOnboarding] = useState(false);
+  const [onboardingStep, setOnboardingStep] = useState(0);
 
-  useEffect(() => { setMounted(true); }, []);
+  useEffect(() => {
+    setMounted(true);
+    // Check if first time user
+    const hasSeenOnboarding = localStorage.getItem('brez-onboarding-complete');
+    if (!hasSeenOnboarding) {
+      setShowOnboarding(true);
+    }
+  }, []);
+
+  const completeOnboarding = () => {
+    localStorage.setItem('brez-onboarding-complete', 'true');
+    setShowOnboarding(false);
+  };
+
   if (!mounted) return null;
 
   // January 2026 - Real numbers
@@ -88,8 +113,8 @@ export default function CommandCenter() {
         <div className="bg-white/5 rounded-2xl p-6 mb-4">
           <div className="text-white/50 text-sm mb-2">REVENUE THIS MONTH</div>
           <div className="flex items-end gap-3">
-            <span className="text-5xl font-bold text-white">${(currentMonth.revenue / 1000).toFixed(0)}K</span>
-            <span className="text-white/40 text-xl mb-2">/ ${(monthlyTarget.revenue / 1000).toFixed(0)}K goal</span>
+            <span className="text-5xl font-bold text-white">{formatM(currentMonth.revenue)}</span>
+            <span className="text-white/40 text-xl mb-2">/ {formatM(monthlyTarget.revenue)} goal</span>
           </div>
 
           {/* Progress Bar */}
@@ -143,14 +168,14 @@ export default function CommandCenter() {
 
         {willHitTarget ? (
           <p className="text-white/70">
-            At current pace, we&apos;ll hit <span className="text-green-400 font-medium">${(projectedRevenue / 1000).toFixed(0)}K</span> by end of month.
+            At current pace, we&apos;ll hit <span className="text-green-400 font-medium">{formatM(projectedRevenue)}</span> by end of month.
           </p>
         ) : (
           <div className="space-y-2">
             <p className="text-white/70">
-              At current pace, we&apos;ll only hit <span className="text-amber-400 font-medium">${(projectedRevenue / 1000).toFixed(0)}K</span>.
+              At current pace, we&apos;ll only hit <span className="text-amber-400 font-medium">{formatM(projectedRevenue)}</span>.
               <br />
-              That&apos;s <span className="text-amber-400 font-medium">${(Math.abs(revenueGap) / 1000).toFixed(0)}K short</span> of our ${(monthlyTarget.revenue / 1000).toFixed(0)}K goal.
+              That&apos;s <span className="text-amber-400 font-medium">{formatM(Math.abs(revenueGap))} short</span> of our {formatM(monthlyTarget.revenue)} goal.
             </p>
           </div>
         )}
@@ -174,10 +199,10 @@ export default function CommandCenter() {
 
             <div className="flex items-center justify-between p-3 bg-purple-500/10 rounded-xl">
               <div>
-                <div className="text-white font-medium">Spend ${(rec.investAmount / 1000).toFixed(0)}K/week on ads</div>
+                <div className="text-white font-medium">Spend {formatK(rec.investAmount)}/week on ads</div>
                 <div className="text-white/50 text-sm">At ${data.economics.cac.toFixed(0)} CAC = {rec.expectedCustomers} customers/week</div>
               </div>
-              <div className="text-purple-400 font-bold">${(rec.investAmount / 1000).toFixed(0)}K</div>
+              <div className="text-purple-400 font-bold">{formatK(rec.investAmount)}</div>
             </div>
           </div>
         </div>
@@ -188,7 +213,7 @@ export default function CommandCenter() {
         <div className="text-purple-300 text-sm mb-2">THIS WEEK&apos;S PLAY</div>
 
         <div className="text-white text-xl font-bold mb-4">
-          Invest ${(rec.investAmount / 1000).toFixed(0)}K in DTC Ads
+          Invest {formatK(rec.investAmount)} in DTC Ads
         </div>
 
         <div className="grid grid-cols-3 gap-3 text-center">
@@ -215,12 +240,12 @@ export default function CommandCenter() {
           <div className="flex items-center justify-between">
             <span className="text-white/70">Cash available:</span>
             <span className={`font-bold ${data.cashHeadroom >= rec.investAmount ? 'text-green-400' : 'text-red-400'}`}>
-              ${(data.cashHeadroom / 1000).toFixed(0)}K
+              {formatK(data.cashHeadroom)}
             </span>
           </div>
           {data.cashHeadroom < rec.investAmount && (
             <div className="text-red-400/70 text-sm mt-1">
-              Need ${((rec.investAmount - data.cashHeadroom) / 1000).toFixed(0)}K more to execute this play
+              Need {formatK(rec.investAmount - data.cashHeadroom)} more to execute this play
             </div>
           )}
         </div>
@@ -256,15 +281,15 @@ export default function CommandCenter() {
         <div className="space-y-2 text-sm">
           <div className="flex justify-between">
             <span className="text-white/70">Cash on hand</span>
-            <span className="text-white font-mono">${(data.cash.current / 1000).toFixed(0)}K</span>
+            <span className="text-white font-mono">{formatK(data.cash.current)}</span>
           </div>
           <div className="flex justify-between">
             <span className="text-white/70">Reserve floor</span>
-            <span className="text-white/50 font-mono">${(data.cash.floor / 1000).toFixed(0)}K</span>
+            <span className="text-white/50 font-mono">{formatK(data.cash.floor)}</span>
           </div>
           <div className="flex justify-between border-t border-white/10 pt-2">
             <span className="text-white/70">Available to invest</span>
-            <span className="text-cyan-400 font-mono font-bold">${(data.cashHeadroom / 1000).toFixed(0)}K</span>
+            <span className="text-cyan-400 font-mono font-bold">{formatK(data.cashHeadroom)}</span>
           </div>
           <div className="flex justify-between">
             <span className="text-white/70">Runway</span>
@@ -283,6 +308,148 @@ export default function CommandCenter() {
 
       {/* Owl */}
       <OwlPopup />
+
+      {/* First-time User Onboarding */}
+      {showOnboarding && (
+        <OnboardingOverlay
+          step={onboardingStep}
+          onNext={() => setOnboardingStep(s => s + 1)}
+          onPrev={() => setOnboardingStep(s => s - 1)}
+          onComplete={completeOnboarding}
+        />
+      )}
+    </div>
+  );
+}
+
+// Onboarding steps configuration
+const onboardingSteps = [
+  {
+    title: "Welcome to BREZ Command Center",
+    description: "This is your single source of truth for company performance. Let's walk through what you're seeing.",
+    highlight: null,
+  },
+  {
+    title: "The Scoreboard",
+    description: "This shows our revenue progress this month. The big number is where we are now, and the goal is what we're aiming for. The progress bar fills up as we get closer.",
+    highlight: "scoreboard",
+  },
+  {
+    title: "Are We On Track?",
+    description: "This tells you instantly if we're pacing to hit our goal. Green means we're good. Amber means we need to pick up the pace.",
+    highlight: "pacing",
+  },
+  {
+    title: "What Needs To Change",
+    description: "When we're behind, this section shows exactly what we need to do — how many more customers and how much ad spend it takes to close the gap.",
+    highlight: "action",
+  },
+  {
+    title: "This Week's Play",
+    description: "The recommended action for this week. Shows the investment amount and expected results: new customers, subscribers, and time to profit.",
+    highlight: "play",
+  },
+  {
+    title: "Ask Owl Anything",
+    description: "See that owl in the corner? Click it to ask questions about the business. It knows all about our metrics and can help you understand the data.",
+    highlight: "owl",
+  },
+];
+
+function OnboardingOverlay({
+  step,
+  onNext,
+  onPrev,
+  onComplete,
+}: {
+  step: number;
+  onNext: () => void;
+  onPrev: () => void;
+  onComplete: () => void;
+}) {
+  const currentStep = onboardingSteps[step];
+  const isLastStep = step === onboardingSteps.length - 1;
+  const isFirstStep = step === 0;
+
+  return (
+    <div className="fixed inset-0 z-50">
+      {/* Backdrop */}
+      <div className="absolute inset-0 bg-black/80" />
+
+      {/* Content */}
+      <div className="absolute inset-0 flex items-center justify-center p-4">
+        <div className="bg-gradient-to-br from-gray-900 to-gray-800 border border-purple-500/30 rounded-2xl p-6 max-w-md w-full shadow-2xl">
+          {/* Step indicator */}
+          <div className="flex items-center justify-between mb-4">
+            <div className="flex gap-1.5">
+              {onboardingSteps.map((_, i) => (
+                <div
+                  key={i}
+                  className={`h-1.5 rounded-full transition-all ${
+                    i === step ? 'w-6 bg-purple-500' : 'w-1.5 bg-white/20'
+                  }`}
+                />
+              ))}
+            </div>
+            <button
+              onClick={onComplete}
+              className="text-white/40 hover:text-white p-1"
+            >
+              <X className="w-5 h-5" />
+            </button>
+          </div>
+
+          {/* Step content */}
+          <div className="mb-6">
+            <h2 className="text-xl font-bold text-white mb-2">{currentStep.title}</h2>
+            <p className="text-white/70 leading-relaxed">{currentStep.description}</p>
+          </div>
+
+          {/* Navigation */}
+          <div className="flex items-center justify-between">
+            <button
+              onClick={onPrev}
+              disabled={isFirstStep}
+              className={`flex items-center gap-1 px-4 py-2 rounded-lg transition-all ${
+                isFirstStep
+                  ? 'text-white/20 cursor-not-allowed'
+                  : 'text-white/60 hover:text-white hover:bg-white/10'
+              }`}
+            >
+              <ChevronLeft className="w-4 h-4" />
+              Back
+            </button>
+
+            {isLastStep ? (
+              <button
+                onClick={onComplete}
+                className="flex items-center gap-2 px-6 py-2 bg-purple-600 hover:bg-purple-500 rounded-lg text-white font-medium transition-all"
+              >
+                Get Started
+                <ChevronRight className="w-4 h-4" />
+              </button>
+            ) : (
+              <button
+                onClick={onNext}
+                className="flex items-center gap-1 px-4 py-2 bg-white/10 hover:bg-white/20 rounded-lg text-white transition-all"
+              >
+                Next
+                <ChevronRight className="w-4 h-4" />
+              </button>
+            )}
+          </div>
+
+          {/* Skip option */}
+          {!isLastStep && (
+            <button
+              onClick={onComplete}
+              className="w-full mt-4 text-white/40 hover:text-white/60 text-sm"
+            >
+              Skip tour
+            </button>
+          )}
+        </div>
+      </div>
     </div>
   );
 }
