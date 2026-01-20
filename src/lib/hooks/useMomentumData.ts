@@ -28,9 +28,38 @@ export interface Recommendation {
   totalLTVProfit: number;
   retailLiftWeekly: number;
   retailLiftLagWeeks: number;
-  paybackMonths: number;
+  paybackWeeks: number;
   firstOrderAOV: number;
   subAOV: number;
+}
+
+// Overridable inputs - can be set via UI
+export interface DataOverrides {
+  cashOnHand?: number;
+  cac?: number;
+  subConversionRate?: number;
+  weeklySpend?: number;
+  firstOrderAOV?: number;
+  subAOV?: number;
+  ltvMultiple?: number;
+  alpha?: number;
+}
+
+// Get overrides from localStorage
+function getOverrides(): DataOverrides {
+  if (typeof window === 'undefined') return {};
+  try {
+    const stored = localStorage.getItem('brez-data-overrides');
+    return stored ? JSON.parse(stored) : {};
+  } catch {
+    return {};
+  }
+}
+
+// Save overrides to localStorage
+export function saveOverrides(overrides: DataOverrides): void {
+  if (typeof window === 'undefined') return;
+  localStorage.setItem('brez-data-overrides', JSON.stringify(overrides));
 }
 
 export interface MomentumData {
@@ -84,6 +113,9 @@ export interface MomentumData {
 
 export function useMomentumData(): MomentumData {
   return useMemo(() => {
+    // Get any user overrides
+    const overrides = getOverrides();
+
     // Calculate trajectory from DTC trends
     const months = Object.values(DTC_YTD_2025.monthly);
     const recentMonths = months.slice(-2);
@@ -115,8 +147,9 @@ export function useMomentumData(): MomentumData {
       trajectoryReason = 'Metrics holding steady with minor fluctuations';
     }
 
-    // Investment capacity
-    const headroom = CASH_POSITION.cashOnHand - CASH_POSITION.minimumReserve;
+    // Investment capacity (use override if provided)
+    const cashOnHand = overrides.cashOnHand ?? CASH_POSITION.cashOnHand;
+    const headroom = cashOnHand - CASH_POSITION.minimumReserve;
     const weeklyBurn = CASH_POSITION.weeklyFixedOpex.totalMonthly / 4.33;
     const runwayWeeks = Math.floor(headroom / weeklyBurn);
 
@@ -202,26 +235,31 @@ export function useMomentumData(): MomentumData {
       loanAvailable: CASH_POSITION.loanOption.amount,
     };
 
-    // LTV Economics
-    const cac = DTC_YTD_2025.ytd.cac;
-    const subValue = DTC_YTD_2025.ytd.subAOV * 12 * 0.43; // Annual sub value at 43% margin
-    const paybackMonths = cac / (subValue / 12);
+    // LTV Economics (use overrides if provided)
+    const cac = overrides.cac ?? DTC_YTD_2025.ytd.cac;
+    const firstOrderAOV = overrides.firstOrderAOV ?? DTC_YTD_2025.ytd.firstTimeAOV;
+    const subAOV = overrides.subAOV ?? DTC_YTD_2025.ytd.subAOV;
+    const ltvMultiple = overrides.ltvMultiple ?? UNIT_ECONOMICS.ltvMultiples.month12;
+    const alpha = overrides.alpha ?? VALIDATED_METRICS.alpha;
+    const subConversionRate = overrides.subConversionRate ?? UNIT_ECONOMICS.subscription.conversionRate;
+
+    const subValue = subAOV * 12 * 0.43; // Annual sub value at 43% margin
+    const paybackWeeks = Math.round((cac / (subValue / 52)) * 10) / 10; // In weeks
 
     const economics = {
       cac,
-      paybackMonths: Math.round(paybackMonths * 10) / 10,
-      ltvCacRatio: UNIT_ECONOMICS.ltvMultiples.month12,
+      paybackMonths: Math.round((paybackWeeks / 4.33) * 10) / 10, // Keep for compatibility
+      ltvCacRatio: ltvMultiple,
       contributionMargin: UNIT_ECONOMICS.margins.dtc.contributionMarginActual,
     };
 
     // THE RECOMMENDATION - Answer: Where to invest, how much, what you get
-    const investAmount = weeklySpendCeiling;
+    const investAmount = overrides.weeklySpend ?? weeklySpendCeiling;
     const expectedCustomers = Math.round(investAmount / cac);
-    const subConversionRate = UNIT_ECONOMICS.subscription.conversionRate;
     const expectedSubscribers = Math.round(expectedCustomers * subConversionRate);
-    const subscriberLTV = Math.round(cac * UNIT_ECONOMICS.ltvMultiples.month12); // ~$603
+    const subscriberLTV = Math.round(cac * ltvMultiple);
     const totalLTVProfit = expectedSubscribers * subscriberLTV;
-    const retailLiftWeekly = Math.round(investAmount * VALIDATED_METRICS.alpha);
+    const retailLiftWeekly = Math.round(investAmount * alpha);
 
     const recommendation: Recommendation = {
       investAmount,
@@ -232,9 +270,9 @@ export function useMomentumData(): MomentumData {
       totalLTVProfit,
       retailLiftWeekly,
       retailLiftLagWeeks: 6,
-      paybackMonths: Math.round(paybackMonths * 10) / 10,
-      firstOrderAOV: Math.round(DTC_YTD_2025.ytd.firstTimeAOV),
-      subAOV: Math.round(DTC_YTD_2025.ytd.subAOV),
+      paybackWeeks,
+      firstOrderAOV: Math.round(firstOrderAOV),
+      subAOV: Math.round(subAOV),
     };
 
     return {
