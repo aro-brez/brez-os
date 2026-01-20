@@ -14,44 +14,38 @@ export default function CommandCenter() {
   useEffect(() => { setMounted(true); }, []);
   if (!mounted) return null;
 
-  // Mock monthly targets (replace with real data from DrivePoint)
+  // January 2026 - Real numbers
   const monthlyTarget = {
-    revenue: 500000,
-    customers: 4300,
-    subscribers: 2200,
+    revenue: 3300000,      // $3.3M total target
+    dtcRevenue: 1650000,   // Half from DTC
+    retailRevenue: 1650000, // Half from retail
   };
 
-  // Current month actuals (mock - should come from DrivePoint)
+  // Current month actuals
+  const daysInMonth = 31;
+  const daysLeft = 10;
+  const daysElapsed = daysInMonth - daysLeft; // 21 days
+
+  // On track for $2.4M at current pace
+  const projectedRevenue = 2400000;
+  const pacePercent = daysElapsed / daysInMonth;
+  const currentRevenue = projectedRevenue * pacePercent; // ~$1.63M so far
+
   const currentMonth = {
-    revenue: 380000,
-    customers: 3200,
-    subscribers: 1650,
-    daysElapsed: 20,
-    daysInMonth: 31,
+    revenue: currentRevenue,
+    daysElapsed,
+    daysInMonth,
   };
 
   // Calculate pacing
-  const pacePercent = currentMonth.daysElapsed / currentMonth.daysInMonth;
-  const expectedByNow = {
-    revenue: monthlyTarget.revenue * pacePercent,
-    customers: monthlyTarget.customers * pacePercent,
-    subscribers: monthlyTarget.subscribers * pacePercent,
-  };
+  const expectedByNow = monthlyTarget.revenue * pacePercent;
+  const revenueOnTrack = currentMonth.revenue >= expectedByNow * 0.95;
 
-  const revenueOnTrack = currentMonth.revenue >= expectedByNow.revenue * 0.95;
-  const customersOnTrack = currentMonth.customers >= expectedByNow.customers * 0.95;
-
-  // Projected end of month
-  const projected = {
-    revenue: (currentMonth.revenue / pacePercent),
-    customers: (currentMonth.customers / pacePercent),
-    subscribers: (currentMonth.subscribers / pacePercent),
-  };
-
-  const willHitTarget = projected.revenue >= monthlyTarget.revenue * 0.95;
+  // Will we hit target?
+  const willHitTarget = projectedRevenue >= monthlyTarget.revenue * 0.95;
 
   // Gap to close
-  const revenueGap = monthlyTarget.revenue - projected.revenue;
+  const revenueGap = monthlyTarget.revenue - projectedRevenue; // $3.3M - $2.4M = $900K gap
   const customersNeeded = revenueGap > 0 ? Math.ceil(revenueGap / (rec.firstOrderAOV || 150)) : 0;
 
   return (
