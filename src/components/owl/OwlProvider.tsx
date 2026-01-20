@@ -26,11 +26,22 @@ export type OwlAction =
   | { type: "propose"; description: string }
   | { type: "show"; entity: string };
 
+export type DashboardContext = {
+  trajectory: 'gaining' | 'losing' | 'stable';
+  trajectoryPercent: number;
+  canInvestMore: 'yes' | 'caution' | 'no';
+  cashHeadroom: number;
+  weeklySpendCeiling: number;
+  topLever: { name: string; current: string; target: string; impact: number };
+  cash: { current: number; runway: number; apTotal: number };
+  economics: { cac: number; paybackMonths: number; ltvRatio: number; cm: number };
+};
+
 type OwlContextType = {
   user: User | null;
   setUser: (user: User | null) => void;
   messages: Message[];
-  sendMessage: (content: string) => Promise<void>;
+  sendMessage: (content: string, dashboardContext?: DashboardContext) => Promise<void>;
   isPopupOpen: boolean;
   setPopupOpen: (open: boolean) => void;
   isFullFace: boolean;
@@ -102,7 +113,7 @@ export function OwlProvider({ children }: { children: React.ReactNode }) {
     }
   }, [user]);
 
-  const sendMessage = useCallback(async (content: string) => {
+  const sendMessage = useCallback(async (content: string, dashboardContext?: DashboardContext) => {
     if (!user) return;
 
     const userMsg: Message = {
@@ -123,6 +134,7 @@ export function OwlProvider({ children }: { children: React.ReactNode }) {
           user,
           messages: messages.map((m) => ({ role: m.role, content: m.content })),
           newMessage: content,
+          dashboardContext,
         }),
       });
 

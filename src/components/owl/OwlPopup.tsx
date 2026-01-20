@@ -1,9 +1,11 @@
 "use client";
 
 import React, { useState, useRef, useEffect } from "react";
-import { useOwl, DEFAULT_USERS, User } from "./OwlProvider";
+import { useOwl, DEFAULT_USERS, User, DashboardContext } from "./OwlProvider";
+import { useMomentumData } from "@/lib/hooks/useMomentumData";
 
 export function OwlPopup() {
+  const momentumData = useMomentumData();
   const [mounted, setMounted] = useState(false);
   const {
     user,
@@ -30,7 +32,34 @@ export function OwlPopup() {
     e.preventDefault();
     if (!input.trim() || isLoading || !user) return;
     setIsLoading(true);
-    await sendMessage(input.trim());
+
+    // Build dashboard context for Owl
+    const dashboardContext: DashboardContext = {
+      trajectory: momentumData.trajectory,
+      trajectoryPercent: momentumData.trajectoryPercent,
+      canInvestMore: momentumData.canInvestMore,
+      cashHeadroom: momentumData.cashHeadroom,
+      weeklySpendCeiling: momentumData.weeklySpendCeiling,
+      topLever: {
+        name: momentumData.levers[0].name,
+        current: momentumData.levers[0].currentDisplay,
+        target: momentumData.levers[0].targetDisplay,
+        impact: momentumData.levers[0].impact,
+      },
+      cash: {
+        current: momentumData.cash.current,
+        runway: momentumData.cash.runwayWeeks,
+        apTotal: momentumData.cash.apTotal,
+      },
+      economics: {
+        cac: momentumData.economics.cac,
+        paybackMonths: momentumData.economics.paybackMonths,
+        ltvRatio: momentumData.economics.ltvCacRatio,
+        cm: momentumData.economics.contributionMargin,
+      },
+    };
+
+    await sendMessage(input.trim(), dashboardContext);
     setInput("");
     setIsLoading(false);
   };
