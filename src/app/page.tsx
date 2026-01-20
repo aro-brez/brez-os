@@ -31,10 +31,26 @@ export default function CommandCenter() {
   const pacePercent = daysElapsed / daysInMonth;
   const currentRevenue = projectedRevenue * pacePercent; // ~$1.63M so far
 
+  // Estimate customers and subscribers based on AOV
+  const avgOrderValue = rec.firstOrderAOV || 150;
+  const estimatedCustomers = Math.round(currentRevenue / avgOrderValue);
+  const targetCustomers = Math.round(monthlyTarget.revenue / avgOrderValue);
+  const subConversionRate = 0.50; // 50% subscribe
+  const estimatedSubscribers = Math.round(estimatedCustomers * subConversionRate);
+  const targetSubscribers = Math.round(targetCustomers * subConversionRate);
+
   const currentMonth = {
     revenue: currentRevenue,
     daysElapsed,
     daysInMonth,
+    customers: estimatedCustomers,
+    subscribers: estimatedSubscribers,
+  };
+
+  const monthlyTargetWithCounts = {
+    ...monthlyTarget,
+    customers: targetCustomers,
+    subscribers: targetSubscribers,
   };
 
   // Calculate pacing
@@ -95,12 +111,12 @@ export default function CommandCenter() {
           <div className="bg-white/5 rounded-xl p-4">
             <div className="text-white/50 text-xs">CUSTOMERS</div>
             <div className="text-2xl font-bold text-white">{currentMonth.customers.toLocaleString()}</div>
-            <div className="text-white/40 text-xs">/ {monthlyTarget.customers.toLocaleString()} goal</div>
+            <div className="text-white/40 text-xs">/ {monthlyTargetWithCounts.customers.toLocaleString()} goal</div>
           </div>
           <div className="bg-white/5 rounded-xl p-4">
             <div className="text-white/50 text-xs">SUBSCRIBERS</div>
             <div className="text-2xl font-bold text-white">{currentMonth.subscribers.toLocaleString()}</div>
-            <div className="text-white/40 text-xs">/ {monthlyTarget.subscribers.toLocaleString()} goal</div>
+            <div className="text-white/40 text-xs">/ {monthlyTargetWithCounts.subscribers.toLocaleString()} goal</div>
           </div>
         </div>
       </div>
@@ -127,12 +143,12 @@ export default function CommandCenter() {
 
         {willHitTarget ? (
           <p className="text-white/70">
-            At current pace, we&apos;ll hit <span className="text-green-400 font-medium">${(projected.revenue / 1000).toFixed(0)}K</span> by end of month.
+            At current pace, we&apos;ll hit <span className="text-green-400 font-medium">${(projectedRevenue / 1000).toFixed(0)}K</span> by end of month.
           </p>
         ) : (
           <div className="space-y-2">
             <p className="text-white/70">
-              At current pace, we&apos;ll only hit <span className="text-amber-400 font-medium">${(projected.revenue / 1000).toFixed(0)}K</span>.
+              At current pace, we&apos;ll only hit <span className="text-amber-400 font-medium">${(projectedRevenue / 1000).toFixed(0)}K</span>.
               <br />
               That&apos;s <span className="text-amber-400 font-medium">${(Math.abs(revenueGap) / 1000).toFixed(0)}K short</span> of our ${(monthlyTarget.revenue / 1000).toFixed(0)}K goal.
             </p>
