@@ -322,37 +322,43 @@ export default function CommandCenter() {
   );
 }
 
-// Onboarding steps configuration
+// Onboarding steps configuration with visual previews
 const onboardingSteps = [
   {
     title: "Welcome to BREZ Command Center",
-    description: "This is your single source of truth for company performance. Let's walk through what you're seeing.",
-    highlight: null,
+    description: "Your single source of truth. One screen. Everything you need to know about how the business is doing.",
+    icon: "🎯",
+    preview: null,
   },
   {
-    title: "The Scoreboard",
-    description: "This shows our revenue progress this month. The big number is where we are now, and the goal is what we're aiming for. The progress bar fills up as we get closer.",
-    highlight: "scoreboard",
+    title: "1. The Scoreboard",
+    description: "This is where we are RIGHT NOW. Revenue earned this month vs our goal. The progress bar shows how close we are.",
+    icon: "📊",
+    preview: "scoreboard",
   },
   {
-    title: "Are We On Track?",
-    description: "This tells you instantly if we're pacing to hit our goal. Green means we're good. Amber means we need to pick up the pace.",
-    highlight: "pacing",
+    title: "2. Are We On Track?",
+    description: "Simple answer: Green = we're good. Amber = we need to move faster. Shows projected end-of-month revenue.",
+    icon: "🚦",
+    preview: "pacing",
   },
   {
-    title: "What Needs To Change",
-    description: "When we're behind, this section shows exactly what we need to do — how many more customers and how much ad spend it takes to close the gap.",
-    highlight: "action",
+    title: "3. What Needs To Change",
+    description: "If we're behind, this tells you EXACTLY what to do. How many more customers and how much ad spend to close the gap.",
+    icon: "🎯",
+    preview: "action",
   },
   {
-    title: "This Week's Play",
-    description: "The recommended action for this week. Shows the investment amount and expected results: new customers, subscribers, and time to profit.",
-    highlight: "play",
+    title: "4. This Week's Play",
+    description: "The recommended action for THIS WEEK. Investment amount, expected customers, subscribers, and time to profit.",
+    icon: "💰",
+    preview: "play",
   },
   {
-    title: "Ask Owl Anything",
-    description: "See that owl in the corner? Click it to ask questions about the business. It knows all about our metrics and can help you understand the data.",
-    highlight: "owl",
+    title: "5. Ask Owl Anything",
+    description: "Have questions? Click the owl in the corner. It knows all the metrics and can explain anything on this dashboard.",
+    icon: "🦉",
+    preview: "owl",
   },
 ];
 
@@ -371,33 +377,116 @@ function OnboardingOverlay({
   const isLastStep = step === onboardingSteps.length - 1;
   const isFirstStep = step === 0;
 
+  // Mini preview components for each step
+  const renderPreview = () => {
+    switch (currentStep.preview) {
+      case "scoreboard":
+        return (
+          <div className="bg-white/5 rounded-xl p-4 mb-4">
+            <div className="text-white/50 text-xs mb-1">REVENUE THIS MONTH</div>
+            <div className="flex items-end gap-2">
+              <span className="text-2xl font-bold text-white">$1.63M</span>
+              <span className="text-white/40 text-sm">/ $3.30M goal</span>
+            </div>
+            <div className="mt-2 h-2 bg-white/10 rounded-full overflow-hidden">
+              <div className="h-full w-[49%] bg-amber-500 rounded-full" />
+            </div>
+            <div className="text-white/40 text-xs mt-1">49% of goal • 21 days in</div>
+          </div>
+        );
+      case "pacing":
+        return (
+          <div className="bg-amber-500/10 border border-amber-500/30 rounded-xl p-4 mb-4">
+            <div className="flex items-center gap-2 mb-2">
+              <AlertTriangle className="w-5 h-5 text-amber-400" />
+              <span className="text-amber-400 font-bold">Behind Pace</span>
+            </div>
+            <p className="text-white/70 text-sm">
+              At current pace, we&apos;ll hit <span className="text-amber-400">$2.40M</span>.
+              That&apos;s <span className="text-amber-400">$0.90M short</span>.
+            </p>
+          </div>
+        );
+      case "action":
+        return (
+          <div className="bg-white/5 rounded-xl p-4 mb-4">
+            <div className="text-white font-bold text-sm mb-2">TO HIT OUR GOAL:</div>
+            <div className="space-y-2">
+              <div className="flex items-center justify-between p-2 bg-cyan-500/10 rounded-lg">
+                <span className="text-white text-sm">Get 6,000 more customers</span>
+                <TrendingUp className="w-4 h-4 text-cyan-400" />
+              </div>
+              <div className="text-white/50 text-xs text-center">↓</div>
+              <div className="flex items-center justify-between p-2 bg-purple-500/10 rounded-lg">
+                <span className="text-white text-sm">Spend $50K/week on ads</span>
+                <span className="text-purple-400 font-bold text-sm">$50K</span>
+              </div>
+            </div>
+          </div>
+        );
+      case "play":
+        return (
+          <div className="bg-gradient-to-r from-purple-900/30 to-indigo-900/30 border border-purple-500/30 rounded-xl p-4 mb-4">
+            <div className="text-purple-300 text-xs mb-1">THIS WEEK&apos;S PLAY</div>
+            <div className="text-white font-bold mb-2">Invest $50K in DTC Ads</div>
+            <div className="grid grid-cols-3 gap-2 text-center">
+              <div className="bg-black/30 rounded-lg p-2">
+                <div className="text-cyan-400 font-bold">667</div>
+                <div className="text-white/50 text-[10px]">customers</div>
+              </div>
+              <div className="bg-black/30 rounded-lg p-2">
+                <div className="text-green-400 font-bold">333</div>
+                <div className="text-white/50 text-[10px]">subscribers</div>
+              </div>
+              <div className="bg-black/30 rounded-lg p-2">
+                <div className="text-amber-400 font-bold">8wk</div>
+                <div className="text-white/50 text-[10px]">to profit</div>
+              </div>
+            </div>
+          </div>
+        );
+      case "owl":
+        return (
+          <div className="flex items-center justify-center mb-4">
+            <div className="bg-purple-900/50 border border-purple-500/30 rounded-full p-4">
+              <span className="text-4xl">🦉</span>
+            </div>
+          </div>
+        );
+      default:
+        return (
+          <div className="flex items-center justify-center mb-4">
+            <div className="text-6xl">{currentStep.icon}</div>
+          </div>
+        );
+    }
+  };
+
   return (
     <div className="fixed inset-0 z-50">
       {/* Backdrop */}
-      <div className="absolute inset-0 bg-black/80" />
+      <div className="absolute inset-0 bg-black/90" />
 
       {/* Content */}
       <div className="absolute inset-0 flex items-center justify-center p-4">
         <div className="bg-gradient-to-br from-gray-900 to-gray-800 border border-purple-500/30 rounded-2xl p-6 max-w-md w-full shadow-2xl">
           {/* Step indicator */}
-          <div className="flex items-center justify-between mb-4">
+          <div className="flex items-center justify-between mb-6">
             <div className="flex gap-1.5">
               {onboardingSteps.map((_, i) => (
                 <div
                   key={i}
-                  className={`h-1.5 rounded-full transition-all ${
-                    i === step ? 'w-6 bg-purple-500' : 'w-1.5 bg-white/20'
+                  className={`h-2 rounded-full transition-all ${
+                    i === step ? 'w-8 bg-purple-500' : i < step ? 'w-2 bg-purple-500/50' : 'w-2 bg-white/20'
                   }`}
                 />
               ))}
             </div>
-            <button
-              onClick={onComplete}
-              className="text-white/40 hover:text-white p-1"
-            >
-              <X className="w-5 h-5" />
-            </button>
+            <span className="text-white/40 text-sm">{step + 1} of {onboardingSteps.length}</span>
           </div>
+
+          {/* Visual Preview */}
+          {renderPreview()}
 
           {/* Step content */}
           <div className="mb-6">
@@ -423,15 +512,15 @@ function OnboardingOverlay({
             {isLastStep ? (
               <button
                 onClick={onComplete}
-                className="flex items-center gap-2 px-6 py-2 bg-purple-600 hover:bg-purple-500 rounded-lg text-white font-medium transition-all"
+                className="flex items-center gap-2 px-6 py-3 bg-purple-600 hover:bg-purple-500 rounded-xl text-white font-bold transition-all"
               >
-                Get Started
+                Let&apos;s Go!
                 <ChevronRight className="w-4 h-4" />
               </button>
             ) : (
               <button
                 onClick={onNext}
-                className="flex items-center gap-1 px-4 py-2 bg-white/10 hover:bg-white/20 rounded-lg text-white transition-all"
+                className="flex items-center gap-1 px-6 py-3 bg-white/10 hover:bg-white/20 rounded-xl text-white font-medium transition-all"
               >
                 Next
                 <ChevronRight className="w-4 h-4" />
