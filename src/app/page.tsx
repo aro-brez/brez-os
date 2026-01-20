@@ -1,17 +1,42 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { TrendingUp, TrendingDown, AlertTriangle, CheckCircle, RefreshCw } from "lucide-react";
+import { TrendingUp, TrendingDown, AlertTriangle, CheckCircle, RefreshCw, X, ChevronRight, ChevronLeft } from "lucide-react";
 import { useMomentumData, saveOverrides, DataOverrides } from "@/lib/hooks/useMomentumData";
 import { OwlPopup } from "@/components/owl/OwlPopup";
+
+// Format number as millions (e.g., 1629000 → "$1.63M")
+function formatM(value: number): string {
+  return `$${(value / 1000000).toFixed(2)}M`;
+}
+
+// Format smaller numbers as K
+function formatK(value: number): string {
+  return `$${(value / 1000).toFixed(0)}K`;
+}
 
 export default function CommandCenter() {
   const data = useMomentumData();
   const rec = data.recommendation;
   const [showUpdate, setShowUpdate] = useState(false);
   const [mounted, setMounted] = useState(false);
+  const [showOnboarding, setShowOnboarding] = useState(false);
+  const [onboardingStep, setOnboardingStep] = useState(0);
 
-  useEffect(() => { setMounted(true); }, []);
+  useEffect(() => {
+    setMounted(true);
+    // Check if first time user
+    const hasSeenOnboarding = localStorage.getItem('brez-onboarding-complete');
+    if (!hasSeenOnboarding) {
+      setShowOnboarding(true);
+    }
+  }, []);
+
+  const completeOnboarding = () => {
+    localStorage.setItem('brez-onboarding-complete', 'true');
+    setShowOnboarding(false);
+  };
+
   if (!mounted) return null;
 
   // January 2026 - Real numbers
@@ -88,8 +113,8 @@ export default function CommandCenter() {
         <div className="bg-white/5 rounded-2xl p-6 mb-4">
           <div className="text-white/50 text-sm mb-2">REVENUE THIS MONTH</div>
           <div className="flex items-end gap-3">
-            <span className="text-5xl font-bold text-white">${(currentMonth.revenue / 1000).toFixed(0)}K</span>
-            <span className="text-white/40 text-xl mb-2">/ ${(monthlyTarget.revenue / 1000).toFixed(0)}K goal</span>
+            <span className="text-5xl font-bold text-white">{formatM(currentMonth.revenue)}</span>
+            <span className="text-white/40 text-xl mb-2">/ {formatM(monthlyTarget.revenue)} goal</span>
           </div>
 
           {/* Progress Bar */}
@@ -143,14 +168,14 @@ export default function CommandCenter() {
 
         {willHitTarget ? (
           <p className="text-white/70">
-            At current pace, we&apos;ll hit <span className="text-green-400 font-medium">${(projectedRevenue / 1000).toFixed(0)}K</span> by end of month.
+            At current pace, we&apos;ll hit <span className="text-green-400 font-medium">{formatM(projectedRevenue)}</span> by end of month.
           </p>
         ) : (
           <div className="space-y-2">
             <p className="text-white/70">
-              At current pace, we&apos;ll only hit <span className="text-amber-400 font-medium">${(projectedRevenue / 1000).toFixed(0)}K</span>.
+              At current pace, we&apos;ll only hit <span className="text-amber-400 font-medium">{formatM(projectedRevenue)}</span>.
               <br />
-              That&apos;s <span className="text-amber-400 font-medium">${(Math.abs(revenueGap) / 1000).toFixed(0)}K short</span> of our ${(monthlyTarget.revenue / 1000).toFixed(0)}K goal.
+              That&apos;s <span className="text-amber-400 font-medium">{formatM(Math.abs(revenueGap))} short</span> of our {formatM(monthlyTarget.revenue)} goal.
             </p>
           </div>
         )}
@@ -174,10 +199,10 @@ export default function CommandCenter() {
 
             <div className="flex items-center justify-between p-3 bg-purple-500/10 rounded-xl">
               <div>
-                <div className="text-white font-medium">Spend ${(rec.investAmount / 1000).toFixed(0)}K/week on ads</div>
+                <div className="text-white font-medium">Spend {formatK(rec.investAmount)}/week on ads</div>
                 <div className="text-white/50 text-sm">At ${data.economics.cac.toFixed(0)} CAC = {rec.expectedCustomers} customers/week</div>
               </div>
-              <div className="text-purple-400 font-bold">${(rec.investAmount / 1000).toFixed(0)}K</div>
+              <div className="text-purple-400 font-bold">{formatK(rec.investAmount)}</div>
             </div>
           </div>
         </div>
@@ -188,7 +213,7 @@ export default function CommandCenter() {
         <div className="text-purple-300 text-sm mb-2">THIS WEEK&apos;S PLAY</div>
 
         <div className="text-white text-xl font-bold mb-4">
-          Invest ${(rec.investAmount / 1000).toFixed(0)}K in DTC Ads
+          Invest {formatK(rec.investAmount)} in DTC Ads
         </div>
 
         <div className="grid grid-cols-3 gap-3 text-center">
@@ -215,12 +240,12 @@ export default function CommandCenter() {
           <div className="flex items-center justify-between">
             <span className="text-white/70">Cash available:</span>
             <span className={`font-bold ${data.cashHeadroom >= rec.investAmount ? 'text-green-400' : 'text-red-400'}`}>
-              ${(data.cashHeadroom / 1000).toFixed(0)}K
+              {formatK(data.cashHeadroom)}
             </span>
           </div>
           {data.cashHeadroom < rec.investAmount && (
             <div className="text-red-400/70 text-sm mt-1">
-              Need ${((rec.investAmount - data.cashHeadroom) / 1000).toFixed(0)}K more to execute this play
+              Need {formatK(rec.investAmount - data.cashHeadroom)} more to execute this play
             </div>
           )}
         </div>
@@ -256,15 +281,15 @@ export default function CommandCenter() {
         <div className="space-y-2 text-sm">
           <div className="flex justify-between">
             <span className="text-white/70">Cash on hand</span>
-            <span className="text-white font-mono">${(data.cash.current / 1000).toFixed(0)}K</span>
+            <span className="text-white font-mono">{formatK(data.cash.current)}</span>
           </div>
           <div className="flex justify-between">
             <span className="text-white/70">Reserve floor</span>
-            <span className="text-white/50 font-mono">${(data.cash.floor / 1000).toFixed(0)}K</span>
+            <span className="text-white/50 font-mono">{formatK(data.cash.floor)}</span>
           </div>
           <div className="flex justify-between border-t border-white/10 pt-2">
             <span className="text-white/70">Available to invest</span>
-            <span className="text-cyan-400 font-mono font-bold">${(data.cashHeadroom / 1000).toFixed(0)}K</span>
+            <span className="text-cyan-400 font-mono font-bold">{formatK(data.cashHeadroom)}</span>
           </div>
           <div className="flex justify-between">
             <span className="text-white/70">Runway</span>
@@ -283,6 +308,237 @@ export default function CommandCenter() {
 
       {/* Owl */}
       <OwlPopup />
+
+      {/* First-time User Onboarding */}
+      {showOnboarding && (
+        <OnboardingOverlay
+          step={onboardingStep}
+          onNext={() => setOnboardingStep(s => s + 1)}
+          onPrev={() => setOnboardingStep(s => s - 1)}
+          onComplete={completeOnboarding}
+        />
+      )}
+    </div>
+  );
+}
+
+// Onboarding steps configuration with visual previews
+const onboardingSteps = [
+  {
+    title: "Welcome to BREZ Command Center",
+    description: "Your single source of truth. One screen. Everything you need to know about how the business is doing.",
+    icon: "🎯",
+    preview: null,
+  },
+  {
+    title: "1. The Scoreboard",
+    description: "This is where we are RIGHT NOW. Revenue earned this month vs our goal. The progress bar shows how close we are.",
+    icon: "📊",
+    preview: "scoreboard",
+  },
+  {
+    title: "2. Are We On Track?",
+    description: "Simple answer: Green = we're good. Amber = we need to move faster. Shows projected end-of-month revenue.",
+    icon: "🚦",
+    preview: "pacing",
+  },
+  {
+    title: "3. What Needs To Change",
+    description: "If we're behind, this tells you EXACTLY what to do. How many more customers and how much ad spend to close the gap.",
+    icon: "🎯",
+    preview: "action",
+  },
+  {
+    title: "4. This Week's Play",
+    description: "The recommended action for THIS WEEK. Investment amount, expected customers, subscribers, and time to profit.",
+    icon: "💰",
+    preview: "play",
+  },
+  {
+    title: "5. Ask Owl Anything",
+    description: "Have questions? Click the owl in the corner. It knows all the metrics and can explain anything on this dashboard.",
+    icon: "🦉",
+    preview: "owl",
+  },
+];
+
+function OnboardingOverlay({
+  step,
+  onNext,
+  onPrev,
+  onComplete,
+}: {
+  step: number;
+  onNext: () => void;
+  onPrev: () => void;
+  onComplete: () => void;
+}) {
+  const currentStep = onboardingSteps[step];
+  const isLastStep = step === onboardingSteps.length - 1;
+  const isFirstStep = step === 0;
+
+  // Mini preview components for each step
+  const renderPreview = () => {
+    switch (currentStep.preview) {
+      case "scoreboard":
+        return (
+          <div className="bg-white/5 rounded-xl p-4 mb-4">
+            <div className="text-white/50 text-xs mb-1">REVENUE THIS MONTH</div>
+            <div className="flex items-end gap-2">
+              <span className="text-2xl font-bold text-white">$1.63M</span>
+              <span className="text-white/40 text-sm">/ $3.30M goal</span>
+            </div>
+            <div className="mt-2 h-2 bg-white/10 rounded-full overflow-hidden">
+              <div className="h-full w-[49%] bg-amber-500 rounded-full" />
+            </div>
+            <div className="text-white/40 text-xs mt-1">49% of goal • 21 days in</div>
+          </div>
+        );
+      case "pacing":
+        return (
+          <div className="bg-amber-500/10 border border-amber-500/30 rounded-xl p-4 mb-4">
+            <div className="flex items-center gap-2 mb-2">
+              <AlertTriangle className="w-5 h-5 text-amber-400" />
+              <span className="text-amber-400 font-bold">Behind Pace</span>
+            </div>
+            <p className="text-white/70 text-sm">
+              At current pace, we&apos;ll hit <span className="text-amber-400">$2.40M</span>.
+              That&apos;s <span className="text-amber-400">$0.90M short</span>.
+            </p>
+          </div>
+        );
+      case "action":
+        return (
+          <div className="bg-white/5 rounded-xl p-4 mb-4">
+            <div className="text-white font-bold text-sm mb-2">TO HIT OUR GOAL:</div>
+            <div className="space-y-2">
+              <div className="flex items-center justify-between p-2 bg-cyan-500/10 rounded-lg">
+                <span className="text-white text-sm">Get 6,000 more customers</span>
+                <TrendingUp className="w-4 h-4 text-cyan-400" />
+              </div>
+              <div className="text-white/50 text-xs text-center">↓</div>
+              <div className="flex items-center justify-between p-2 bg-purple-500/10 rounded-lg">
+                <span className="text-white text-sm">Spend $50K/week on ads</span>
+                <span className="text-purple-400 font-bold text-sm">$50K</span>
+              </div>
+            </div>
+          </div>
+        );
+      case "play":
+        return (
+          <div className="bg-gradient-to-r from-purple-900/30 to-indigo-900/30 border border-purple-500/30 rounded-xl p-4 mb-4">
+            <div className="text-purple-300 text-xs mb-1">THIS WEEK&apos;S PLAY</div>
+            <div className="text-white font-bold mb-2">Invest $50K in DTC Ads</div>
+            <div className="grid grid-cols-3 gap-2 text-center">
+              <div className="bg-black/30 rounded-lg p-2">
+                <div className="text-cyan-400 font-bold">667</div>
+                <div className="text-white/50 text-[10px]">customers</div>
+              </div>
+              <div className="bg-black/30 rounded-lg p-2">
+                <div className="text-green-400 font-bold">333</div>
+                <div className="text-white/50 text-[10px]">subscribers</div>
+              </div>
+              <div className="bg-black/30 rounded-lg p-2">
+                <div className="text-amber-400 font-bold">8wk</div>
+                <div className="text-white/50 text-[10px]">to profit</div>
+              </div>
+            </div>
+          </div>
+        );
+      case "owl":
+        return (
+          <div className="flex items-center justify-center mb-4">
+            <div className="bg-purple-900/50 border border-purple-500/30 rounded-full p-4">
+              <span className="text-4xl">🦉</span>
+            </div>
+          </div>
+        );
+      default:
+        return (
+          <div className="flex items-center justify-center mb-4">
+            <div className="text-6xl">{currentStep.icon}</div>
+          </div>
+        );
+    }
+  };
+
+  return (
+    <div className="fixed inset-0 z-50">
+      {/* Backdrop */}
+      <div className="absolute inset-0 bg-black/90" />
+
+      {/* Content */}
+      <div className="absolute inset-0 flex items-center justify-center p-4">
+        <div className="bg-gradient-to-br from-gray-900 to-gray-800 border border-purple-500/30 rounded-2xl p-6 max-w-md w-full shadow-2xl">
+          {/* Step indicator */}
+          <div className="flex items-center justify-between mb-6">
+            <div className="flex gap-1.5">
+              {onboardingSteps.map((_, i) => (
+                <div
+                  key={i}
+                  className={`h-2 rounded-full transition-all ${
+                    i === step ? 'w-8 bg-purple-500' : i < step ? 'w-2 bg-purple-500/50' : 'w-2 bg-white/20'
+                  }`}
+                />
+              ))}
+            </div>
+            <span className="text-white/40 text-sm">{step + 1} of {onboardingSteps.length}</span>
+          </div>
+
+          {/* Visual Preview */}
+          {renderPreview()}
+
+          {/* Step content */}
+          <div className="mb-6">
+            <h2 className="text-xl font-bold text-white mb-2">{currentStep.title}</h2>
+            <p className="text-white/70 leading-relaxed">{currentStep.description}</p>
+          </div>
+
+          {/* Navigation */}
+          <div className="flex items-center justify-between">
+            <button
+              onClick={onPrev}
+              disabled={isFirstStep}
+              className={`flex items-center gap-1 px-4 py-2 rounded-lg transition-all ${
+                isFirstStep
+                  ? 'text-white/20 cursor-not-allowed'
+                  : 'text-white/60 hover:text-white hover:bg-white/10'
+              }`}
+            >
+              <ChevronLeft className="w-4 h-4" />
+              Back
+            </button>
+
+            {isLastStep ? (
+              <button
+                onClick={onComplete}
+                className="flex items-center gap-2 px-6 py-3 bg-purple-600 hover:bg-purple-500 rounded-xl text-white font-bold transition-all"
+              >
+                Let&apos;s Go!
+                <ChevronRight className="w-4 h-4" />
+              </button>
+            ) : (
+              <button
+                onClick={onNext}
+                className="flex items-center gap-1 px-6 py-3 bg-white/10 hover:bg-white/20 rounded-xl text-white font-medium transition-all"
+              >
+                Next
+                <ChevronRight className="w-4 h-4" />
+              </button>
+            )}
+          </div>
+
+          {/* Skip option */}
+          {!isLastStep && (
+            <button
+              onClick={onComplete}
+              className="w-full mt-4 text-white/40 hover:text-white/60 text-sm"
+            >
+              Skip tour
+            </button>
+          )}
+        </div>
+      </div>
     </div>
   );
 }
