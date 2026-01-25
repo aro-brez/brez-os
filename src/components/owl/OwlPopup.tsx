@@ -1,15 +1,8 @@
 "use client";
 
-import React, { useState, useRef, useEffect } from "react";
+import React, { useState, useRef, useEffect, useCallback } from "react";
 import { useOwl, DEFAULT_USERS, User } from "./OwlProvider";
-
-// TypeScript declarations for Web Speech API
-declare global {
-  interface Window {
-    SpeechRecognition: typeof SpeechRecognition;
-    webkitSpeechRecognition: typeof SpeechRecognition;
-  }
-}
+import { useVoice } from "@/lib/hooks/useVoice";
 
 export function OwlPopup() {
   const [mounted, setMounted] = useState(false);
@@ -27,45 +20,26 @@ export function OwlPopup() {
 
   const [input, setInput] = useState("");
   const [isLoading, setIsLoading] = useState(false);
-  const [isListening, setIsListening] = useState(false);
   const [isAwakening, setIsAwakening] = useState(false);
+  const [autoSpeak, setAutoSpeak] = useState(true); // Auto-speak OWL responses
   const messagesEndRef = useRef<HTMLDivElement>(null);
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const recognitionRef = useRef<any>(null);
+  const lastMessageIdRef = useRef<string | null>(null);
+
+  // Voice hook - Deepgram STT + Cartesia TTS
+  const voice = useVoice({
+    onTranscript: (text) => {
+      if (text.trim()) {
+        setInput(text);
+      }
+    },
+    onError: (error) => {
+      console.error("Voice error:", error);
+    },
+  });
 
   // Fix hydration mismatch
   useEffect(() => {
     setMounted(true);
-  }, []);
-
-  // Initialize speech recognition
-  useEffect(() => {
-    if (typeof window !== "undefined") {
-      const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
-      if (SpeechRecognition) {
-        const recognition = new SpeechRecognition();
-        recognition.continuous = false;
-        recognition.interimResults = false;
-        recognition.lang = "en-US";
-
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        recognition.onresult = (event: any) => {
-          const transcript = event.results[0][0].transcript;
-          setInput(transcript);
-          setIsListening(false);
-        };
-
-        recognition.onerror = () => {
-          setIsListening(false);
-        };
-
-        recognition.onend = () => {
-          setIsListening(false);
-        };
-
-        recognitionRef.current = recognition;
-      }
-    }
   }, []);
 
   // Auto-scroll to bottom on new messages
@@ -73,12 +47,30 @@ export function OwlPopup() {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages]);
 
+  // Auto-speak new OWL messages
+  useEffect(() => {
+    if (!autoSpeak || messages.length === 0) return;
+
+    const lastMessage = messages[messages.length - 1];
+    if (
+      lastMessage.role === "owl" &&
+      lastMessage.id !== lastMessageIdRef.current &&
+      lastMessage.content !== "*wakes you*"
+    ) {
+      lastMessageIdRef.current = lastMessage.id;
+      voice.speak(lastMessage.content);
+    }
+  }, [messages, autoSpeak, voice]);
+
   // Don't render until mounted (fixes hydration)
   if (!mounted) return null;
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!input.trim() || isLoading) return;
+
+    // Stop any current speech
+    voice.stopSpeaking();
 
     setIsLoading(true);
     await sendMessage(input.trim());
@@ -103,18 +95,33 @@ export function OwlPopup() {
     window.location.href = "/owl";
   };
 
-  const toggleVoice = () => {
-    if (!recognitionRef.current) return;
-
-    if (isListening) {
-      recognitionRef.current.stop();
-      setIsListening(false);
+  const toggleVoice = async () => {
+    if (voice.isListening) {
+      // Stop listening and send the transcript
+      const transcript = await voice.stopListening();
+      if (transcript && transcript.trim()) {
+        setIsLoading(true);
+        await sendMessage(transcript.trim());
+        setInput("");
+        setIsLoading(false);
+      }
     } else {
+      // Stop any current speech and start listening
+      voice.stopSpeaking();
       setInput("");
-      recognitionRef.current.start();
-      setIsListening(true);
+      await voice.startListening();
     }
   };
+
+  // Get voice state indicator
+  const getVoiceButtonContent = () => {
+    if (voice.isListening) return { icon: "🔴", title: "Listening... (click to send)" };
+    if (voice.isProcessing) return { icon: "⏳", title: "Processing..." };
+    if (voice.isSpeaking) return { icon: "🔊", title: "Speaking... (click to stop)" };
+    return { icon: "🎤", title: "Speak to your owl" };
+  };
+
+  const voiceButton = getVoiceButtonContent();
 
   return (
     <>
@@ -146,6 +153,20 @@ export function OwlPopup() {
               </div>
             </div>
             <div className="flex gap-2">
+              {/* Auto-speak toggle */}
+              {user && (
+                <button
+                  onClick={() => setAutoSpeak(!autoSpeak)}
+                  className={`p-2 rounded-lg transition-colors ${
+                    autoSpeak
+                      ? "bg-purple-500/30 text-purple-200"
+                      : "hover:bg-purple-500/20 text-purple-400"
+                  }`}
+                  title={autoSpeak ? "Voice on (click to mute)" : "Voice off (click to enable)"}
+                >
+                  {autoSpeak ? "🔊" : "🔇"}
+                </button>
+              )}
               {user && (
                 <button
                   onClick={handleExpand}
@@ -209,7 +230,7 @@ export function OwlPopup() {
                 {/* Voice Hint for first conversation */}
                 {!isAwakening && messages.length === 1 && messages[0].role === "owl" && (
                   <div className="text-center text-purple-400/60 text-xs mb-2">
-                    Tap the microphone to speak
+                    Tap the microphone to speak • Click 🔊 to toggle voice
                   </div>
                 )}
                 {messages
@@ -230,6 +251,16 @@ export function OwlPopup() {
                     </div>
                   </div>
                 ))}
+
+                {/* Voice state indicator */}
+                {(voice.isListening || voice.isProcessing) && (
+                  <div className="flex justify-end">
+                    <div className="bg-purple-600/50 text-white rounded-2xl px-4 py-2 animate-pulse">
+                      {voice.isListening ? "🎤 Listening..." : "⏳ Processing..."}
+                    </div>
+                  </div>
+                )}
+
                 <div ref={messagesEndRef} />
               </div>
 
@@ -262,28 +293,36 @@ export function OwlPopup() {
                   {/* Voice Input Button */}
                   <button
                     type="button"
-                    onClick={toggleVoice}
-                    disabled={isLoading}
+                    onClick={voice.isSpeaking ? voice.stopSpeaking : toggleVoice}
+                    disabled={isLoading || voice.isProcessing}
                     className={`px-3 py-2 rounded-xl font-medium transition-all ${
-                      isListening
+                      voice.isListening
                         ? "bg-red-500 hover:bg-red-400 animate-pulse"
+                        : voice.isSpeaking
+                        ? "bg-green-500 hover:bg-green-400"
                         : "bg-gray-700 hover:bg-gray-600"
                     } disabled:opacity-50`}
-                    title={isListening ? "Stop listening" : "Speak to your owl"}
+                    title={voiceButton.title}
                   >
-                    <span role="img" aria-label="microphone">{isListening ? "\uD83D\uDD34" : "\uD83C\uDFA4"}</span>
+                    <span role="img" aria-label="voice">{voiceButton.icon}</span>
                   </button>
                   <input
                     type="text"
                     value={input}
                     onChange={(e) => setInput(e.target.value)}
-                    placeholder={isListening ? "Listening..." : "Ask your owl..."}
-                    disabled={isLoading || isListening}
+                    placeholder={
+                      voice.isListening
+                        ? "Listening..."
+                        : voice.isProcessing
+                        ? "Processing..."
+                        : "Ask your owl..."
+                    }
+                    disabled={isLoading || voice.isListening || voice.isProcessing}
                     className="flex-1 bg-gray-800 border border-purple-500/30 rounded-xl px-4 py-2 text-white placeholder-gray-400 focus:outline-none focus:border-purple-500 focus:ring-1 focus:ring-purple-500 disabled:opacity-50"
                   />
                   <button
                     type="submit"
-                    disabled={isLoading || !input.trim()}
+                    disabled={isLoading || !input.trim() || voice.isListening}
                     className="px-4 py-2 bg-purple-600 hover:bg-purple-500 disabled:bg-gray-700 disabled:opacity-50 rounded-xl font-medium transition-colors"
                   >
                     {isLoading ? "..." : "Send"}
